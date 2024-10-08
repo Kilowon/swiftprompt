@@ -1,8 +1,13 @@
-import { defineConfig } from "@solidjs/start/config";
-import UnoCSS from "unocss/vite";
+import { defineConfig } from "@solidjs/start/config"
+import UnoCSS from "unocss/vite"
 
 export default defineConfig({
-  vite: {
-    plugins: [UnoCSS()]
-  }
-});
+	ssr: false,
+	vite: {
+		plugins: [
+			UnoCSS({
+				configFile: "../my-uno.config.ts"
+			})
+		]
+	}
+})
