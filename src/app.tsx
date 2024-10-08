@@ -10,6 +10,7 @@ import Nav from "~/components/Nav"
 import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
 import { getCookie } from "vinxi/http"
+import { ColorExampleFooter } from "./components/ColorExampleFooter"
 
 function getServerCookies() {
 	"use server"
@@ -36,6 +37,7 @@ export default function App() {
 						<>
 							<Nav />
 							<Suspense>{props.children}</Suspense>
+							<ColorExampleFooter />
 						</>
 					)}
 				>
