@@ -10,6 +10,7 @@ import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Dialog, DialogContent } from "~/registry/ui/dialog"
 import { Button } from "~/registry/ui/button"
 import { Navigate } from "~/components/Navigate"
+import { ItemContainer } from "~/components/ItemContainer"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
@@ -137,7 +138,7 @@ export default function Home() {
 										value="all"
 										class="m-0"
 									>
-										<div class="text-xs">Elements</div>
+										<ItemContainer />
 									</TabsContent>
 								</Tabs>
 							</Show>
