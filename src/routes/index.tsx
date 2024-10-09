@@ -95,7 +95,7 @@ export default function Home() {
 							</div>
 							<Separator />
 							<div class="h-full bg-background-secondary">
-								<div>Menu</div>
+								<div class="text-xs">Menu</div>
 							</div>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
@@ -111,13 +111,13 @@ export default function Home() {
 							onExpand={() => {
 								setIsCollapsedGroup(false)
 							}}
-							class={cn(isCollapsedGroup() && "min-w-8 transition-all duration-300 ease-in-out overflow-hidden")}
+							class={cn(isCollapsedGroup() && "min-w-6 transition-all duration-300 ease-in-out overflow-hidden")}
 						>
 							<Show
 								when={!isCollapsedGroup()}
 								fallback={
-									<div class="flex flex-col items-center justify-center h-full px-4 py-2 min-h-[400px] h-[calc(100vh-280px)]  bg-background-background">
-										<div class="rotate-90">Group</div>
+									<div class="flex flex-col items-center justify-center h-full px-2 py-2 min-h-[400px] h-[calc(100vh-280px)]  bg-background-background">
+										<div class="rotate-90 text-xs">Group</div>
 									</div>
 								}
 							>
@@ -132,7 +132,7 @@ export default function Home() {
 										value="all"
 										class="m-0"
 									>
-										<div>Elements</div>
+										<div class="text-xs">Elements</div>
 									</TabsContent>
 								</Tabs>
 							</Show>
@@ -161,17 +161,17 @@ export default function Home() {
 								}
 							>
 								<div class="flex items-center px-4 py-2 bg-background-secondary min-h-14">
-									<div class="ml-auto flex items-center gap-2 ">
-										<div>Template Menu</div>
+									<div class="flex items-center gap-2 ">
+										<div class="text-xs">Template Menu</div>
 									</div>
 								</div>
 								<Separator />
 								<div class="p-4 bg-background-secondary">
-									<div>Versions</div>
+									<div class="text-xs">Versions</div>
 								</div>
 
 								<div class="p-4 bg-background-secondary h-100% overflow-auto">
-									<div>Templates</div>
+									<div class="text-xs">Templates</div>
 								</div>
 							</Show>
 						</ResizablePanel>
@@ -192,11 +192,11 @@ export default function Home() {
 							class={cn(isCollapsedViewer() && "min-w-10 transition-all duration-300 ease-in-out overflow-hidden")}
 						>
 							<div class="flex items-center px-4 py-2 min-h-14">
-								<div>Viewer</div>
+								<div class="text-xs">Viewer</div>
 							</div>
 							<Separator />
 							<div>
-								<div>Response</div>
+								<div class="text-xs">Response</div>
 							</div>
 						</ResizablePanel>
 					</Resizable>
