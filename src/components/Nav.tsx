@@ -20,13 +20,10 @@ export default function Nav() {
 
 	return (
 		<nav class={cn("bg-zinc-800", colorMode() === "dark" ? "bg-slate-800" : "")}>
-			<div class="flex items-center justify-between p-3">
-				<ul class="flex text-gray-200">
+			<div class="flex items-center justify-between font-inter">
+				<ul class="flex text-gray-200 text-xs">
 					<li class={`border-b-2 ${active("/")} mx-1.5 sm:mx-6`}>
 						<a href="/">Home</a>
-					</li>
-					<li class={`border-b-2 ${active("/mainui")} mx-1.5 sm:mx-6`}>
-						<a href="/mainui">Main UI</a>
 					</li>
 				</ul>
 				<Show when={initialized()}>

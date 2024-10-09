@@ -347,10 +347,10 @@ export default defineConfig({
 			  0%,70%,100% { opacity: 1 }
 			  20%,50% { opacity: 0 }
 			}
-			 body, #root {
+			 html, body, #root {
+				height: 100%;
 				margin: 0;
 				padding: 0;
-				height: 100vh;
 				overflow: hidden;
 			}
 		  `

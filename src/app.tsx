@@ -34,11 +34,13 @@ export default function App() {
 			<ColorModeProvider storageManager={storageManager}>
 				<Router
 					root={props => (
-						<>
+						<div class="flex flex-col h-full">
 							<Nav />
-							<Suspense>{props.children}</Suspense>
+							<div class="flex-1 overflow-hidden">
+								<Suspense>{props.children}</Suspense>
+							</div>
 							<ColorExampleFooter />
-						</>
+						</div>
 					)}
 				>
 					<FileRoutes />
