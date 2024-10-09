@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Items } from "./Items"
 
 export function ItemContainer() {
 	const testNavArray = [
@@ -15,7 +16,7 @@ export function ItemContainer() {
 					{item => {
 						return (
 							<div>
-								<span>{item.title}</span>
+								<Items item={item} />
 							</div>
 						)
 					}}
