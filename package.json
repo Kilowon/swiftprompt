@@ -2,11 +2,12 @@
 	"name": "example-with-unocss",
 	"type": "module",
 	"scripts": {
-		"dev": "vinxi dev",
+		"dev": "vinxi dev --port 3008 --host localhost",
 		"build": "vinxi build",
-		"start": "vinxi start"
+		"start": "vinxi start --port 3010 --host localhost"
 	},
 	"dependencies": {
+		"@corvu/resizable": "^0.2.3",
 		"@iconify/json": "^2.2.238",
 		"@kobalte/core": "^0.13.4",
 		"@solid-primitives/clipboard": "^1.5.10",
