@@ -9,6 +9,7 @@ import { cn } from "~/lib/utils"
 import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Dialog, DialogContent } from "~/registry/ui/dialog"
 import { Button } from "~/registry/ui/button"
+import { Navigate } from "~/components/Navigate"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
@@ -95,7 +96,11 @@ export default function Home() {
 							</div>
 							<Separator />
 							<div class="h-full bg-background-secondary">
-								<div class="text-xs">Menu</div>
+								<Navigate
+									isCollapsed={isCollapsedMenu()}
+									groups={[]}
+									templates={[]}
+								/>
 							</div>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
