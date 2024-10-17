@@ -1,4 +1,69 @@
 import { createSignal } from "solid-js"
+import { createStore } from "solid-js/store"
+import { ReactiveMap } from "@solid-primitives/map"
+
+import {
+	Entity,
+	Group,
+	Item,
+	GroupID,
+	BadgeID,
+	ElementID,
+	TemplateGroupID,
+	TemplateGroup,
+	TemplateSectionID,
+	VersionID
+} from "~/types/entityType"
+import { Id } from "@thisbeyond/solid-dnd"
+import { Badge } from "~/types/badgeType"
+import { EditingItem } from "~/types/entityType"
+const [entities, setEntities] = createStore<Record<Id, Entity>>({})
+
+export { entities, setEntities }
+
+const entityGroups = new ReactiveMap<GroupID, Group>()
+const entityItems = new ReactiveMap<
+	GroupID,
+	ReactiveMap<ElementID, Omit<Item, "body"> & { body: ReactiveMap<VersionID, string> }>
+>()
+
+export { entityGroups, entityItems }
+
+const groupBadge = new ReactiveMap<GroupID, ReactiveMap<BadgeID, ElementID[]>>()
+
+export { groupBadge }
+
+const badge = new ReactiveMap<BadgeID, Badge>()
+
+export { badge }
+
+const templates = new ReactiveMap<TemplateGroupID, TemplateGroup>()
+
+export { templates }
+
+const [availableBadges, setAvailableBadges] = createSignal<Badge[]>([])
+
+export { availableBadges, setAvailableBadges }
+
+const [isEditingGroup, setIsEditingGroup] = createSignal<EditingItem>({
+	status: "saved",
+	id: "" as unknown as ElementID,
+	label: ""
+})
+
+export { isEditingGroup, setIsEditingGroup }
+
+const [isEditingItem, setIsEditingItem] = createSignal<EditingItem>({
+	status: "saved",
+	id: "" as unknown as ElementID,
+	label: ""
+})
+
+export const ORDER_DELTA = 1
+
+const [nextOrder, setNextOrder] = createSignal(ORDER_DELTA)
+
+export { nextOrder, setNextOrder }
 
 const [colorFooter, setColorFooter] = createSignal(false)
 
