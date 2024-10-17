@@ -14,10 +14,10 @@
 		"@solid-primitives/date": "^2.0.22",
 		"@solid-primitives/intersection-observer": "^2.1.6",
 		"@solid-primitives/keyboard": "^1.2.8",
-		"@solid-primitives/map": "^0.4.11",
+		"@solid-primitives/map": "^0.4.13",
 		"@solid-primitives/resize-observer": "^2.0.26",
 		"@solid-primitives/selection": "^0.0.8",
-		"@solid-primitives/set": "^0.4.12",
+		"@solid-primitives/set": "^0.5.0",
 		"@solid-primitives/storage": "^4.0.0",
 		"@solid-primitives/workers": "^0.3.0",
 		"@solidjs/router": "^0.14.7",
@@ -26,19 +26,22 @@
 		"@tanstack/solid-query-devtools": "^5.51.21",
 		"@thisbeyond/solid-dnd": "^0.7.5",
 		"@thisbeyond/solid-select": "^0.15.0",
-		"@unocss/reset": "^0.59.2",
 		"@triplit/client": "^0.5.2",
+		"@unocss/reset": "^0.59.2",
 		"big.js": "^6.2.1",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"solid-js": "^1.9.1",
-		"tailwind-merge": "^2.5.2",
 		"solid-sonner": "^0.2.8",
+		"tailwind-merge": "^2.5.2",
 		"unocss": "^0.59.2",
 		"unocss-preset-scrollbar": "^0.3.1",
 		"vinxi": "^0.4.3"
 	},
 	"engines": {
 		"node": ">=18"
+	},
+	"devDependencies": {
+		"@types/big.js": "^6.2.2"
 	}
 }
