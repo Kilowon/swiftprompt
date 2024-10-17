@@ -536,6 +536,7 @@ export function Navigate(props: NavProps) {
 						<span class="select-none">{groupFilter() === "all" ? "All" : groupFilter()}</span>
 					</div>
 				</div>
+				<hr class="w-full border-muted" />
 				<nav
 					class={`overflow-y-auto scrollbar-none group-[[data-collapsed=true]]:px-2 group-[[data-collapsed=false]]:mx-1 transition-all duration-300 ${getSectionHeight(
 						"groups"
@@ -599,6 +600,7 @@ export function Navigate(props: NavProps) {
 				</nav>
 			</div>
 
+			<hr class="w-full border-foreground/30" />
 			<div class="flex flex-col mt-2">
 				<div
 					class="flex items-center justify-between mb-2 cursor-pointer"
@@ -655,6 +657,7 @@ export function Navigate(props: NavProps) {
 						<span class="select-none">{templateFilter() === "all" ? "All" : templateFilter()}</span>
 					</div>
 				</div>
+				<hr class="w-full border-muted" />
 				<nav
 					class={`overflow-y-auto scrollbar-none group-[[data-collapsed=true]]:px-2 group-[[data-collapsed=false]]:mx-1 transition-all duration-300 ${getSectionHeight(
 						"templates"
