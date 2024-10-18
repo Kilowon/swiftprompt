@@ -1,7 +1,18 @@
-import { For, Show } from "solid-js"
+import { Accessor, For, Show } from "solid-js"
 import { Items } from "./Items"
+import { PromptItem } from "~/types/entityType"
 
-export function ItemContainer() {
+interface ItemContainerProps {
+	type: "all" | "unread"
+	sizes: number[]
+	items: Accessor<PromptItem[]>
+	initializedUserElement: Accessor<boolean>
+	initializedUserGroup: Accessor<boolean>
+	isFullElements: Accessor<boolean>
+	setIsFullElements: (value: boolean) => void
+}
+
+export function ItemContainer(props: ItemContainerProps) {
 	const testNavArray = [
 		{
 			title: "Element One",
@@ -11,8 +22,8 @@ export function ItemContainer() {
 
 	return (
 		<div class="flex min-h-[400px] h-[calc(100vh-280px)] flex-col gap-2 overflow-auto p-4 pt-2 scrollbar-default scrollbar-gutter">
-			<Show when={true}>
-				<For each={testNavArray}>
+			<Show when={props.type === "all"}>
+				<For each={props.items()}>
 					{item => {
 						return (
 							<div>

@@ -69,6 +69,42 @@ export const addGroup = (name: string, sortType: Filter) => {
 	return id
 }
 
+export const deleteGroup = (id: GroupID) => {
+	entityGroups.delete(id)
+	entityItems.delete(id)
+	storeEntityMap()
+}
+
+export const duplicateGroup = (id: GroupID) => {
+	const group = entityGroups.get(id)
+	const groupItems = entityItems.get(id)
+	const newGroupId = addGroup(group?.name || "Copy of " + group?.name, group?.sort)
+	if (group && groupItems) {
+		groupItems.forEach(item => {
+			addItem(
+				item.name,
+				newGroupId as unknown as GroupID,
+				item.labels || [],
+				item.summary || "",
+				0,
+				0,
+				item.body?.get(item.selectedVersion) || ""
+			)
+		})
+	}
+	storeEntityMap()
+	return newGroupId
+}
+
+export const updateGroupSort = (id: GroupID, sort: Filter) => {
+	const group = entityGroups.get(id)
+	if (group) {
+		const updatedGroup = { ...group, sort: sort }
+		entityGroups.set(id, updatedGroup)
+		storeEntityMap()
+	}
+}
+
 export const addTemplateGroup = (name: string, sortType: TemplateFilter) => {
 	const order = getNextOrder()
 	const id = crypto.randomUUID()
@@ -240,3 +276,5 @@ export const pinToggleItem = (groupId: GroupID, id: ElementID) => {
 		console.warn("Cannot pin non-item entity")
 	}
 }
+
+export const groupsMap = () => entityGroups

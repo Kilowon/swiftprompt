@@ -59,6 +59,8 @@ const [isEditingItem, setIsEditingItem] = createSignal<EditingItem>({
 	label: ""
 })
 
+export { isEditingItem, setIsEditingItem }
+
 export const ORDER_DELTA = 1
 
 const [nextOrder, setNextOrder] = createSignal(ORDER_DELTA)
@@ -68,3 +70,11 @@ export { nextOrder, setNextOrder }
 const [colorFooter, setColorFooter] = createSignal(false)
 
 export { colorFooter, setColorFooter }
+
+const [selected, setSelected] = createSignal<GroupID | null>(null)
+
+export { selected, setSelected }
+
+const [selectedItem, setSelectedItem] = createSignal<ElementID | null>(null)
+
+export { selectedItem, setSelectedItem }
