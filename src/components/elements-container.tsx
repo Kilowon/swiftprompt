@@ -1,6 +1,7 @@
 import { Accessor, For, Show } from "solid-js"
 import Elements from "./elements"
-import { PromptItem } from "~/types/entityType"
+import { changeItemAttributes } from "~/helpers/actionHelpers"
+import { PromptItem, VersionID } from "~/types/entityType"
 import ItemsCompact from "./elements-compact"
 
 interface ElementsContainerProps {
@@ -11,6 +12,20 @@ interface ElementsContainerProps {
 	initializedUserGroup: Accessor<boolean>
 	isFullElements: Accessor<boolean>
 	setIsFullElements: (value: boolean) => void
+}
+
+const handleUpdateAttributes = (
+	item: PromptItem,
+	name: string,
+	summary: string,
+	body: string,
+	version: VersionID,
+	versionCounter: VersionID,
+	updatedBody: boolean
+) => {
+	if (item.id) {
+		changeItemAttributes(item.group, item.id, name, summary, body, version, versionCounter, updatedBody)
+	}
 }
 
 export default function ElementsContainer(props: ElementsContainerProps) {
@@ -25,7 +40,10 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 								fallback={<ItemsCompact item={item} />}
 							>
 								<div>
-									<Elements item={item} />
+									<Elements
+										item={item}
+										handleUpdateAttributes={handleUpdateAttributes}
+									/>
 								</div>
 							</Show>
 						)

@@ -58,7 +58,7 @@ const testNavArray: PromptItem[] = [
 		],
 		versionCounter: 1,
 		selectedVersion: 1,
-		order: "1",
+		order: "2",
 		status: "active"
 	}
 ]
