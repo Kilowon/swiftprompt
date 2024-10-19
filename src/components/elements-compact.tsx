@@ -6,7 +6,7 @@ interface ItemsCompactProps {
 	item: PromptItem
 }
 
-function ItemsCompact(props: ItemsCompactProps) {
+function ElementsCompact(props: ItemsCompactProps) {
 	return (
 		<div>
 			<Button
@@ -46,4 +46,4 @@ function ItemsCompact(props: ItemsCompactProps) {
 	)
 }
 
-export default ItemsCompact
+export default ElementsCompact

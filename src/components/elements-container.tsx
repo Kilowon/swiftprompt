@@ -1,9 +1,9 @@
 import { Accessor, For, Show } from "solid-js"
-import { Items } from "./Items"
+import Elements from "./elements"
 import { PromptItem } from "~/types/entityType"
-import ItemsCompact from "./items-compact"
+import ItemsCompact from "./elements-compact"
 
-interface ItemContainerProps {
+interface ElementsContainerProps {
 	type: "all" | "unread"
 	sizes: number[]
 	items: Accessor<PromptItem[]>
@@ -13,7 +13,7 @@ interface ItemContainerProps {
 	setIsFullElements: (value: boolean) => void
 }
 
-export function ItemContainer(props: ItemContainerProps) {
+export default function ElementsContainer(props: ElementsContainerProps) {
 	return (
 		<div class="flex min-h-[400px] h-[calc(100vh-280px)] flex-col gap-2 overflow-auto p-4 pt-2 scrollbar-default scrollbar-gutter">
 			<Show when={props.items()}>
@@ -25,7 +25,7 @@ export function ItemContainer(props: ItemContainerProps) {
 								fallback={<ItemsCompact item={item} />}
 							>
 								<div>
-									<Items item={item} />
+									<Elements item={item} />
 								</div>
 							</Show>
 						)

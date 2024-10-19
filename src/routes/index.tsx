@@ -8,7 +8,7 @@ import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
 import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Navigate } from "~/components/Navigate"
-import { ItemContainer } from "~/components/items-container"
+import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
@@ -28,6 +28,25 @@ const testNavArray: PromptItem[] = [
 		type: "item",
 		description: "description One",
 		summary: "summary One",
+		body: body,
+		date_created: "2024-01-01",
+		date_modified: "2024-01-01",
+		id: { id: "1" },
+		group: { id: "1" },
+		labels: [
+			{ name: "Label One", id: "1" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" },
+			{ name: "Label Two", id: "2" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" }
+		],
+		versionCounter: 1,
+		selectedVersion: 1,
+		order: "1",
+		status: "active"
+	},
+	{
+		name: "Element Two",
+		type: "item",
+		description: "description Two",
+		summary: "summary Two",
 		body: body,
 		date_created: "2024-01-01",
 		date_modified: "2024-01-01",
@@ -198,7 +217,7 @@ export default function Home() {
 										value="all"
 										class="m-0"
 									>
-										<ItemContainer
+										<ElementsContainer
 											type="all"
 											sizes={sizes()}
 											items={testNav}
