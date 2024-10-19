@@ -10,7 +10,7 @@ import Nav from "~/components/Nav"
 import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
 import { getCookie } from "vinxi/http"
-import { ColorExampleFooter } from "./components/ColorExampleFooter"
+import { ColorExampleFooter } from "./components/color-footer"
 
 function getServerCookies() {
 	"use server"

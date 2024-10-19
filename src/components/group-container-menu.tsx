@@ -1,12 +1,9 @@
 import { createEffect, createSignal, Show, onMount } from "solid-js"
 import { toast } from "solid-sonner"
 import { Button } from "~/registry/ui/button"
-import { Separator } from "~/registry/ui/separator"
-import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/registry/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "~/registry/ui/dialog"
-import { ItemContainer } from "~/components/ItemContainer"
 import { nameChangeGroup, addItem, deleteGroup, updateGroupSort } from "../helpers/actionHelpers"
 import { initializeEntityMap } from "../helpers/entityHelpers"
 import { addGroup, groupsMap, duplicateGroup } from "../helpers/actionHelpers"
@@ -26,7 +23,9 @@ import { PromptItem, GroupID, ElementID, Filter } from "../types/entityType"
 
 import { EditableGroupTitle } from "~/components/editable-group-title"
 
-export function GroupContainerMenu() {
+interface GroupContainerMenuProps {}
+
+export function GroupContainerMenu(props: GroupContainerMenuProps) {
 	const [isCollapsedGroup, setIsCollapsedGroup] = createSignal(false)
 	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
 		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])

@@ -1,7 +1,7 @@
 import { useLocation } from "@solidjs/router"
 import { useColorMode } from "@kobalte/core"
 import { cn } from "~/lib/utils"
-import { ModeToggle } from "~/components/ModeToggle"
+import { ModeToggle } from "~/components/mode-toggle"
 import { Show, createEffect, createSignal } from "solid-js"
 import { isServer } from "solid-js/web"
 

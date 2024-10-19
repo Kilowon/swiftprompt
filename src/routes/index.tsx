@@ -8,7 +8,7 @@ import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
 import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Navigate } from "~/components/Navigate"
-import { ItemContainer } from "~/components/ItemContainer"
+import { ItemContainer } from "~/components/items-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
 import { PromptItem, GroupID, VersionID, BadgeID } from "~/types/entityType"
@@ -17,14 +17,15 @@ import { ReactiveMap } from "@solid-primitives/map"
 
 let body = new ReactiveMap<VersionID, string>()
 
-body.set(1, "Body One")
+body.set(1, "Body Version One")
+body.set(2, "Body Version Two")
 
 const testNavArray: PromptItem[] = [
 	{
 		name: "Element One",
 		type: "item",
-		description: "Element One",
-		summary: "Element One",
+		description: "description One",
+		summary: "summary One",
 		body: body,
 		date_created: "2024-01-01",
 		date_modified: "2024-01-01",
@@ -50,7 +51,7 @@ export default function Home() {
 	const [isCollapsedViewer, setIsCollapsedViewer] = createSignal(false)
 	const [initializedUserElement, setInitializedUserElement] = createSignal(false)
 	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
-	const [isFullElements, setIsFullElements] = createSignal(true)
+	const [isFullElements, setIsFullElements] = createSignal<boolean>(true)
 
 	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
 		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
