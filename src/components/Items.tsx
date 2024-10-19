@@ -1,10 +1,15 @@
-import { Show, createSignal } from "solid-js"
+import { For, Show, createSignal } from "solid-js"
 import { cn } from "~/lib/utils"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "~/registry/ui/dropdown-menu"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
+import { PromptItem } from "~/types/entityType"
 
-export function Items(props: any) {
+interface ItemsProps {
+	item: PromptItem
+}
+
+export function Items(props: ItemsProps) {
 	const [mouseOver, setMouseOver] = createSignal(false)
 	return (
 		<div>
@@ -38,19 +43,23 @@ export function Items(props: any) {
 					<div class="flex flex-col items-start justify-between w-full relative">
 						{/* Title Prompts */}
 						<div class="flex items-center gap-2 pr-10 group flex-grow mb-2">
-							<div>Title Here</div>
+							<div>{props.item.name}</div>
 						</div>
 					</div>
 					{/* Summary Prompts */}
 					<div class="items-center gap-2 pr-10">
-						<div>Summary Here</div>
+						<div>{props.item.description}</div>
 					</div>
 
 					{/* Body Prompts */}
-					<div>Body Here</div>
+					<div>{props.item.body.get(props.item.selectedVersion)}</div>
 					{/* Badges */}
 					<div class="min-h-5.5">
-						<div>Badges Here</div>
+						<For each={props.item.labels}>
+							{label => {
+								return <div>{label.name}</div>
+							}}
+						</For>
 					</div>
 				</div>
 				{/* Help Indicators and Edit Buttons */}

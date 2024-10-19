@@ -1,5 +1,5 @@
 import { createShortcut } from "@solid-primitives/keyboard"
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
 import { entityItems, selected, setColorFooter } from "~/global_state"
@@ -11,8 +11,37 @@ import { Navigate } from "~/components/Navigate"
 import { ItemContainer } from "~/components/ItemContainer"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
-import { PromptItem, GroupID } from "~/types/entityType"
+import { PromptItem, GroupID, VersionID, BadgeID } from "~/types/entityType"
 import { groupsMap } from "~/helpers/actionHelpers"
+import { ReactiveMap } from "@solid-primitives/map"
+
+let body = new ReactiveMap<VersionID, string>()
+
+body.set(1, "Body One")
+
+const testNavArray: PromptItem[] = [
+	{
+		name: "Element One",
+		type: "item",
+		description: "Element One",
+		summary: "Element One",
+		body: body,
+		date_created: "2024-01-01",
+		date_modified: "2024-01-01",
+		id: { id: "1" },
+		group: { id: "1" },
+		labels: [
+			{ name: "Label One", id: "1" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" },
+			{ name: "Label Two", id: "2" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" }
+		],
+		versionCounter: 1,
+		selectedVersion: 1,
+		order: "1",
+		status: "active"
+	}
+]
+
+const [testNav, setTestNav] = createSignal<PromptItem[]>(testNavArray)
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
@@ -158,7 +187,10 @@ export default function Home() {
 									</div>
 
 									<Separator />
-									<GroupContainerSearch />
+									<GroupContainerSearch
+										isFullElements={isFullElements}
+										setIsFullElements={setIsFullElements}
+									/>
 									<TabsContent
 										value="all"
 										class="m-0"
@@ -166,7 +198,7 @@ export default function Home() {
 										<ItemContainer
 											type="all"
 											sizes={sizes()}
-											items={itemsList}
+											items={testNav}
 											initializedUserElement={initializedUserElement}
 											initializedUserGroup={initializedUserGroup}
 											isFullElements={isFullElements}
