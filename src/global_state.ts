@@ -78,3 +78,23 @@ export { selected, setSelected }
 const [selectedItem, setSelectedItem] = createSignal<ElementID | null>(null)
 
 export { selectedItem, setSelectedItem }
+
+const [selectedTemplateGroup, setSelectedTemplateGroup] = createSignal<TemplateGroupID | null>(null)
+
+export { selectedTemplateGroup, setSelectedTemplateGroup }
+
+const [selectedTemplateVersion, setSelectedTemplateVersion] = createSignal<VersionID | null>(null)
+
+export { selectedTemplateVersion, setSelectedTemplateVersion }
+
+const [selectedSection, setSelectedSection] = createSignal<TemplateSectionID | null>(null)
+
+export { selectedSection, setSelectedSection }
+
+const [selectedSectionItemEl, setSelectedSectionItemEl] = createSignal<HTMLButtonElement | undefined>(undefined)
+
+export { selectedSectionItemEl, setSelectedSectionItemEl }
+
+const [selectedSectionItem, setSelectedSectionItem] = createSignal<ElementID | null>(null)
+
+export { selectedSectionItem, setSelectedSectionItem }

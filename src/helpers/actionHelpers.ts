@@ -171,6 +171,15 @@ export const editTemplateSection = (
 	}
 }
 
+export const updateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilter) => {
+	const group = templates.get(id)
+	if (group) {
+		const updatedGroup = { ...group, sort: sort }
+		templates.set(id, updatedGroup)
+		storeEntityMap()
+	}
+}
+
 export const addItem = (
 	name: string,
 	group: GroupID,

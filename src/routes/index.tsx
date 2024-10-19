@@ -10,10 +10,12 @@ import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Navigate } from "~/components/Navigate"
 import { ItemContainer } from "~/components/items-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
+import TemplateContainerMenu from "~/components/template-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
 import { PromptItem, GroupID, VersionID, BadgeID } from "~/types/entityType"
 import { groupsMap } from "~/helpers/actionHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
+import SectionContainer from "~/components/section-container"
 
 let body = new ReactiveMap<VersionID, string>()
 
@@ -232,9 +234,9 @@ export default function Home() {
 									</div>
 								}
 							>
-								<div class="flex items-center px-4 py-2 bg-background-secondary min-h-14">
+								<div class="items-center py-2 bg-background-secondary min-h-14">
 									<div class="flex items-center gap-2 ">
-										<div class="text-xs">Template Menu</div>
+										<TemplateContainerMenu />
 									</div>
 								</div>
 								<Separator />
@@ -243,7 +245,7 @@ export default function Home() {
 								</div>
 
 								<div class="p-4 bg-background-secondary h-100% overflow-auto">
-									<div class="text-xs">Templates</div>
+									<SectionContainer />
 								</div>
 							</Show>
 						</ResizablePanel>
