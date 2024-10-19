@@ -2,22 +2,30 @@ import { createShortcut } from "@solid-primitives/keyboard"
 import { createEffect, createSignal, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
-import { setColorFooter } from "~/global_state"
+import { entityItems, selected, setColorFooter } from "~/global_state"
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
 import { Tabs, TabsContent } from "~/registry/ui/tabs"
-import { Dialog, DialogContent } from "~/registry/ui/dialog"
-import { Button } from "~/registry/ui/button"
 import { Navigate } from "~/components/Navigate"
 import { ItemContainer } from "~/components/ItemContainer"
 import { GroupContainerMenu } from "~/components/group-container-menu"
+import GroupContainerSearch from "~/components/group-container-search"
+import { PromptItem, GroupID } from "~/types/entityType"
+import { groupsMap } from "~/helpers/actionHelpers"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
 	const [isCollapsedGroup, setIsCollapsedGroup] = createSignal(false)
 	const [isCollapsedTemplate, setIsCollapsedTemplate] = createSignal(false)
 	const [isCollapsedViewer, setIsCollapsedViewer] = createSignal(false)
+	const [initializedUserElement, setInitializedUserElement] = createSignal(false)
+	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
+	const [isFullElements, setIsFullElements] = createSignal(true)
+
+	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
+		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
+	] as PromptItem[])
 
 	const [isClientSide, setIsClientSide] = createSignal(false)
 	const [initialized, setInitialized] = createSignal(false)
@@ -26,6 +34,26 @@ export default function Home() {
 		storage: cookieStorage,
 		storageOptions: {
 			path: "/"
+		}
+	})
+
+	createEffect(() => {
+		setItemsList([...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])] as PromptItem[])
+	})
+
+	createEffect(() => {
+		if (selected() !== null && selected() !== undefined && Array.from(groupsMap().values()).length > 0) {
+			setInitializedUserGroup(true)
+		} else {
+			setInitializedUserGroup(false)
+		}
+
+		if (
+			entityItems.get(selected() as unknown as GroupID)?.values() !== null &&
+			entityItems.get(selected() as unknown as GroupID)?.values() !== undefined &&
+			Array.from(entityItems.get(selected() as unknown as GroupID)?.keys() ?? []).length > 0
+		) {
+			setInitializedUserElement(true)
 		}
 	})
 
@@ -79,7 +107,6 @@ export default function Home() {
 						>
 							{/* <AccountSwitcher isCollapsed={isCollapsed()} /> */}
 							<div class="px-2 flex items-center justify-center bg-background-secondary min-h-14">
-								{/* Creating Awkward Responses Leisurely */}
 								<div
 									class={cn(
 										"font-bold",
@@ -92,9 +119,6 @@ export default function Home() {
 								<div class="text-[0.5rem] font-semibold mb-0.5 text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:ml-2">
 									Beta
 								</div>
-								<Show when={!isCollapsedMenu()}>
-									<div class="my-5"></div>
-								</Show>
 							</div>
 							<Separator />
 							<div class="h-full bg-background-secondary">
@@ -134,22 +158,20 @@ export default function Home() {
 									</div>
 
 									<Separator />
-
+									<GroupContainerSearch />
 									<TabsContent
 										value="all"
 										class="m-0"
 									>
-										{/* <ItemContainer
+										<ItemContainer
 											type="all"
 											sizes={sizes()}
-											items={[]}
-											initializedUserElement={false}
-											initializedUserGroup={false}
-											inputValueTitle=""
-											isDialogOpenGroup={false}
-											isDialogOpenAIElement={false}
-											groupFilter="collection"
-										/> */}
+											items={itemsList}
+											initializedUserElement={initializedUserElement}
+											initializedUserGroup={initializedUserGroup}
+											isFullElements={isFullElements}
+											setIsFullElements={setIsFullElements}
+										/>
 									</TabsContent>
 								</Tabs>
 							</Show>
