@@ -11,7 +11,7 @@ import { Dialog, DialogContent } from "~/registry/ui/dialog"
 import { Button } from "~/registry/ui/button"
 import { Navigate } from "~/components/Navigate"
 import { ItemContainer } from "~/components/ItemContainer"
-import { EditableGroupContainerMenu } from "~/components/editable-group-container-menu"
+import { GroupContainerMenu } from "~/components/group-container-menu"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
@@ -129,8 +129,8 @@ export default function Home() {
 								}
 							>
 								<Tabs defaultValue="all">
-									<div class="flex items-center px-2 py-2 min-h-14">
-										<EditableGroupContainerMenu />
+									<div class="items-center px-2 py-2 min-h-14">
+										<GroupContainerMenu />
 									</div>
 
 									<Separator />

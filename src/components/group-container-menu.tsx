@@ -26,7 +26,7 @@ import { PromptItem, GroupID, ElementID, Filter } from "../types/entityType"
 
 import { EditableGroupTitle } from "~/components/editable-group-title"
 
-export function EditableGroupContainerMenu() {
+export function GroupContainerMenu() {
 	const [isCollapsedGroup, setIsCollapsedGroup] = createSignal(false)
 	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
 		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
