@@ -1,7 +1,7 @@
 import { closestCenter, DragEventHandler, Draggable, Droppable, CollisionDetector } from "@thisbeyond/solid-dnd"
 import { createSignal } from "solid-js"
 import Big from "big.js"
-import { nextOrder, setNextOrder, ORDER_DELTA, entityItems, entityGroups, templates } from "~/global_state"
+import { nextOrder, setNextOrder, ORDER_DELTA, entityItems, entityGroups, templates, groupBadge } from "~/global_state"
 import {
 	Entity,
 	Group,
@@ -268,6 +268,97 @@ export const changeItemAttributes = (
 	entityItems.set(groupId, entity)
 
 	storeEntityMap()
+}
+
+export const deleteItem = (groupId: GroupID, id: ElementID) => {
+	// Removes the item from the templates before deleting the item from the entityItems
+	const itemBadges = entityItems.get(groupId)?.get(id)
+	console.log("deleteItem", id, itemBadges?.labels)
+	templates.forEach(template => {
+		const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
+			[template.sections.entries()].map(([version, sections]) => [
+				version,
+				new ReactiveMap<TemplateSectionID, TemplateSection>(
+					(sections as [TemplateSectionID, TemplateSection][]).map(([sectionId, section]) => [
+						sectionId,
+						{ ...section, items: section.items.filter(item => item.id !== id) }
+					])
+				)
+			])
+		)
+		templates.set(template.id, { ...template, sections: updatedSections })
+	})
+
+	entityItems.get(groupId)?.delete(id)
+	storeEntityMap()
+}
+
+export const duplicateItem = (groupId: GroupID, itemId: ElementID) => {
+	const item = entityItems.get(groupId)?.get(itemId)
+	if (item) {
+		const newItem: ElementID = addItem(
+			item.name + " - Copy",
+			groupId,
+			item.labels,
+			item.summary || "",
+			item.versionCounter,
+			item.selectedVersion,
+			item.body?.get(item.selectedVersion) || ""
+		) as unknown as ElementID
+
+		item.labels.forEach(bdg => {
+			if (!groupBadge.has(item.group)) {
+				groupBadge.set(item.group, new ReactiveMap())
+			}
+			const groupBadgeMap = groupBadge.get(item.group)
+			if (groupBadgeMap) {
+				// Check if badgeID exists in groupBadgeMap
+				if (!groupBadgeMap.has(bdg.id)) {
+					groupBadgeMap.set(bdg.id, [...(groupBadgeMap.get(bdg.id) || []), newItem])
+				}
+				// Check if itemID exists in badgeID
+				if (!groupBadgeMap.get(bdg.id)?.includes(newItem)) {
+					groupBadgeMap.get(bdg.id)?.push(newItem)
+				}
+				// Check if the item ID is already associated with the badge
+				if (groupBadgeMap.get(bdg.id)?.includes(newItem)) {
+					// Optionally handle the case where the item ID is already present
+					console.log(`Item ID ${newItem} is already associated with badge ID ${bdg.id}`)
+				}
+				// Sets groupBadgeMap to groupBadge
+				console.log(`Item added to badge ElementID:${newItem}`)
+				groupBadge.set(item.group, groupBadgeMap)
+			}
+		})
+	}
+}
+
+export const moveItemToGroup = (groupId: GroupID, itemId: ElementID, newGroupId: GroupID) => {
+	if (groupId === newGroupId) return
+	const item = entityItems.get(groupId)?.get(itemId)
+	if (item) {
+		const updatedItem = { ...item, group: newGroupId }
+
+		// Updates the item in the templates with the new groupId
+		templates.forEach(template => {
+			const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
+				[template.sections.entries()].map(([version, sections]) => [
+					version,
+					new ReactiveMap<TemplateSectionID, TemplateSection>(
+						(sections as [TemplateSectionID, TemplateSection][]).map(([sectionId, section]) => [
+							sectionId,
+							{ ...section, items: section.items.map(item => (item.id === itemId ? { ...item, group: newGroupId } : item)) }
+						])
+					)
+				])
+			)
+			templates.set(template.id, { ...template, sections: updatedSections })
+		})
+
+		entityItems.get(newGroupId)?.set(itemId, updatedItem)
+		entityItems.get(groupId)?.delete(itemId)
+		storeEntityMap()
+	}
 }
 
 export const pinToggleItem = (groupId: GroupID, id: ElementID) => {

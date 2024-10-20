@@ -1,34 +1,47 @@
-import { For, Show, createSignal } from "solid-js"
-import { ReactiveSet } from "@solid-primitives/set"
-import { cn } from "~/lib/utils"
+import { createEffect, Show, createSignal, For, createMemo } from "solid-js"
 import { toast } from "solid-sonner"
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuSub,
-	DropdownMenuPortal,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
-	DropdownMenuItem
-} from "~/registry/ui/dropdown-menu"
-import { Button } from "~/registry/ui/button"
-import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
-import { ElementID, GroupID, PromptItem, VersionID } from "~/types/entityType"
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~/registry/ui/select"
-import { EditableItemTitle } from "./editable-item-title"
-import { storeEntityMap } from "~/helpers/entityHelpers"
+import { cn } from "~/lib/utils"
+
 import {
 	selectedItem,
 	isEditingItem,
 	setIsEditingItem,
-	entityItems,
-	setSelectedItem,
 	setIsEditingGroup,
 	entityGroups,
+	entityItems,
+	selectedTemplateGroup,
+	selectedSection,
 	templates,
+	badge,
+	selectedSectionItem,
+	setSelectedSectionItemEl,
+	setSelectedTemplateGroup,
+	setSelectedSection,
 	selectedTemplateVersion
 } from "~/global_state"
+import { pinToggleItem } from "~/helpers/actionHelpers"
+import { PromptItem, GroupID, ElementID, BadgeID, VersionID, TemplateGroupID } from "~/types/entityType"
+import {
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSub,
+	DropdownMenuSubTrigger,
+	DropdownMenuSubContent,
+	DropdownMenuPortal
+} from "~/registry/ui/dropdown-menu"
+import { Button } from "~/registry/ui/button"
+import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
+import { EditableItemTitle } from "./editable-item-title"
+import { EditableItemSummary } from "./editable-item-summary"
+import { EditableItemBody } from "./editable-item-body"
+import { EditableItemPrism } from "./editable-item-prism"
+import { createTimeAgo } from "@solid-primitives/date"
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~/registry/ui/select"
+import { storeEntityMap } from "~/helpers/entityHelpers"
+import { Progress, ProgressValueLabel } from "~/registry/ui/progress"
+import { ReactiveSet } from "@solid-primitives/set"
 
 interface ItemsProps {
 	item: PromptItem
@@ -41,12 +54,20 @@ interface ItemsProps {
 		versionCounter: VersionID,
 		updatedBody: boolean
 	) => void
+	handleDeleteItem: (groupId: GroupID, itemId: ElementID) => void
+	handleDuplicateItem: (item: PromptItem) => void
+	handleMoveItem: (item: PromptItem, groupId: GroupID) => void
+	sizes: number[]
 }
 
 export default function Elements(props: ItemsProps) {
 	const [mouseOver, setMouseOver] = createSignal(false)
+	const [isNew, setIsNew] = createSignal(false)
+	const [isModified, setIsModified] = createSignal(false)
+	const [isPinned, setIsPinned] = createSignal(false)
+	const [isBadgeSelectEdit, setIsBadgeSelectEdit] = createSignal(false)
+	const [selectedIconValues, setSelectedIconValues] = createSignal<any[]>([])
 	const [inputValueTitle, setInputValueTitle] = createSignal(props.item.name || "")
-	const [isRevert, setIsRevert] = createSignal(false)
 	const [inputValueSummary, setInputValueSummary] = createSignal(props.item.summary || "")
 	const [inputValueBody, setInputValueBody] = createSignal(props.item.body.get(props.item.selectedVersion) || "")
 	const [inputValueBodyPrism, setInputValueBodyPrism] = createSignal(
@@ -54,7 +75,79 @@ export default function Elements(props: ItemsProps) {
 	)
 	const [isPrism, setIsPrism] = createSignal(true)
 	const [prismValue, setPrismValue] = createSignal("")
+	const [isRevert, setIsRevert] = createSignal(false)
 	let el: HTMLButtonElement | undefined
+
+	createEffect(() => {
+		setInputValueBody(props.item.body.get(props.item.selectedVersion) || "")
+		setInputValueBodyPrism(props.item.body.get(props.item.selectedVersion) || "")
+	})
+
+	createEffect(() => {
+		if (selectedSectionItem() === props.item.id) {
+			setSelectedSectionItemEl(el)
+		}
+	})
+
+	const groupOptions = Array.from(entityGroups.values())
+		.filter((group: any) => group.id !== props.item.group)
+		.map((group: any) => ({
+			value: group.id,
+			label: group.name
+		}))
+
+	createEffect(() => {
+		if (selectedItem() === props.item.id) {
+			setMouseOver(true)
+		} else {
+			setMouseOver(false)
+		}
+	})
+
+	const [timeAgoCreated, { difference: createdDifference }] = createTimeAgo(() => props.item.date_created, {
+		interval: 600000 // Update every 10 minutes
+	})
+
+	createEffect(() => {
+		if (-createdDifference() <= 3600000) {
+			// 1 hour in milliseconds
+			// 2 days in milliseconds
+			setIsNew(true)
+		} else {
+			setIsNew(false)
+		}
+	})
+
+	const [timeAgoModified, { difference: modifiedDifference }] = createTimeAgo(() => props.item.date_modified, {
+		interval: 30000 // Update every 30 seconds
+	})
+
+	createEffect(() => {
+		if (props.item.date_modified === props.item.date_created) return
+		if (-modifiedDifference() <= 120000) {
+			// 1 minute in milliseconds
+			setIsModified(true)
+		} else {
+			setIsModified(false)
+		}
+	})
+
+	createEffect(() => {
+		if (props.item.pinned) {
+			setIsPinned(true)
+		} else {
+			setIsPinned(false)
+		}
+	})
+
+	const handlePinToggle = () => {
+		pinToggleItem(props.item.group, props.item.id)
+		setIsPinned(props.item.pinned || false)
+	}
+
+	const handleNewGroup = (groupId: any) => {
+		props.handleMoveItem(props.item, groupId.value)
+	}
 
 	const handleSave = () => {
 		const body = isPrism() ? prismValue() : inputValueBody()
@@ -126,23 +219,39 @@ export default function Elements(props: ItemsProps) {
 		}
 	}
 
-	const getTemplatesNames = () => {
-		const templateNames = Array.from(
-			usedInSections({ id: props.item.id, group: props.item.group }).templates.values()
-		).map((template: any) => {
-			const name = templates.get(template)?.name
-			const id = template
-			return { value: id, label: name }
-		})
-		return templateNames
+	const handleOpenTemplate = (templateId: { value: TemplateGroupID; label: string }) => {
+		setSelectedTemplateGroup(templateId.value)
+		setSelectedSection(null)
 	}
 
-	const groupOptions = Array.from(entityGroups.values())
-		.filter((group: any) => group.id !== props.item.group)
-		.map((group: any) => ({
-			value: group.id,
-			label: group.name
-		}))
+	const getBadgeValuesFromBadgeID = (badgeId: BadgeID) => {
+		const badges = badge.get(badgeId)
+		if (!badges) return
+		return {
+			id: badges.id,
+			name: badges.name,
+			icon: badges.icon
+		}
+	}
+
+	const initialValue = () => {
+		const item = entityItems.get(props.item.group)?.get(props.item.id)
+		return (item?.labels || []).map(label => getBadgeValuesFromBadgeID(label.id))
+	}
+
+	createEffect(() => {
+		setSelectedIconValues(initialValue())
+	})
+
+	const contentPreview = createMemo(() => {
+		const body = props.item?.body.get(props.item.selectedVersion) || ""
+		const wordCount = body.trim() ? body.split(/\s+/).length : 0
+		return { wordCount }
+	})
+
+	const estimateTokens = (wordCount: number): number => {
+		return Math.ceil(wordCount * 1.33)
+	}
 
 	// Keep an eye on this ugly thing if slowdowns occur look here first
 	const usedInSections = ({ id, group }: { id: ElementID; group: GroupID }) => {
@@ -157,6 +266,17 @@ export default function Elements(props: ItemsProps) {
 		return { sections: sections, templates: templateList }
 	}
 
+	const getTemplatesNames = () => {
+		const templateNames = Array.from(
+			usedInSections({ id: props.item.id, group: props.item.group }).templates.values()
+		).map((template: any) => {
+			const name = templates.get(template)?.name
+			const id = template
+			return { value: id, label: name }
+		})
+		return templateNames
+	}
+
 	return (
 		<div>
 			<Button
@@ -167,11 +287,10 @@ export default function Elements(props: ItemsProps) {
 					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/50 cursor-default",
 					selectedItem() === props.item.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
 				)}
-				onClick={() => setSelectedItem(props.item.id)}
 				onMouseEnter={() => setMouseOver(true)}
 				onMouseLeave={() => setMouseOver(false)}
 			>
-				<Show when={true}>
+				<Show when={selectedItem() === props.item.id && isBadgeSelectEdit() === false}>
 					<Tooltip
 						openDelay={1000}
 						closeDelay={0}
@@ -181,6 +300,9 @@ export default function Elements(props: ItemsProps) {
 							variant="ghost"
 							size="icon"
 							class="absolute bottom-1 right-2 text-accent hover:text-accent-foreground"
+							onClick={() => {
+								//add debounce
+							}}
 						>
 							<div class="i-mdi:file-document-arrow-right w-1.25em h-1.25em"></div>
 							<span class="sr-only">Add to Template</span>
@@ -204,7 +326,7 @@ export default function Elements(props: ItemsProps) {
 								<div class="flex items-center gap-2 mt-5">
 									<Select
 										onChange={e => {
-											const value = Number(e?.value) || 0
+											const value = Number(e?.value) ?? 1
 											handleSetVersion(value, false)
 										}}
 										options={Array.from(props.item.body.keys()).map(key => ({
@@ -258,27 +380,237 @@ export default function Elements(props: ItemsProps) {
 					</div>
 					{/* Summary Prompts */}
 					<div class="items-center gap-2 pr-10">
-						<div>{props.item.description}</div>
+						<Show
+							when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
+							fallback={
+								<div class="flex items-center gap-2">
+									<div class={cn("text-xs text-foreground/60", !props.item?.summary ? "text-foreground/60" : "")}>
+										{props.item?.summary || "Add summary"}
+									</div>
+								</div>
+							}
+						>
+							<EditableItemSummary
+								item={props.item}
+								summary={props.item.summary}
+								inputValueSummary={inputValueSummary()}
+								setInputValueSummary={setInputValueSummary}
+								handleSave={handleSave}
+							/>
+						</Show>
 					</div>
 
 					{/* Body Prompts */}
-					<div>{props.item.body.get(props.item.selectedVersion)}</div>
+					<Show
+						when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
+						fallback={
+							<div class="text-xs w-full">
+								<div class="flex flex-col w-full gap-1">
+									<div class="flex justify-between text-foreground/60"></div>
+									<Progress
+										value={contentPreview()?.wordCount || 0}
+										minValue={0}
+										maxValue={1000}
+										getValueLabel={({ value, max }) => ``}
+										class="w-[300px] space-y-1"
+									>
+										<div class="flex justify-between">
+											<div class="text-foreground/60 text-xs flex items-center gap-4">
+												<div class="flex items-center gap-1">
+													<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
+													<span class="text-[.6rem] mr-2">tokens</span>
+												</div>
+												<div class="flex items-center gap-1">
+													<span>{`${usedInSections({ id: props.item.id, group: props.item.group }).sections.length}`}</span>
+													<span class="text-[.6rem] mr-2">Sections</span>
+												</div>
+												<div class="flex items-center gap-1">
+													<span>{`${
+														Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length
+													}`}</span>
+													<span class="text-[.6rem] mr-2">Templates</span>
+												</div>
+											</div>
+											<ProgressValueLabel />
+										</div>
+									</Progress>
+								</div>
+							</div>
+						}
+					>
+						<Show
+							when={isPrism()}
+							fallback={
+								<EditableItemBody
+									inputValueBody={inputValueBody}
+									setInputValueBody={setInputValueBody}
+									item={props.item}
+									body={props.item.body.get(props.item.selectedVersion)}
+									handleSave={handleSave}
+									setIsPrism={setIsPrism}
+								/>
+							}
+						>
+							<EditableItemPrism
+								item={props.item}
+								inputValueBody={inputValueBodyPrism}
+								setInputValueBody={setInputValueBodyPrism}
+								setPrismValue={setPrismValue}
+								body={props.item.body.get(props.item.selectedVersion)}
+								handleSave={handleSave}
+								setIsPrism={setIsPrism}
+							/>
+						</Show>
+					</Show>
 					{/* Badges */}
 					<div class="min-h-5.5">
-						<For each={props.item.labels}>
-							{label => {
-								return <div>{label.name}</div>
-							}}
-						</For>
+						<Show
+							when={isBadgeSelectEdit()}
+							fallback={
+								<div>
+									<Show when={selectedIconValues().length === 0 && selectedItem() === props.item.id}>
+										<div class="flex items-center  gap-2">
+											<Tooltip
+												openDelay={1000}
+												closeDelay={0}
+											>
+												<TooltipTrigger
+													as={Button}
+													variant="badge"
+													size="badge"
+													onClick={() => setIsBadgeSelectEdit(true)}
+													class={cn("transition-opacity duration-200 opacity-100 py-0.75 px-2.5 ")}
+												>
+													<div class="i-material-symbols:add w-1em h-1em"></div>
+													<span class="sr-only">AI Generate Prompt</span>
+												</TooltipTrigger>
+												<TooltipContent>Add Badge</TooltipContent>
+											</Tooltip>
+
+											{/* <Tooltip
+												openDelay={1000}
+												closeDelay={0}
+											>
+												<TooltipTrigger
+													as={Button}
+													variant="badge"
+													size="badge"
+													class={cn("transition-opacity duration-200 opacity-100 py-0.5 px-2.5")}
+													onClick={() => {
+														console.log("Generate Prompt")
+													}}
+												>
+													<div class="i-ion:sparkles-sharp w-1.15em h-1.15em"></div>
+												</TooltipTrigger>
+												<span class="sr-only">AI Generate Prompt</span>
+												<TooltipContent>AI Generate Badges (Coming Soon)</TooltipContent>
+											</Tooltip> */}
+										</div>
+									</Show>
+									<Show when={selectedIconValues().length > 0}>
+										<div class="flex gap-1 text-sm items-center flex-wrap ">
+											<Show
+												when={selectedItem() === props.item.id}
+												fallback={
+													<For each={selectedIconValues()}>
+														{(option, index) => {
+															const [iconSelection, setIconSelection] = createSignal<{ icon: string; name: string }>(option)
+
+															createEffect(() => {
+																setIconSelection(option)
+															})
+
+															return (
+																<div class="group relative cursor-pointer overflow-hidden py-0 border border-transparent rounded-md focus:outline-none focus:ring-1 focus:ring-primary">
+																	Badge
+																</div>
+															)
+														}}
+													</For>
+												}
+											>
+												<For each={selectedIconValues()}>
+													{(option, index) => {
+														const [iconSelection, setIconSelection] = createSignal<{ icon: string; name: string }>(option)
+
+														createEffect(() => {
+															setIconSelection(option)
+														})
+
+														return (
+															<button class="group relative cursor-pointer overflow-hidden py-0 border border-transparent rounded-md focus:outline-none focus:ring-1 focus:ring-primary">
+																Badge
+															</button>
+														)
+													}}
+												</For>
+											</Show>
+											<Show when={selectedItem() === props.item.id}>
+												<div class={cn("flex items-center  gap-2", selectedItem() === props.item.id && "opacity-100")}>
+													<Tooltip
+														openDelay={1000}
+														closeDelay={0}
+													>
+														<TooltipTrigger
+															as={Button}
+															variant="badge"
+															size="badge"
+															class={cn("py-0.75 px-2.5")}
+															onClick={() => setIsBadgeSelectEdit(true)}
+														>
+															<div class="i-material-symbols:add w-1em h-1em"></div>
+															<span class="sr-only">AI Generate Prompt</span>
+														</TooltipTrigger>
+														<TooltipContent>Add Badge</TooltipContent>
+													</Tooltip>
+													{/* <Tooltip
+														openDelay={1000}
+														closeDelay={0}
+													>
+														<TooltipTrigger
+															as={Button}
+															variant="badge"
+															size="badge"
+															class={cn("py-0.5 px-2.5")}
+															onClick={() => {
+																console.log("Generate Prompt")
+															}}
+														>
+															<div class="i-ion:sparkles-sharp w-1.15em h-1.15em"></div>
+															<span class="sr-only">AI Generate Prompt</span>
+														</TooltipTrigger>
+														<TooltipContent>AI Generate Badges (Coming Soon)</TooltipContent>
+													</Tooltip> */}
+												</div>
+											</Show>
+										</div>
+									</Show>
+								</div>
+							}
+						>
+							<div>Grid View</div>
+						</Show>
 					</div>
 				</div>
 				{/* Help Indicators and Edit Buttons */}
 				<div class="absolute top-1 right-2">
 					<div class="flex gap-1 items-center">
-						<Show when={false}>
+						<Show when={isPinned() && props.sizes[1] > 0.2 && isEditingItem().status === "saved"}>
 							<Button
 								variant="ghost"
 								size="icon"
+								onClick={() => {
+									handlePinToggle()
+									toast(
+										<div class="flex items-center gap-2">
+											<div class="i-material-symbols:check-box w-4 h-4 text-success" />
+											<span class="text-xs font-medium">
+												{props.item.name} {isPinned() ? "Unpinned" : "Pinned"}
+											</span>
+										</div>,
+										{ duration: 2000, position: "bottom-center" }
+									)
+								}}
 								class="group"
 							>
 								<div class="i-material-symbols-light:push-pin text-foreground/80 w-4 h-4 group-hover:text-accent-foreground"></div>
@@ -381,28 +713,40 @@ export default function Elements(props: ItemsProps) {
 											<span class="sr-only">More</span>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
-											<DropdownMenuItem>
+											<DropdownMenuItem onSelect={() => props.handleDuplicateItem(props.item)}>
 												<div class="i-octicon:duplicate-16 w-1.25em h-1.25em mr-2"></div>
 												Duplicate Element
 											</DropdownMenuItem>
 											<DropdownMenuItem onSelect={() => console.log("Clear Prompt")}>
 												<div class="i-icon-park-outline:clear-format w-1.25em h-1.25em mr-2"></div> Clear Prompt
 											</DropdownMenuItem>
-											<DropdownMenuItem>
+											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.group, props.item.id)}>
 												<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Element
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												onSelect={() => {
+													handlePinToggle()
+
 													toast(
 														<div class="flex items-center gap-2">
 															<div class="i-material-symbols:check-box w-4 h-4 text-success" />
-															<span class="text-xs font-medium">{props.item.name}</span>
+															<span class="text-xs font-medium">
+																{props.item.name} {isPinned() ? "Unpinned" : "Pinned"}
+															</span>
 														</div>,
 														{ duration: 2000, position: "bottom-center" }
 													)
 												}}
 											>
-												<div class={cn(" w-1.25em h-1.25em mr-2")}></div>{" "}
+												<div
+													class={cn(
+														" w-1.25em h-1.25em mr-2",
+														isPinned() && "i-material-symbols-light:toggle-on w-5 h-5",
+														!isPinned() && "i-material-symbols-light:toggle-off-outline w-5 h-5"
+													)}
+												></div>{" "}
+												<Show when={isPinned()}>Unpin Element</Show>
+												<Show when={!isPinned()}>Pin Element</Show>
 											</DropdownMenuItem>
 
 											<DropdownMenuSub overlap>
@@ -413,6 +757,7 @@ export default function Elements(props: ItemsProps) {
 												<DropdownMenuPortal>
 													<DropdownMenuSubContent>
 														<Select
+															onChange={(e: any) => handleNewGroup(e)}
 															options={groupOptions}
 															optionValue={"value" as any}
 															optionTextValue={"label" as any}
@@ -440,6 +785,7 @@ export default function Elements(props: ItemsProps) {
 												<DropdownMenuPortal>
 													<DropdownMenuSubContent>
 														<Select
+															onChange={(e: any) => handleOpenTemplate(e)}
 															options={getTemplatesNames()}
 															optionValue={"value" as any}
 															optionTextValue={"label" as any}

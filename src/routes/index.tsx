@@ -7,7 +7,7 @@ import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resiza
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
 import { Tabs, TabsContent } from "~/registry/ui/tabs"
-import { Navigate } from "~/components/Navigate"
+import { Navigate } from "~/components/navigate"
 import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
