@@ -98,3 +98,11 @@ export { selectedSectionItemEl, setSelectedSectionItemEl }
 const [selectedSectionItem, setSelectedSectionItem] = createSignal<ElementID | null>(null)
 
 export { selectedSectionItem, setSelectedSectionItem }
+
+const [searchSelectedBadges, setSearchSelectedBadges] = createSignal<Badge[]>([])
+
+export { searchSelectedBadges, setSearchSelectedBadges }
+
+const [allBadgesGroup, setAllBadgesGroup] = createSignal<Badge[]>([])
+
+export { allBadgesGroup, setAllBadgesGroup }

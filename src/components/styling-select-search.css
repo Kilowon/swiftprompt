@@ -1,0 +1,89 @@
+.custom {
+    font-family: 'Inter', sans-serif;
+    &.solid-select-container {
+      color: hsl(var(--foreground));
+      background-color: hsl(var(--popover));
+    }
+    .solid-select-input {
+      color: hsl(var(--foreground));
+      background-color: hsl(var(--popover));
+      font-family: 'Inter', sans-serif;
+    }
+    .solid-select-control {
+      border-color: hsl(var(--border));
+      background-color: hsl(var(--popover));
+      &:focus-within {
+        outline-color: hsl(var(--ring));
+      }
+    }
+  
+    .solid-select-placeholder {
+      color: hsl(var(--muted-foreground));
+      font-family: 'Inter', sans-serif;
+    }
+  
+    .solid-select-option {
+      background-color: hsl(var(--popover));
+      font-family: 'Inter', sans-serif;
+      &:hover {
+        background-color: hsl(var(--accent));
+        color: hsl(var(--accent-foreground));
+      }
+      &[data-focused="true"] {
+        background-color: hsl(var(--accent));
+        color: hsl(var(--accent-foreground));
+      }
+    }
+
+    .solid-select-multi-value {
+      background-color: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
+      font-family: 'Inter', sans-serif;
+      font-weight: bold;
+      font-size: 12px;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+    }
+    .solid-select-multi-value-label {
+      color: hsl(var(--accent-foreground));
+      font-family: 'Inter', sans-serif;
+    }
+    .solid-select-multi-value-close {
+      color: hsl(var(--accent-foreground));
+    }
+    .solid-select-multi-value-remove {
+      background-color: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
+      font-family: 'Inter', sans-serif;
+      opacity: 0; 
+      width: 1px;
+      padding: 0px 1px;
+      margin: 0px 0px 0px 0px;
+      display: flex;
+      align-items: start;
+      transition: margin 0.1s ease-in-out 0.1s, opacity 0.1s ease-in-out 0.1s; 
+  }
+  
+  .solid-select-multi-value:hover .solid-select-multi-value-remove {
+      opacity: 1; 
+      margin: 0px 5px 0px 0px;
+  }
+    .solid-select-multi-value:hover .solid-select-multi-value-remove {
+        opacity: 1;
+    }
+    .solid-select-multi-value-remove button {
+        opacity: 0;
+        transition: opacity 0.1s ease-in-out;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .solid-select-multi-value:hover .solid-select-multi-value-remove button {
+        opacity: 1;
+    }
+    .solid-select-list{
+      height: 25vh;
+    }
+  }

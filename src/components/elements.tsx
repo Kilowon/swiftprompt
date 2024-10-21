@@ -1,13 +1,15 @@
 import { createEffect, Show, createSignal, For, createMemo } from "solid-js"
 import { toast } from "solid-sonner"
 import { cn } from "~/lib/utils"
-
+import { Badge } from "~/registry/ui/badge"
 import {
 	selectedItem,
 	isEditingItem,
 	setIsEditingItem,
 	setIsEditingGroup,
 	entityGroups,
+	searchSelectedBadges,
+	setSearchSelectedBadges,
 	entityItems,
 	selectedTemplateGroup,
 	selectedSection,
@@ -19,7 +21,8 @@ import {
 	setSelectedSection,
 	selectedTemplateVersion
 } from "~/global_state"
-import { pinToggleItem } from "~/helpers/actionHelpers"
+import { pinToggleItem, updateBadge } from "~/helpers/actionHelpers"
+import { Badge as BadgeType } from "~/types/badgeType"
 import { PromptItem, GroupID, ElementID, BadgeID, VersionID, TemplateGroupID } from "~/types/entityType"
 import {
 	DropdownMenu,
@@ -39,12 +42,16 @@ import { EditableItemBody } from "./editable-item-body"
 import { EditableItemPrism } from "./editable-item-prism"
 import { createTimeAgo } from "@solid-primitives/date"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~/registry/ui/select"
+import { SelectBadge } from "./select-badge"
+import BadgeIcons from "./badge-icons"
 import { storeEntityMap } from "~/helpers/entityHelpers"
+import { addItemToTemplateSection } from "~/helpers/actionHelpers"
 import { Progress, ProgressValueLabel } from "~/registry/ui/progress"
 import { ReactiveSet } from "@solid-primitives/set"
 
-interface ItemsProps {
+interface ElementsProps {
 	item: PromptItem
+	handleEditing: (item: PromptItem, label: "title" | "summary" | "body", status: "editing" | "saved", id: string) => void
 	handleUpdateAttributes: (
 		item: PromptItem,
 		name: string,
@@ -57,10 +64,12 @@ interface ItemsProps {
 	handleDeleteItem: (groupId: GroupID, itemId: ElementID) => void
 	handleDuplicateItem: (item: PromptItem) => void
 	handleMoveItem: (item: PromptItem, groupId: GroupID) => void
+	labelLimit: () => number
+	items: PromptItem[]
 	sizes: number[]
 }
 
-export default function Elements(props: ItemsProps) {
+export default function Elements(props: ElementsProps) {
 	const [mouseOver, setMouseOver] = createSignal(false)
 	const [isNew, setIsNew] = createSignal(false)
 	const [isModified, setIsModified] = createSignal(false)
@@ -88,6 +97,14 @@ export default function Elements(props: ItemsProps) {
 			setSelectedSectionItemEl(el)
 		}
 	})
+
+	const selectBadge = (index: number, option: { name: string; id: BadgeID }) => {
+		if (!searchSelectedBadges().some(badge => badge.name === option.name)) {
+			setSearchSelectedBadges(prev => [...prev, { ...option }])
+		} else {
+			setSearchSelectedBadges(prev => prev.filter(badge => badge.name !== option.name))
+		}
+	}
 
 	const groupOptions = Array.from(entityGroups.values())
 		.filter((group: any) => group.id !== props.item.group)
@@ -145,6 +162,11 @@ export default function Elements(props: ItemsProps) {
 		setIsPinned(props.item.pinned || false)
 	}
 
+	const handleUpdateBadge = (badgeId: BadgeID, icon: string, name: string) => {
+		updateBadge(badgeId, icon, name)
+		setSelectedIconValues(prev => prev.map(item => (item.id === badgeId ? { ...item, icon } : item)))
+	}
+
 	const handleNewGroup = (groupId: any) => {
 		props.handleMoveItem(props.item, groupId.value)
 	}
@@ -194,6 +216,27 @@ export default function Elements(props: ItemsProps) {
 		} else {
 			toast("No Changes to Save", { duration: 5000, position: "bottom-center" })
 			return
+		}
+	}
+
+	const handleAddToTemplate = () => {
+		addItemToTemplateSection(
+			selectedTemplateGroup()!,
+			selectedSection()!,
+			props.item.id,
+			props.item.group,
+			selectedTemplateVersion()!
+		)
+	}
+
+	const [isDebouncing, setIsDebouncing] = createSignal(false)
+	const handleDebounce = () => {
+		if (!isDebouncing()) {
+			setIsDebouncing(true)
+			handleAddToTemplate()
+			setTimeout(() => {
+				setIsDebouncing(false)
+			}, 1000)
 		}
 	}
 
@@ -256,8 +299,8 @@ export default function Elements(props: ItemsProps) {
 	// Keep an eye on this ugly thing if slowdowns occur look here first
 	const usedInSections = ({ id, group }: { id: ElementID; group: GroupID }) => {
 		const sections = Array.from(templates.values()).flatMap((template: any) =>
-			Array.from(template.sections.get(selectedTemplateVersion()!)?.values() ?? []).flatMap((section: any) =>
-				section.items?.some((item: any) => item.id === id && item.group === group)
+			[template.sections.get(selectedTemplateVersion()!)?.values() ?? []].flatMap(section =>
+				section.items?.some((item: PromptItem) => item.id === id && item.group === group)
 					? [{ templateId: template.id, sectionId: section.id }]
 					: []
 			)
@@ -301,7 +344,7 @@ export default function Elements(props: ItemsProps) {
 							size="icon"
 							class="absolute bottom-1 right-2 text-accent hover:text-accent-foreground"
 							onClick={() => {
-								//add debounce
+								handleDebounce()
 							}}
 						>
 							<div class="i-mdi:file-document-arrow-right w-1.25em h-1.25em"></div>
@@ -326,8 +369,8 @@ export default function Elements(props: ItemsProps) {
 								<div class="flex items-center gap-2 mt-5">
 									<Select
 										onChange={e => {
-											const value = Number(e?.value) ?? 1
-											handleSetVersion(value, false)
+											const value = e?.value ?? ""
+											handleSetVersion(Number(value), false)
 										}}
 										options={Array.from(props.item.body.keys()).map(key => ({
 											value: key,
@@ -521,8 +564,26 @@ export default function Elements(props: ItemsProps) {
 															})
 
 															return (
-																<div class="group relative cursor-pointer overflow-hidden py-0 border border-transparent rounded-md focus:outline-none focus:ring-1 focus:ring-primary">
-																	Badge
+																<div
+																	onClick={() => selectBadge(index(), option)}
+																	class="group relative cursor-pointer overflow-hidden py-0 border border-transparent rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+																>
+																	<Badge
+																		variant={
+																			searchSelectedBadges().some((badge: BadgeType) => badge.name === option.name) ? "default" : "outline"
+																		}
+																		class="group relative cursor-pointer overflow-hidden py-0"
+																	>
+																		{(option as any).name || ""}
+
+																		<BadgeIcons
+																			itemId={props.item.id}
+																			iconSelection={iconSelection}
+																			isBadgeHover={false}
+																			badgeId={option.id}
+																			handleUpdateBadge={handleUpdateBadge}
+																		/>
+																	</Badge>
 																</div>
 															)
 														}}
@@ -538,8 +599,26 @@ export default function Elements(props: ItemsProps) {
 														})
 
 														return (
-															<button class="group relative cursor-pointer overflow-hidden py-0 border border-transparent rounded-md focus:outline-none focus:ring-1 focus:ring-primary">
-																Badge
+															<button
+																onClick={() => selectBadge(index(), option)}
+																class="group relative cursor-pointer overflow-hidden py-0 border border-transparent rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+															>
+																<Badge
+																	variant={
+																		searchSelectedBadges().some((badge: BadgeType) => badge.name === option.name) ? "default" : "outline"
+																	}
+																	class="group relative cursor-pointer overflow-hidden py-0"
+																>
+																	{(option as any).name || ""}
+
+																	<BadgeIcons
+																		itemId={props.item.id}
+																		iconSelection={iconSelection}
+																		isBadgeHover={false}
+																		badgeId={option.id}
+																		handleUpdateBadge={handleUpdateBadge}
+																	/>
+																</Badge>
 															</button>
 														)
 													}}
@@ -588,7 +667,14 @@ export default function Elements(props: ItemsProps) {
 								</div>
 							}
 						>
-							<div>Grid View</div>
+							<SelectBadge
+								item={props.item}
+								isBadgeSelectEdit={isBadgeSelectEdit()}
+								setIsBadgeSelectEdit={setIsBadgeSelectEdit}
+								selectedValues={selectedIconValues}
+								setSelectedValues={setSelectedIconValues}
+								body={props.item.body.get(props.item.selectedVersion)}
+							/>
 						</Show>
 					</div>
 				</div>

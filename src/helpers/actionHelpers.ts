@@ -1,7 +1,19 @@
 import { closestCenter, DragEventHandler, Draggable, Droppable, CollisionDetector } from "@thisbeyond/solid-dnd"
 import { createSignal } from "solid-js"
 import Big from "big.js"
-import { nextOrder, setNextOrder, ORDER_DELTA, entityItems, entityGroups, templates, groupBadge } from "~/global_state"
+import {
+	nextOrder,
+	setNextOrder,
+	ORDER_DELTA,
+	entityItems,
+	entityGroups,
+	templates,
+	groupBadge,
+	badge,
+	selectedTemplateVersion,
+	selectedTemplateGroup,
+	selectedSection
+} from "~/global_state"
 import {
 	Entity,
 	Group,
@@ -13,16 +25,23 @@ import {
 	TemplateSection,
 	VersionID,
 	TemplateFilter,
-	Filter
+	Filter,
+	BadgeID
 } from "~/types/entityType"
 import { Badge } from "~/types/badgeType"
 import { storeEntityMap } from "./entityHelpers"
+import { toast } from "solid-sonner"
 import { ReactiveMap } from "@solid-primitives/map"
 
 export const sortByOrder = (entities: Entity[]) => {
 	const sorted = entities.map(item => ({ order: new Big(item.order), item }))
 	sorted.sort((a, b) => a.order.cmp(b.order))
 	return sorted.map(entry => entry.item)
+}
+
+export const updateBadge = (badgeId: BadgeID, icon: string, name: string) => {
+	badge.set(badgeId, { id: badgeId, name: name, icon: icon })
+	storeEntityMap()
 }
 
 export const nameChangeGroup = (id: GroupID, name: string) => {
@@ -177,6 +196,70 @@ export const updateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilte
 		const updatedGroup = { ...group, sort: sort }
 		templates.set(id, updatedGroup)
 		storeEntityMap()
+	}
+}
+
+export const addItemToTemplateSection = (
+	templateGroupId: TemplateGroupID,
+	id: TemplateSectionID,
+	itemId: ElementID,
+	groupId: GroupID,
+	version: VersionID
+) => {
+	const versionCounter = templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0
+	const selectedVersion = selectedTemplateVersion() ?? 0
+
+	if (versionCounter !== selectedVersion) {
+		toast.error("Template version is Locked", {
+			description:
+				"Cannot add elements to template section. Template version is locked. Please select the current Template version to add elements",
+			duration: 5000,
+			position: "bottom-center"
+		})
+		return
+	}
+
+	if (selectedTemplateGroup() === null) {
+		toast.error("No template selected", {
+			description: "Cannot add elements to template section. No template selected",
+			duration: 5000,
+			position: "bottom-center"
+		})
+		return
+	}
+
+	if (selectedSection() === null) {
+		toast.error("No section selected", {
+			description: "Cannot add elements to template section. No section selected",
+			duration: 5000,
+			position: "bottom-center"
+		})
+		return
+	}
+
+	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
+	const hasItem = section?.items.some(item => item.id === itemId)
+
+	if (section && !hasItem) {
+		section.items.push({
+			id: itemId,
+			group: groupId,
+			order: getNextOrder(),
+			date_created: new Date().toISOString(),
+			date_modified: new Date().toISOString()
+		})
+		templates
+			.get(templateGroupId)
+			?.sections.get(version)
+			?.set(id, { ...section, items: section.items })
+		storeEntityMap()
+	}
+	if (hasItem) {
+		toast.error("Element already exists in section", {
+			description: "Can only have one instance of an Element in a section",
+			duration: 5000,
+			position: "bottom-center"
+		})
 	}
 }
 

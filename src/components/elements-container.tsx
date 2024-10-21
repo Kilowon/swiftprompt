@@ -1,6 +1,7 @@
 import { Accessor, createSignal, For, Show } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import Elements from "./elements"
+import { setIsEditingItem, searchSelectedBadges, groupBadge, selected } from "~/global_state"
 import { changeItemAttributes, deleteItem, duplicateItem, moveItemToGroup } from "~/helpers/actionHelpers"
 import { ElementID, GroupID, PromptItem, VersionID } from "~/types/entityType"
 import ItemsCompact from "./elements-compact"
@@ -32,8 +33,6 @@ const handleUpdateAttributes = (
 export default function ElementsContainer(props: ElementsContainerProps) {
 	const handleDeleteItem = (groupId: GroupID, itemId: ElementID) => {
 		const [isLoading, setIsLoading] = createSignal(true)
-
-		const [labelLimit, setLabelLimit] = createSignal<number>(18)
 		const [items, setItems] = createStore(props.items)
 
 		setItems(
@@ -45,6 +44,17 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 			})
 		)
 		deleteItem(groupId, itemId)
+	}
+
+	const handleEditing = (
+		item: PromptItem,
+		label: "title" | "summary" | "body",
+		status: "saved" | "editing",
+		id: string
+	) => {
+		if (item.id) {
+			setIsEditingItem({ label, status, id: id as unknown as ElementID })
+		}
 	}
 
 	const duplicateItemHandler = (item: PromptItem) => {
@@ -76,6 +86,9 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 										handleDeleteItem={handleDeleteItem}
 										handleDuplicateItem={duplicateItemHandler}
 										handleMoveItem={moveItemToNewGroup}
+										handleEditing={handleEditing}
+										labelLimit={() => 18}
+										items={props.items()}
 										sizes={props.sizes}
 									/>
 								</div>
