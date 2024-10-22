@@ -24,7 +24,9 @@ export const SelectSearch = () => {
 
 	createEffect(() => {
 		const candidates = Array.from(groupBadge.get(selected() as unknown as GroupID)?.keys() ?? [])
-		const allBadges = candidates.map(id => badge.get(id)).filter((badge): badge is Badge => badge !== undefined)
+		const allBadges = candidates
+			.map(id => badge.get(id as unknown as BadgeID))
+			.filter((badge): badge is Badge => badge !== undefined)
 		setAllBadgesGroup(allBadges)
 	})
 
@@ -99,7 +101,7 @@ export const SelectSearch = () => {
 			</div>
 			<div class="flex gap-3 text-sm items-center flex-wrap ">
 				<For
-					each={Array.from(groupBadge.get(selected() as unknown as GroupID)?.entries() ?? [])
+					each={[groupBadge.get(selected() as unknown as GroupID)?.entries() ?? []]
 						.filter(([id, _]) => !searchSelectedBadges().some(badge => badge.id === id))
 						.sort(([_, a], [__, b]) => b.length - a.length)
 						.slice(0, 5)
