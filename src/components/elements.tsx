@@ -4,6 +4,7 @@ import { cn } from "~/lib/utils"
 import { Badge } from "~/registry/ui/badge"
 import {
 	selectedItem,
+	setSelectedItem,
 	isEditingItem,
 	setIsEditingItem,
 	setIsEditingGroup,
@@ -330,6 +331,7 @@ export default function Elements(props: ElementsProps) {
 					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/50 cursor-default",
 					selectedItem() === props.item.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
 				)}
+				onClick={() => setSelectedItem(props.item.id)}
 				onMouseEnter={() => setMouseOver(true)}
 				onMouseLeave={() => setMouseOver(false)}
 			>
