@@ -166,7 +166,7 @@ export function Navigate(props: NavProps) {
 												)}
 											>
 												<span class="truncate max-w-30 select-none">{group.title}</span>
-												<span class={cn("flex-shrink-0 ml-auto")}>{"0"}</span>
+												<span class={cn("flex-shrink-0 ml-auto")}>{entityItems.get(group.id)?.size ?? 0}</span>
 											</a>
 										}
 									>
