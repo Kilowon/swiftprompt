@@ -1,6 +1,7 @@
 import { Accessor } from "solid-js"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
 import { Button } from "~/registry/ui/button"
+import { SelectSearch } from "~/components/select-search"
 
 interface GroupContainerSearchProps {
 	setIsFullElements: (value: boolean) => void
@@ -11,7 +12,8 @@ function GroupContainerSearch(props: GroupContainerSearchProps) {
 	return (
 		<div class="p-4">
 			<div class="flex items-start justify-between">
-				<div>Search bar</div>
+				<SelectSearch />
+
 				<div class="flex items-center gap-2">
 					<Tooltip
 						openDelay={1000}
