@@ -2,7 +2,17 @@ import { For, Show, createSignal, createEffect } from "solid-js"
 import { cn } from "~/lib/utils"
 import { buttonVariants } from "~/registry/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
-
+import {
+	selected,
+	setSelected,
+	selectedTemplateGroup,
+	setSelectedTemplateGroup,
+	setSelectedSection,
+	entityItems,
+	templates,
+	selectedTemplateVersion,
+	setSelectedTemplateVersion
+} from "~/global_state"
 import {
 	Group,
 	GroupID,
@@ -37,426 +47,20 @@ interface Selected {
 	id: GroupID
 }
 
-const testNavArray = [
-	{
-		title: "Group First",
-		sort: "all",
-		id: "1"
-	},
-	{
-		title: "Group Two",
-		sort: "all",
-		id: "2"
-	},
-	{
-		title: "Group Three",
-		sort: "all",
-		id: "3"
-	},
-	{
-		title: "Group Four",
-		sort: "all",
-		id: "4"
-	},
-	{
-		title: "Group Five",
-		sort: "all",
-		id: "5"
-	},
-	{
-		title: "Group Six",
-		sort: "all",
-		id: "6"
-	},
-	{
-		title: "Group Seven",
-		sort: "all",
-		id: "7"
-	},
-	{
-		title: "Group Eight",
-		sort: "all",
-		id: "8"
-	},
-	{
-		title: "Group Nine",
-		sort: "all",
-		id: "9"
-	},
-	{
-		title: "Group Ten",
-		sort: "all",
-		id: "10"
-	},
-	{
-		title: "Group One",
-		sort: "all",
-		id: "1"
-	},
-	{
-		title: "Group Two",
-		sort: "all",
-		id: "2"
-	},
-	{
-		title: "Group Three",
-		sort: "all",
-		id: "3"
-	},
-	{
-		title: "Group Four",
-		sort: "all",
-		id: "4"
-	},
-	{
-		title: "Group Five",
-		sort: "all",
-		id: "5"
-	},
-	{
-		title: "Group Six",
-		sort: "all",
-		id: "6"
-	},
-	{
-		title: "Group Seven",
-		sort: "all",
-		id: "7"
-	},
-	{
-		title: "Group Eight",
-		sort: "all",
-		id: "8"
-	},
-	{
-		title: "Group Nine",
-		sort: "all",
-		id: "9"
-	},
-	{
-		title: "Group Ten",
-		sort: "all",
-		id: "10"
-	},
-	{
-		title: "Group One",
-		sort: "all",
-		id: "1"
-	},
-	{
-		title: "Group Two",
-		sort: "all",
-		id: "2"
-	},
-	{
-		title: "Group Three",
-		sort: "all",
-		id: "3"
-	},
-	{
-		title: "Group Four",
-		sort: "all",
-		id: "4"
-	},
-	{
-		title: "Group Five",
-		sort: "all",
-		id: "5"
-	},
-	{
-		title: "Group Six",
-		sort: "all",
-		id: "6"
-	},
-	{
-		title: "Group Seven",
-		sort: "all",
-		id: "7"
-	},
-	{
-		title: "Group Eight",
-		sort: "all",
-		id: "8"
-	},
-	{
-		title: "Group Nine",
-		sort: "all",
-		id: "9"
-	},
-	{
-		title: "Group Ten",
-		sort: "all",
-		id: "10"
-	},
-	{
-		title: "Group One",
-		sort: "all",
-		id: "1"
-	},
-	{
-		title: "Group Two",
-		sort: "all",
-		id: "2"
-	},
-	{
-		title: "Group Three",
-		sort: "all",
-		id: "3"
-	},
-	{
-		title: "Group Four",
-		sort: "all",
-		id: "4"
-	},
-	{
-		title: "Group Five",
-		sort: "all",
-		id: "5"
-	},
-	{
-		title: "Group Six",
-		sort: "all",
-		id: "6"
-	},
-	{
-		title: "Group Seven",
-		sort: "all",
-		id: "7"
-	},
-	{
-		title: "Group Eight",
-		sort: "all",
-		id: "8"
-	},
-	{
-		title: "Group Nine",
-		sort: "all",
-		id: "9"
-	},
-	{
-		title: "Group Last",
-		sort: "all",
-		id: "10"
-	}
-]
-
-const testTemplateArray = [
-	{
-		title: "Template First",
-		sort: "all",
-		id: "1",
-		versionCounter: "1",
-		sections: "1"
-	},
-	{
-		title: "Template Two",
-		sort: "all",
-		id: "2",
-		versionCounter: "2",
-		sections: "2"
-	},
-	{
-		title: "Template Three",
-		sort: "all",
-		id: "3",
-		versionCounter: "3",
-		sections: "3"
-	},
-	{
-		title: "Template Four",
-		sort: "all",
-		id: "4",
-		versionCounter: "4",
-		sections: "4"
-	},
-	{
-		title: "Template Five",
-		sort: "all",
-		id: "5",
-		versionCounter: "5",
-		sections: "5"
-	},
-	{
-		title: "Template One",
-		sort: "all",
-		id: "1",
-		versionCounter: "1",
-		sections: "1"
-	},
-	{
-		title: "Template Two",
-		sort: "all",
-		id: "2",
-		versionCounter: "2",
-		sections: "2"
-	},
-	{
-		title: "Template Three",
-		sort: "all",
-		id: "3",
-		versionCounter: "3",
-		sections: "3"
-	},
-	{
-		title: "Template Four",
-		sort: "all",
-		id: "4",
-		versionCounter: "4",
-		sections: "4"
-	},
-	{
-		title: "Template Five",
-		sort: "all",
-		id: "5",
-		versionCounter: "5",
-		sections: "5"
-	},
-	{
-		title: "Template One",
-		sort: "all",
-		id: "1",
-		versionCounter: "1",
-		sections: "1"
-	},
-	{
-		title: "Template Two",
-		sort: "all",
-		id: "2",
-		versionCounter: "2",
-		sections: "2"
-	},
-	{
-		title: "Template Three",
-		sort: "all",
-		id: "3",
-		versionCounter: "3",
-		sections: "3"
-	},
-	{
-		title: "Template Four",
-		sort: "all",
-		id: "4",
-		versionCounter: "4",
-		sections: "4"
-	},
-	{
-		title: "Template Five",
-		sort: "all",
-		id: "5",
-		versionCounter: "5",
-		sections: "5"
-	},
-	{
-		title: "Template One",
-		sort: "all",
-		id: "1",
-		versionCounter: "1",
-		sections: "1"
-	},
-	{
-		title: "Template Two",
-		sort: "all",
-		id: "2",
-		versionCounter: "2",
-		sections: "2"
-	},
-	{
-		title: "Template Three",
-		sort: "all",
-		id: "3",
-		versionCounter: "3",
-		sections: "3"
-	},
-	{
-		title: "Template Four",
-		sort: "all",
-		id: "4",
-		versionCounter: "4",
-		sections: "4"
-	},
-	{
-		title: "Template Five",
-		sort: "all",
-		id: "5",
-		versionCounter: "5",
-		sections: "5"
-	},
-	{
-		title: "Template One",
-		sort: "all",
-		id: "1",
-		versionCounter: "1",
-		sections: "1"
-	},
-	{
-		title: "Template Two",
-		sort: "all",
-		id: "2",
-		versionCounter: "2",
-		sections: "2"
-	},
-	{
-		title: "Template Three",
-		sort: "all",
-		id: "3",
-		versionCounter: "3",
-		sections: "3"
-	},
-	{
-		title: "Template Four",
-		sort: "all",
-		id: "4",
-		versionCounter: "4",
-		sections: "4"
-	},
-	{
-		title: "Template Five",
-		sort: "all",
-		id: "5",
-		versionCounter: "5",
-		sections: "5"
-	},
-	{
-		title: "Template One",
-		sort: "all",
-		id: "1",
-		versionCounter: "1",
-		sections: "1"
-	},
-	{
-		title: "Template Two",
-		sort: "all",
-		id: "2",
-		versionCounter: "2",
-		sections: "2"
-	},
-	{
-		title: "Template Three",
-		sort: "all",
-		id: "3",
-		versionCounter: "3",
-		sections: "3"
-	},
-	{
-		title: "Template Four",
-		sort: "all",
-		id: "4",
-		versionCounter: "4",
-		sections: "4"
-	},
-	{
-		title: "Template Last",
-		sort: "all",
-		id: "5",
-		versionCounter: "5",
-		sections: "5"
-	}
-]
-
 export function Navigate(props: NavProps) {
 	const [templateFilter, setTemplateFilter] = createSignal<TemplateFilter>("all")
 	const [groupFilter, setGroupFilter] = createSignal<Filter>("all")
 	const [expandedSections, setExpandedSections] = createSignal<Set<"groups" | "templates">>(new Set())
+
+	const handleSelect = (id: GroupID) => {
+		setSelected(id)
+	}
+
+	const handleSelectTemplateGroup = (id: TemplateGroupID) => {
+		setSelectedSection(null)
+		setSelectedTemplateGroup(id)
+		setSelectedTemplateVersion(null)
+	}
 
 	const toggleSection = (section: "groups" | "templates") => {
 		setExpandedSections(prev => {
@@ -543,20 +147,21 @@ export function Navigate(props: NavProps) {
 					)}`}
 				>
 					<div class="pb-30">
-						<For each={groupFilter() === "all" ? testNavArray : testNavArray.filter(group => group.sort === groupFilter())}>
+						<For each={groupFilter() === "all" ? props.groups : props.groups.filter(group => group.sort === groupFilter())}>
 							{group => {
 								return (
 									<Show
 										when={props.isCollapsed}
 										fallback={
 											<a
+												onClick={() => handleSelect(group.id)}
 												class={cn(
 													buttonVariants({
-														variant: "outline_only",
+														variant: selected() === group.id ? "outline_selected" : "outline_only",
 														size: "sm",
 														class: "text-xs capitalize cursor-pointer hover:border-accent group-[[data-collapsed=false]]:max-h-7.5"
 													}),
-													" bg-accent border-background text-accent-foreground",
+													selected() === group.id && " bg-accent border-background text-accent-foreground",
 													"flex justify-between"
 												)}
 											>
@@ -573,11 +178,14 @@ export function Navigate(props: NavProps) {
 											<TooltipTrigger
 												as="a"
 												href="#"
+												onClick={() => handleSelect(group.id)}
 												class={cn(
-													buttonVariants({ variant: "outline_only", size: "icon" }),
-													"size-9 capitalize hover:border-accent bg-accent border-background text-accent-foreground"
+													buttonVariants({ variant: selected() === group.id ? "outline_selected" : "outline_only", size: "icon" }),
+													"size-9 capitalize hover:border-accent",
+													selected() === group.id && "bg-accent border-background text-accent-foreground"
 												)}
 												tabIndex={0} // Make it focusable
+												onKeyPress={(e: KeyboardEvent) => e.key === "Enter" && handleSelect(group.id)} // Handle keyboard interaction
 											>
 												<div
 													// Handle keyboard interaction
@@ -589,7 +197,9 @@ export function Navigate(props: NavProps) {
 											</TooltipTrigger>
 											<TooltipContent class="flex items-center gap-4">
 												{group.title}
-												<span class={cn("ml-auto")}>{"0"}</span>
+												<span class={cn("ml-auto", selected() === group.id && "dark:text-white")}>
+													{entityItems.get(group.id)?.size ?? 0}
+												</span>
 											</TooltipContent>
 										</Tooltip>
 									</Show>
@@ -667,8 +277,8 @@ export function Navigate(props: NavProps) {
 						<For
 							each={
 								templateFilter() === "all"
-									? testTemplateArray
-									: testTemplateArray.filter(template => template.sort === templateFilter())
+									? props.templates
+									: props.templates.filter(template => template.sort === templateFilter())
 							}
 						>
 							{template => {
@@ -677,17 +287,22 @@ export function Navigate(props: NavProps) {
 										when={props.isCollapsed}
 										fallback={
 											<a
+												onClick={() => handleSelectTemplateGroup(template.id)}
 												class={cn(
 													buttonVariants({
-														variant: "outline_only",
+														variant: selectedTemplateGroup() === template.id ? "outline_selected" : "outline_only",
 														size: "sm",
 														class:
 															"flex justify-between text-xs capitalize cursor-pointer hover:border-accent group-[[data-collapsed=false]]:max-h-7.5"
-													})
+													}),
+													selectedTemplateGroup() === template.id && " bg-accent border-background text-accent-foreground",
+													"justify-start"
 												)}
 											>
 												<span class="truncate max-w-30 select-none">{template.title}</span>
-												<span class={cn("flex-shrink-0 ml-auto")}>{template.sections}</span>
+												<span class={cn("flex-shrink-0 ml-auto", selectedTemplateGroup() === template.id && " dark:text-white")}>
+													{template.sections.get(template.versionCounter as VersionID)?.size ?? 0}
+												</span>
 											</a>
 										}
 									>
@@ -699,12 +314,14 @@ export function Navigate(props: NavProps) {
 											<TooltipTrigger
 												as="a"
 												href="#"
+												onClick={() => handleSelectTemplateGroup(template.id)}
 												class={cn(
 													buttonVariants({
-														variant: "outline_only",
+														variant: selectedTemplateGroup() === template.id ? "outline_selected" : "outline_only",
 														size: "icon"
 													}),
-													"size-9 capitalize hover:border-accent"
+													"size-9 capitalize hover:border-accent",
+													selectedTemplateGroup() === template.id && "bg-accent border-background text-accent-foreground"
 												)}
 											>
 												<div class="flex items-center justify-center size-6 rounded-full text-sm">{template.title.slice(0, 2)}</div>
@@ -712,7 +329,9 @@ export function Navigate(props: NavProps) {
 											</TooltipTrigger>
 											<TooltipContent class="flex items-center gap-4">
 												{template.title}
-												<span class={cn("ml-auto")}>{template.sections}</span>
+												<span class={cn("ml-auto", selectedTemplateGroup() === template.id && "dark:text-white")}>
+													{template.sections.get(template.versionCounter as VersionID)?.size ?? 0}
+												</span>
 											</TooltipContent>
 										</Tooltip>
 									</Show>

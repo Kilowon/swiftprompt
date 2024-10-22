@@ -2,7 +2,7 @@ import { createShortcut } from "@solid-primitives/keyboard"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
-import { entityItems, selected, setColorFooter } from "~/global_state"
+import { entityItems, selected, setColorFooter, templates } from "~/global_state"
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
@@ -12,7 +12,7 @@ import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
-import { PromptItem, GroupID, VersionID, BadgeID } from "~/types/entityType"
+import { PromptItem, GroupID, VersionID, BadgeID, Group, TemplateGroup } from "~/types/entityType"
 import { groupsMap } from "~/helpers/actionHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
 import SectionContainer from "~/components/section-container"
@@ -175,8 +175,19 @@ export default function Home() {
 							<div class="h-full bg-background-secondary">
 								<Navigate
 									isCollapsed={isCollapsedMenu()}
-									groups={[]}
-									templates={[]}
+									groups={Array.from(groupsMap().values()).map((group: any) => {
+										return {
+											title: group.name,
+											...group
+										}
+									})}
+									templates={Array.from(templates.values()).map((template: any) => {
+										return {
+											title: template.name,
+											sections: template.sections,
+											...template
+										}
+									})}
 								/>
 							</div>
 						</ResizablePanel>
@@ -220,7 +231,7 @@ export default function Home() {
 										<ElementsContainer
 											type="all"
 											sizes={sizes()}
-											items={testNav}
+											items={itemsList}
 											initializedUserElement={initializedUserElement}
 											initializedUserGroup={initializedUserGroup}
 											isFullElements={isFullElements}
