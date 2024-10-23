@@ -2,7 +2,7 @@ import { createShortcut } from "@solid-primitives/keyboard"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
-import { entityItems, selected, setColorFooter, templates } from "~/global_state"
+import { entityItems, selected, selectedTemplateGroup, setColorFooter, templates } from "~/global_state"
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
@@ -16,6 +16,8 @@ import { PromptItem, GroupID, VersionID, BadgeID, Group, TemplateGroup } from "~
 import { groupsMap } from "~/helpers/actionHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
 import SectionContainer from "~/components/section-container"
+import TemplateVersions from "~/components/template-versions"
+import TemplateContainer from "~/components/template-container"
 
 let body = new ReactiveMap<VersionID, string>()
 
@@ -70,6 +72,7 @@ export default function Home() {
 	const [isCollapsedGroup, setIsCollapsedGroup] = createSignal(false)
 	const [isCollapsedTemplate, setIsCollapsedTemplate] = createSignal(false)
 	const [isCollapsedViewer, setIsCollapsedViewer] = createSignal(false)
+	const [isEditingTemplateSection, setIsEditingTemplateSection] = createSignal({ status: "saved" })
 	const [initializedUserElement, setInitializedUserElement] = createSignal(false)
 	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
 	const [isFullElements, setIsFullElements] = createSignal<boolean>(true)
@@ -271,11 +274,19 @@ export default function Home() {
 								</div>
 								<Separator />
 								<div class="p-4 bg-background-secondary">
-									<div class="text-xs">Versions</div>
+									<Show
+										when={selectedTemplateGroup()}
+										fallback={<div class="flex justify-end items-center gap-2 h-10"></div>}
+									>
+										<TemplateVersions version={templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0} />
+									</Show>
 								</div>
-
 								<div class="p-4 bg-background-secondary h-100% overflow-auto">
-									<SectionContainer />
+									<TemplateContainer
+										isEditingTemplateSection={isEditingTemplateSection}
+										setIsEditingTemplateSection={setIsEditingTemplateSection}
+										setIsFullElements={setIsFullElements}
+									/>
 								</div>
 							</Show>
 						</ResizablePanel>

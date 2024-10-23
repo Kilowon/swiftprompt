@@ -130,26 +130,24 @@ const deserializeEntityMap = (serialized: string): EntityMap => {
 		const templateGroup: TemplateGroup = {
 			...template,
 			sections: new ReactiveMap(
-				Array.from(template.sections.entries() as [VersionID, ReactiveMap<TemplateSectionID, TemplateSection>][]).map(
-					([versionId, sectionMap]) => [
-						versionId,
-						new ReactiveMap(
-							Array.from(sectionMap.entries() as [TemplateSectionID, TemplateSection][]).map(([sectionId, section]) => [
-								sectionId,
-								{
-									...section,
-									items: section.items.map(item => ({
-										id: item.id,
-										group: item.group,
-										order: item.order,
-										date_created: item.date_created,
-										date_modified: item.date_modified
-									}))
-								}
-							])
-						)
-					]
-				)
+				[...(template.sections?.entries() || [])].map(([versionId, sectionMap]) => [
+					versionId,
+					new ReactiveMap(
+						[...(sectionMap?.entries() || [])].map(([sectionId, section]) => [
+							sectionId,
+							{
+								...section,
+								items: [...(section.items?.entries() || [])].map(([itemId, item]) => ({
+									id: itemId,
+									group: item.group,
+									order: item.order,
+									date_created: item.date_created,
+									date_modified: item.date_modified
+								}))
+							}
+						])
+					)
+				])
 			)
 		}
 		templates.set(id, templateGroup)

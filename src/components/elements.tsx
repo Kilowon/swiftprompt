@@ -221,6 +221,10 @@ export default function Elements(props: ElementsProps) {
 	}
 
 	const handleAddToTemplate = () => {
+		if (selectedSection() === null) {
+			toast("Please select a section to add the item to", { duration: 5000, position: "bottom-center" })
+			return
+		}
 		addItemToTemplateSection(
 			selectedTemplateGroup()!,
 			selectedSection()!,

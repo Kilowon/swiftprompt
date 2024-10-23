@@ -1,18 +1,20 @@
 import { closestCenter, DragEventHandler, Draggable, Droppable, CollisionDetector } from "@thisbeyond/solid-dnd"
-import { createSignal } from "solid-js"
 import Big from "big.js"
 import {
+	entities,
+	setEntities,
 	nextOrder,
 	setNextOrder,
 	ORDER_DELTA,
 	entityItems,
 	entityGroups,
-	templates,
 	groupBadge,
 	badge,
+	templates,
 	selectedTemplateVersion,
 	selectedTemplateGroup,
-	selectedSection
+	selectedSection,
+	setSelectedSection
 } from "~/global_state"
 import {
 	Entity,
@@ -20,18 +22,18 @@ import {
 	Item,
 	ElementID,
 	GroupID,
+	BadgeID,
 	TemplateGroupID,
 	TemplateSectionID,
 	TemplateSection,
 	VersionID,
 	TemplateFilter,
-	Filter,
-	BadgeID
+	Filter
 } from "~/types/entityType"
 import { Badge } from "~/types/badgeType"
 import { storeEntityMap } from "./entityHelpers"
-import { toast } from "solid-sonner"
 import { ReactiveMap } from "@solid-primitives/map"
+import { toast } from "solid-sonner"
 
 export const sortByOrder = (entities: Entity[]) => {
 	const sorted = entities.map(item => ({ order: new Big(item.order), item }))
@@ -42,6 +44,20 @@ export const sortByOrder = (entities: Entity[]) => {
 export const updateBadge = (badgeId: BadgeID, icon: string, name: string) => {
 	badge.set(badgeId, { id: badgeId, name: name, icon: icon })
 	storeEntityMap()
+	badgeToDB(badgeId, icon, name)
+}
+
+export const saveUpdatedBadgesItem = (groupId: GroupID, id: ElementID, badges: Badge[]) => {
+	const groupItems = entityItems.get(groupId)
+	const item = groupItems?.get(id)
+	const updatedItem = {
+		...item,
+		labels: badges.map(badge => badge.id)
+	}
+
+	entityItems
+		.get(groupId)
+		?.set(id, updatedItem as unknown as Omit<Item, "body"> & { body: ReactiveMap<VersionID, string> })
 }
 
 export const nameChangeGroup = (id: GroupID, name: string) => {
@@ -88,12 +104,6 @@ export const addGroup = (name: string, sortType: Filter) => {
 	return id
 }
 
-export const deleteGroup = (id: GroupID) => {
-	entityGroups.delete(id)
-	entityItems.delete(id)
-	storeEntityMap()
-}
-
 export const duplicateGroup = (id: GroupID) => {
 	const group = entityGroups.get(id)
 	const groupItems = entityItems.get(id)
@@ -113,6 +123,12 @@ export const duplicateGroup = (id: GroupID) => {
 	}
 	storeEntityMap()
 	return newGroupId
+}
+
+export const deleteGroup = (id: GroupID) => {
+	entityGroups.delete(id)
+	entityItems.delete(id)
+	storeEntityMap()
 }
 
 export const updateGroupSort = (id: GroupID, sort: Filter) => {
@@ -149,6 +165,110 @@ export const editTemplateGroup = (id: TemplateGroupID, names: string, version: V
 	if (existingGroup) {
 		templates.set(id, { ...existingGroup, name: names, date_modified: new Date().toISOString() })
 
+		storeEntityMap()
+	}
+}
+
+export const deleteTemplateGroup = (id: TemplateGroupID) => {
+	templates.delete(id)
+	storeEntityMap()
+	//TODO: Delete all template versions - does this work?
+}
+
+export const incrementTemplateGroupVersion = (id: TemplateGroupID) => {
+	const group = templates.get(id)
+	if (group) {
+		const updatedGroup = { ...group, versionCounter: group.versionCounter + 1, selectedVersion: group.versionCounter + 1 }
+		const oldVersionSections = templates.get(id)?.sections.get(group.versionCounter)
+		const newVersionSections = new ReactiveMap<TemplateSectionID, TemplateSection>()
+		oldVersionSections?.forEach(section => {
+			const newSection = { ...section, isLocked: false }
+			newVersionSections.set(section.id, newSection)
+			templates
+				.get(id)
+				?.sections.get(group.versionCounter)
+				?.set(section.id, { ...section, isLocked: true })
+		})
+		templates.set(id, updatedGroup)
+		templates.get(id)?.sections.set(updatedGroup.versionCounter, newVersionSections)
+		storeEntityMap()
+
+		toast.success("Template version incremented to new version: " + updatedGroup.versionCounter, {
+			duration: 5000,
+			position: "bottom-center"
+		})
+	}
+}
+
+export const revertTemplateToPreviousVersion = (id: TemplateGroupID, version: VersionID) => {
+	const group = templates.get(id)
+	if (group) {
+		const updatedGroup = { ...group, versionCounter: group.versionCounter + 1, selectedVersion: group.versionCounter + 1 }
+		const oldVersionSections = templates.get(id)?.sections.get(version)
+		const newVersionSections = new ReactiveMap<TemplateSectionID, TemplateSection>()
+		oldVersionSections?.forEach(section => {
+			const newSection = { ...section, isLocked: false }
+			newVersionSections.set(section.id, newSection)
+			templates
+				.get(id)
+				?.sections.get(version)
+				?.set(section.id, { ...section, isLocked: true })
+		})
+		templates.set(id, updatedGroup)
+		templates.get(id)?.sections.set(updatedGroup.versionCounter, newVersionSections)
+		storeEntityMap()
+
+		toast.success("Template version reverted to previous at new version: " + updatedGroup.versionCounter, {
+			duration: 7000,
+			position: "bottom-center"
+		})
+	}
+}
+
+export const duplicateTemplateGroup = (id: TemplateGroupID) => {
+	const group = templates.get(id)
+	const newGroupId = addTemplateGroup("(Copy) " + (group?.name || ""), group?.sort as TemplateFilter)
+
+	if (group && group.sections) {
+		const newSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>()
+
+		group.sections.forEach((versionSections, versionId) => {
+			const newVersionSections = new ReactiveMap<TemplateSectionID, TemplateSection>()
+
+			versionSections.forEach((section, sectionId) => {
+				const newSectionId = crypto.randomUUID() as unknown as TemplateSectionID
+				const newSection: TemplateSection = {
+					...section,
+					id: newSectionId,
+					items: [...section.items], // Create a new array with the same items
+					date_created: new Date().toISOString(),
+					date_modified: new Date().toISOString()
+				}
+				newVersionSections.set(newSectionId, newSection)
+			})
+
+			newSections.set(versionId, newVersionSections)
+		})
+
+		templates.set(newGroupId as unknown as TemplateGroupID, {
+			...group,
+			id: newGroupId as unknown as TemplateGroupID,
+			sections: newSections,
+			date_created: new Date().toISOString(),
+			date_modified: new Date().toISOString()
+		})
+	}
+
+	storeEntityMap()
+
+	return newGroupId
+}
+
+export const updateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilter) => {
+	const group = templates.get(id)
+	if (group) {
+		const updatedGroup = { ...group, sort: sort }
+		templates.set(id, updatedGroup)
 		storeEntityMap()
 	}
 }
@@ -190,13 +310,74 @@ export const editTemplateSection = (
 	}
 }
 
-export const updateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilter) => {
-	const group = templates.get(id)
-	if (group) {
-		const updatedGroup = { ...group, sort: sort }
-		templates.set(id, updatedGroup)
+export const deleteTemplateSection = (templateGroupId: TemplateGroupID, id: TemplateSectionID, version: VersionID) => {
+	templates.get(templateGroupId)?.sections.get(version)?.delete(id)
+	setSelectedSection(null)
+	storeEntityMap()
+}
+
+export const duplicateTemplateSection = (
+	templateGroupId: TemplateGroupID,
+	id: TemplateSectionID,
+	version: VersionID
+) => {
+	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
+	if (section) {
+		const newId = crypto.randomUUID() as unknown as TemplateSectionID
+		const newSection: TemplateSection = {
+			...section,
+			id: newId,
+			name: section.name + " - Copy",
+			items: [...section.items], // Create a new array with the same items
+			date_created: new Date().toISOString(),
+			date_modified: new Date().toISOString()
+		}
+
+		templates.get(templateGroupId)?.sections.get(version)?.set(newId, newSection)
 		storeEntityMap()
+
+		return newId
 	}
+}
+
+export const moveTemplateSection = (
+	templateGroupId: TemplateGroupID,
+	id: TemplateSectionID,
+	newTemplateGroupId: TemplateGroupID
+) => {
+	const version = templates.get(templateGroupId)?.selectedVersion ?? 0
+	const newVersion = templates.get(newTemplateGroupId)?.versionCounter ?? 0
+
+	const templateGroup = templates.get(templateGroupId)
+	if (!templateGroup) return
+
+	const section = templateGroup.sections.get(version)?.get(id)
+	if (!section) return
+
+	const targetTemplateGroup = templates.get(newTemplateGroupId)
+	if (!targetTemplateGroup) return
+
+	if (!targetTemplateGroup.sections.has(newVersion)) {
+		targetTemplateGroup.sections.set(newVersion, new ReactiveMap<TemplateSectionID, TemplateSection>())
+	}
+
+	// Move the section to the target version
+	const newSection: TemplateSection = {
+		...section,
+		date_modified: new Date().toISOString()
+	}
+	targetTemplateGroup.sections.get(newVersion)?.set(id, newSection)
+
+	// Remove the section from the original version
+	templateGroup.sections.get(version)?.delete(id)
+
+	// Update the template group
+	templates.set(templateGroupId, {
+		...templateGroup,
+		date_modified: new Date().toISOString()
+	})
+
+	storeEntityMap()
 }
 
 export const addItemToTemplateSection = (
@@ -260,6 +441,23 @@ export const addItemToTemplateSection = (
 			duration: 5000,
 			position: "bottom-center"
 		})
+	}
+}
+
+export const removeItemFromTemplateSection = (
+	templateGroupId: TemplateGroupID,
+	id: TemplateSectionID,
+	itemId: ElementID,
+	version: VersionID
+) => {
+	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
+	if (section) {
+		section.items = section.items.filter(item => item.id !== itemId)
+		templates
+			.get(templateGroupId)
+			?.sections.get(version)
+			?.set(id, { ...section, items: section.items })
+		storeEntityMap()
 	}
 }
 
@@ -349,8 +547,23 @@ export const changeItemAttributes = (
 
 	entity.set(id, updatedItem as unknown as Omit<Item, "body"> & { body: ReactiveMap<VersionID, string> })
 	entityItems.set(groupId, entity)
-
 	storeEntityMap()
+}
+
+export const pinToggleItem = (groupId: GroupID, id: ElementID) => {
+	const groupItems = entityItems.get(groupId)
+	const item = groupItems?.get(id)
+
+	if (item && item.type === "item") {
+		groupItems?.set(id, {
+			...item,
+			pinned: !item.pinned
+		})
+
+		storeEntityMap()
+	} else {
+		console.warn("Cannot pin non-item entity")
+	}
 }
 
 export const deleteItem = (groupId: GroupID, id: ElementID) => {
@@ -359,10 +572,10 @@ export const deleteItem = (groupId: GroupID, id: ElementID) => {
 	console.log("deleteItem", id, itemBadges?.labels)
 	templates.forEach(template => {
 		const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
-			[template.sections.entries()].map(([version, sections]) => [
+			Array.from(template.sections.entries()).map(([version, sections]) => [
 				version,
 				new ReactiveMap<TemplateSectionID, TemplateSection>(
-					(sections as [TemplateSectionID, TemplateSection][]).map(([sectionId, section]) => [
+					Array.from(sections.entries()).map(([sectionId, section]) => [
 						sectionId,
 						{ ...section, items: section.items.filter(item => item.id !== id) }
 					])
@@ -425,10 +638,10 @@ export const moveItemToGroup = (groupId: GroupID, itemId: ElementID, newGroupId:
 		// Updates the item in the templates with the new groupId
 		templates.forEach(template => {
 			const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
-				[template.sections.entries()].map(([version, sections]) => [
+				Array.from(template.sections.entries()).map(([version, sections]) => [
 					version,
 					new ReactiveMap<TemplateSectionID, TemplateSection>(
-						(sections as [TemplateSectionID, TemplateSection][]).map(([sectionId, section]) => [
+						Array.from(sections.entries()).map(([sectionId, section]) => [
 							sectionId,
 							{ ...section, items: section.items.map(item => (item.id === itemId ? { ...item, group: newGroupId } : item)) }
 						])
@@ -444,20 +657,132 @@ export const moveItemToGroup = (groupId: GroupID, itemId: ElementID, newGroupId:
 	}
 }
 
-export const pinToggleItem = (groupId: GroupID, id: ElementID) => {
-	const groupItems = entityItems.get(groupId)
-	const item = groupItems?.get(id)
+export const isSortableGroup = (sortable: Draggable | Droppable) => sortable.data.type === "group"
 
-	if (item && item.type === "item") {
-		groupItems?.set(id, {
-			...item,
-			pinned: !item.pinned
-		})
+export const closestEntity: CollisionDetector = (draggable, droppables, context) => {
+	if (!draggable || !droppables || droppables.length === 0) return null
 
-		storeEntityMap()
-	} else {
-		console.warn("Cannot pin non-item entity")
+	const closestGroup = closestCenter(
+		draggable,
+		droppables.filter(droppable => droppable && isSortableGroup(droppable)),
+		context
+	)
+
+	if (isSortableGroup(draggable)) {
+		return closestGroup
+	} else if (closestGroup) {
+		const closestItem = closestCenter(
+			draggable,
+			droppables.filter(droppable => droppable && !isSortableGroup(droppable) && droppable.data.group === closestGroup.id),
+			context
+		)
+
+		if (!closestItem) {
+			return closestGroup
+		}
+
+		const changingGroup = draggable.data.group !== closestGroup.id
+		if (changingGroup) {
+			const lastItemId = groupItems(closestGroup.id as unknown as GroupID).at(-1)?.id as ElementID | undefined
+			const closestItemId = closestItem.id as unknown as ElementID
+			const belowLastItem = lastItemId === closestItemId
+
+			if (belowLastItem) return closestGroup
+		}
+
+		return closestItem
 	}
+
+	return null
 }
 
+export const groups = () =>
+	sortByOrder(Object.values(entities).filter(item => item.type === "group" && item.status !== "deleted")) as Group[] // Deprecated
+
 export const groupsMap = () => entityGroups
+
+export const groupIds = () => Array.from(entityGroups.keys())
+
+export const groupItems = (groupId: GroupID) => {
+	const groupItems = entityItems.get(groupId)
+	if (groupItems) {
+		return Array.from(groupItems.values())
+	}
+	return []
+}
+
+export const groupOrders = () => Array.from(entityGroups.values()).map(group => group.order)
+
+export const groupItemIds = (groupId: GroupID) => Array.from(entityItems.get(groupId)?.keys() ?? [])
+
+export const groupItemOrders = (groupId: GroupID) =>
+	Array.from(entityItems.get(groupId)?.values() ?? []).map(item => item.order)
+
+export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangingGroup = true) => {
+	if (!draggable || !droppable) return
+
+	const draggableIsGroup = isSortableGroup(draggable)
+	const droppableIsGroup = isSortableGroup(droppable)
+
+	const draggableGroupId = draggableIsGroup ? draggable.id : draggable.data.group
+
+	const droppableGroupId = droppableIsGroup ? droppable.id : droppable.data.group
+
+	if (onlyWhenChangingGroup && (draggableIsGroup || draggableGroupId === droppableGroupId)) {
+		return
+	}
+
+	let ids, orders, order: number | undefined
+
+	if (draggableIsGroup) {
+		ids = groupIds()
+		orders = groupOrders()
+	} else {
+		ids = groupItemIds(droppableGroupId)
+		orders = groupItemOrders(droppableGroupId)
+	}
+
+	if (droppableIsGroup && !draggableIsGroup) {
+		order = new Big(orders.at(-1) ?? -ORDER_DELTA).plus(ORDER_DELTA).round().toNumber()
+	} else {
+		const draggableIndex = ids.indexOf(draggable.id as unknown as GroupID)
+		const droppableIndex = ids.indexOf(droppable.id as unknown as GroupID)
+		if (draggableIndex !== droppableIndex) {
+			let orderAfter, orderBefore
+			if (draggableIndex === -1 || draggableIndex > droppableIndex) {
+				orderBefore = new Big(orders[droppableIndex])
+				orderAfter = new Big(orders[droppableIndex - 1] ?? orderBefore.minus(ORDER_DELTA * 2))
+			} else {
+				orderAfter = new Big(orders[droppableIndex])
+				orderBefore = new Big(orders[droppableIndex + 1] ?? orderAfter.plus(ORDER_DELTA * 2))
+			}
+
+			if (orderAfter !== undefined && orderBefore !== undefined) {
+				const orderBig = orderAfter.plus(orderBefore).div(2)
+				if (orderBig !== undefined) {
+					const rounded = orderBig.round()
+					if (rounded.gt(orderAfter) && rounded.lt(orderBefore)) {
+						order = rounded.toNumber()
+					} else {
+						order = orderBig.toNumber()
+					}
+				}
+			}
+		}
+	}
+
+	if (order !== undefined) {
+		setEntities(draggable.id, entity => ({
+			...entity,
+			order: order.toString(),
+			group: droppableGroupId
+		}))
+	}
+	storeEntityMap()
+}
+
+export const onDragOver: DragEventHandler = ({ draggable, droppable }) =>
+	draggable && droppable && move(draggable, droppable)
+
+export const onDragEnd: DragEventHandler = ({ draggable, droppable }) =>
+	draggable && droppable && move(draggable, droppable, false)
