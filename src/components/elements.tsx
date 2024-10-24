@@ -24,7 +24,7 @@ import {
 } from "~/global_state"
 import { pinToggleItem, updateBadge } from "~/helpers/actionHelpers"
 import { Badge as BadgeType } from "~/types/badgeType"
-import { PromptItem, GroupID, ElementID, BadgeID, VersionID, TemplateGroupID } from "~/types/entityType"
+import { PromptItem, GroupID, ElementID, BadgeID, VersionID, TemplateGroupID, TemplateGroup } from "~/types/entityType"
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -301,17 +301,25 @@ export default function Elements(props: ElementsProps) {
 		return Math.ceil(wordCount * 1.33)
 	}
 
-	// Keep an eye on this ugly thing if slowdowns occur look here first
 	const usedInSections = ({ id, group }: { id: ElementID; group: GroupID }) => {
-		const sections = Array.from(templates.values()).flatMap(template =>
-			Array.from(template.sections.get(selectedTemplateVersion()!)?.values() ?? []).flatMap(section =>
-				section.items?.some(item => item.id === id && item.group === group)
-					? [{ templateId: template.id, sectionId: section.id }]
+		const sections = createMemo(() =>
+			[...templates.values()].flatMap((template: TemplateGroup) => {
+				const version = template.sections.get(selectedTemplateVersion()!)
+				return version
+					? [...version.values()]
+							.filter(section => section.items?.some((item: PromptItem) => item.id === id && item.group === group))
+							.map(section => ({
+								templateId: template.id,
+								sectionId: section.id
+							}))
 					: []
-			)
+			})
 		)
-		const templateList = new ReactiveSet(sections.map(section => section.templateId))
-		return { sections: sections, templates: templateList }
+
+		return {
+			sections: sections(),
+			templates: new ReactiveSet(sections().map(s => s.templateId))
+		}
 	}
 
 	const getTemplatesNames = () => {

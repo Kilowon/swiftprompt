@@ -17,6 +17,7 @@ import { groupsMap } from "~/helpers/actionHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
 import TemplateVersions from "~/components/template-versions"
 import TemplateContainer from "~/components/template-container"
+import PromptDisplay from "~/components/prompt-display"
 
 let body = new ReactiveMap<VersionID, string>()
 
@@ -194,7 +195,7 @@ export default function Home() {
 							</div>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
-						{/* Edit Group */}
+						{/* Group + Elements */}
 						<ResizablePanel
 							initialSize={sizes()[1] ?? 0.3}
 							minSize={0.15}
@@ -241,7 +242,7 @@ export default function Home() {
 							</Show>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
-						{/* Templates */}
+						{/* Templates + Sections */}
 						<ResizablePanel
 							initialSize={sizes()[2] ?? 0.3}
 							minSize={0.1}
@@ -289,7 +290,7 @@ export default function Home() {
 							</Show>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
-						{/* Viewer Display */}
+						{/* Prompt + Response Display */}
 						<ResizablePanel
 							initialSize={sizes()[3] ?? 0.3}
 							minSize={0.3}
@@ -304,12 +305,8 @@ export default function Home() {
 							}}
 							class={cn(isCollapsedViewer() && "min-w-10 transition-all duration-300 ease-in-out overflow-hidden")}
 						>
-							<div class="flex items-center px-4 py-2 min-h-14">
-								<div class="text-xs">Viewer</div>
-							</div>
-							<Separator />
-							<div>
-								<div class="text-xs">Response</div>
+							<div class="h-100% pb-10">
+								<PromptDisplay />
 							</div>
 						</ResizablePanel>
 					</Resizable>

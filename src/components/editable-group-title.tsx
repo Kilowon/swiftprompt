@@ -50,9 +50,7 @@ export const EditableGroupTitle = (props: {
 						props.handleNameChange(e.target.value)
 					}}
 					class="w-full min-h-6 h-8 border-none outline-none  text-xs bg-background px-1 py-0.5 text-sm font-bold capitalize"
-				>
-					{/* {props.name || "\u200B"} */}
-				</TextFieldInput>
+				/>
 			</TextField>
 		</div>
 	)

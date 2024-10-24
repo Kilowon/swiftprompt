@@ -130,6 +130,11 @@ export default function TemplateContainerMenu() {
 									status: "editing"
 								})
 							}
+							onClick={(e: MouseEvent) =>
+								setIsEditingTemplateGroup({
+									status: "editing"
+								})
+							}
 							onKeyDown={(e: KeyboardEvent) => {
 								if (e.key === "Enter") {
 									setIsEditingTemplateGroup({
@@ -137,8 +142,9 @@ export default function TemplateContainerMenu() {
 									})
 								}
 							}}
+							class="flex items-center min-w-40 group"
 						>
-							<h1 class="text-xs font-bold  w-full overflow-hidden text-ellipsis whitespace-nowrap">
+							<h1 class="text-sm font-bold mt-1.5 mb-1.5 capitalize truncate max-w-60">
 								{templates.get(selectedTemplateGroup()!)?.name}
 							</h1>
 						</div>
