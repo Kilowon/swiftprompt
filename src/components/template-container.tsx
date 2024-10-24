@@ -94,9 +94,9 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 	}
 
 	return (
-		<div class="flex flex-col gap-2 overflow-auto p-4 pt-0 scrollbar-gutter">
+		<div class="flex flex-col gap-2 h-full overflow-auto p-4 pt-2 scrollbar-gutter">
 			<Show
-				when={Array.from(templates.keys()).length > 0 && selectedTemplateGroup() !== null}
+				when={[...templates.keys()].length > 0 && selectedTemplateGroup() !== null}
 				fallback={
 					<div class="flex flex-col items-center justify-center mt-3 h-full">
 						<div class="text-2xl font-bold mb-4">No template selected</div>
@@ -106,12 +106,18 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 			>
 				<Show
 					when={
-						Array.from(templates.get(selectedTemplateGroup()!)?.sections.get(selectedTemplateVersion()!)?.values() ?? [])
+						[...(templates.get(selectedTemplateGroup()!)?.sections.get(selectedTemplateVersion()!)?.values() ?? [])]
 							.length === 0
 					}
 					fallback={
-						<For each={[templates.get(selectedTemplateGroup()!)?.sections.get(selectedTemplateVersion()!)?.values() ?? []]}>
+						<For
+							each={[...(templates.get(selectedTemplateGroup()!)?.sections.get(selectedTemplateVersion()!)?.values() ?? [])]}
+						>
 							{(section: TemplateSection) => {
+								createEffect(() => {
+									console.log(`section: ${section.id}`, section)
+								})
+
 								const [mouseOverSection, setMouseOverSection] = createSignal<TemplateSectionID | null>(null)
 								const [mouseOverItem, setMouseOverItem] = createSignal<ElementID | null>(null)
 								const [sectionName, setSectionName] = createSignal("")

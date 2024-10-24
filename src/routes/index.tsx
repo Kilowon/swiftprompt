@@ -1,5 +1,5 @@
 import { createShortcut } from "@solid-primitives/keyboard"
-import { createEffect, createMemo, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
 import { entityItems, selected, selectedTemplateGroup, setColorFooter, templates } from "~/global_state"
@@ -12,10 +12,9 @@ import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
-import { PromptItem, GroupID, VersionID, BadgeID, Group, TemplateGroup } from "~/types/entityType"
+import { PromptItem, GroupID, VersionID, BadgeID } from "~/types/entityType"
 import { groupsMap } from "~/helpers/actionHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
-import SectionContainer from "~/components/section-container"
 import TemplateVersions from "~/components/template-versions"
 import TemplateContainer from "~/components/template-container"
 
@@ -217,7 +216,7 @@ export default function Home() {
 									</div>
 								}
 							>
-								<Tabs defaultValue="all">
+								<div class="flex flex-col h-full">
 									<div class="items-center px-2 py-2 min-h-14">
 										<GroupContainerMenu />
 									</div>
@@ -227,10 +226,7 @@ export default function Home() {
 										isFullElements={isFullElements}
 										setIsFullElements={setIsFullElements}
 									/>
-									<TabsContent
-										value="all"
-										class="m-0"
-									>
+									<div class="flex-1 overflow-auto pb-10">
 										<ElementsContainer
 											type="all"
 											sizes={sizes()}
@@ -240,8 +236,8 @@ export default function Home() {
 											isFullElements={isFullElements}
 											setIsFullElements={setIsFullElements}
 										/>
-									</TabsContent>
-								</Tabs>
+									</div>
+								</div>
 							</Show>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
@@ -267,26 +263,28 @@ export default function Home() {
 									</div>
 								}
 							>
-								<div class="items-center py-2 bg-background-secondary min-h-14">
-									<div class="flex items-center gap-2 ">
-										<TemplateContainerMenu />
+								<div class="flex flex-col h-full">
+									<div class="items-center py-2 bg-background-secondary min-h-14">
+										<div class="flex items-center gap-2">
+											<TemplateContainerMenu />
+										</div>
 									</div>
-								</div>
-								<Separator />
-								<div class="p-4 bg-background-secondary">
-									<Show
-										when={selectedTemplateGroup()}
-										fallback={<div class="flex justify-end items-center gap-2 h-10"></div>}
-									>
-										<TemplateVersions version={templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0} />
-									</Show>
-								</div>
-								<div class="p-4 bg-background-secondary h-100% overflow-auto">
-									<TemplateContainer
-										isEditingTemplateSection={isEditingTemplateSection}
-										setIsEditingTemplateSection={setIsEditingTemplateSection}
-										setIsFullElements={setIsFullElements}
-									/>
+									<Separator />
+									<div class="p-4 bg-background-secondary">
+										<Show
+											when={selectedTemplateGroup()}
+											fallback={<div class="flex justify-end items-center gap-2 h-10"></div>}
+										>
+											<TemplateVersions version={templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0} />
+										</Show>
+									</div>
+									<div class="flex-1 p-4 bg-background-secondary overflow-auto pb-10">
+										<TemplateContainer
+											isEditingTemplateSection={isEditingTemplateSection}
+											setIsEditingTemplateSection={setIsEditingTemplateSection}
+											setIsFullElements={setIsFullElements}
+										/>
+									</div>
 								</div>
 							</Show>
 						</ResizablePanel>

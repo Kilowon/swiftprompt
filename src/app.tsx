@@ -6,11 +6,12 @@ import { ColorModeProvider, ColorModeScript, cookieStorageManagerSSR } from "@ko
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-import Nav from "~/components/Nav"
+import Nav from "~/components/nav"
 import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
 import { getCookie } from "vinxi/http"
 import { ColorExampleFooter } from "./components/color-footer"
+import { Toaster } from "~/registry/ui/sonner"
 
 function getServerCookies() {
 	"use server"
@@ -46,6 +47,7 @@ export default function App() {
 					<FileRoutes />
 				</Router>
 			</ColorModeProvider>
+			<Toaster />
 			<SolidQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	)

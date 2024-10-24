@@ -38,48 +38,43 @@ const entitiesToEntityMap = (): EntityMap => {
 const serializeEntityMap = (entityMap: EntityMap): string => {
 	const serialized = {
 		groups: Array.from(entityMap.groups.entries()),
-		items: Array.from(entityMap.items.entries() as [GroupID, ReactiveMap<ElementID, Item>][]).map(
-			([groupId, itemMap]) => [
-				groupId,
-				Array.from(itemMap.entries() as [ElementID, Item][]).map(([elementID, item]) => [
-					elementID,
-					{
-						...item,
-						body: Array.from(item.body?.entries())
-					}
-				])
-			]
-		),
-		badges: Array.from(entityMap.badges.entries()),
-		groupBadges: Array.from(entityMap.groupBadges.entries() as [GroupID, ReactiveMap<BadgeID, ElementID[]>][]).map(
+		items: Array.from<[GroupID, ReactiveMap<ElementID, Item>]>(entityMap.items.entries()).map(([groupId, itemMap]) => [
+			groupId,
+			Array.from<[ElementID, Item]>(itemMap.entries()).map(([elementID, item]) => [
+				elementID,
+				{
+					...item,
+					body: Array.from<[VersionID, string]>(item.body?.entries() || [])
+				}
+			])
+		]),
+		badges: Array.from<[BadgeID, Badge]>(entityMap.badges.entries()),
+		groupBadges: Array.from<[GroupID, ReactiveMap<BadgeID, ElementID[]>]>(entityMap.groupBadges.entries()).map(
 			([groupId, badgeMap]) => [
 				groupId,
-				Array.from(badgeMap.entries() as [BadgeID, ElementID[]][]).filter(([_, elementIds]) => elementIds.length > 0)
+				Array.from<[BadgeID, ElementID[]]>(badgeMap.entries()).filter(([_, elementIds]) => elementIds.length > 0)
 			]
 		),
-		template: Array.from(entityMap.template.entries() as [TemplateGroupID, TemplateGroup][]).map(
-			([templateId, template]) => [
-				templateId,
-				{
-					...template,
-					sections: Array.from(
-						template.sections.entries() as [VersionID, ReactiveMap<TemplateSectionID, TemplateSection>][]
-					).map(([versionId, sectionMap]) => [
+		template: Array.from<[TemplateGroupID, TemplateGroup]>(entityMap.template.entries()).map(([templateId, template]) => [
+			templateId,
+			{
+				...template,
+				sections: Array.from<[VersionID, ReactiveMap<TemplateSectionID, TemplateSection>]>(template.sections.entries()).map(
+					([versionId, sectionMap]) => [
 						versionId,
-						Array.from(sectionMap.entries() as [TemplateSectionID, TemplateSection][]).map(([sectionId, section]) => [
+						Array.from<[TemplateSectionID, TemplateSection]>(sectionMap.entries()).map(([sectionId, section]) => [
 							sectionId,
 							{
 								...section,
 								items: section.items
 							}
 						])
-					])
-				}
-			]
-		),
+					]
+				)
+			}
+		]),
 		nextOrder: nextOrder()
-	} as const
-
+	}
 	return JSON.stringify(serialized)
 }
 
@@ -130,30 +125,16 @@ const deserializeEntityMap = (serialized: string): EntityMap => {
 		const templateGroup: TemplateGroup = {
 			...template,
 			sections: new ReactiveMap(
-				[...(template.sections?.entries() || [])].map(([versionId, sectionMap]) => [
+				Array.from<[VersionID, any]>(template.sections).map(([versionId, sectionMap]) => [
 					versionId,
-					new ReactiveMap(
-						[...(sectionMap?.entries() || [])].map(([sectionId, section]) => [
-							sectionId,
-							{
-								...section,
-								items: [...(section.items?.entries() || [])].map(([itemId, item]) => ({
-									id: itemId,
-									group: item.group,
-									order: item.order,
-									date_created: item.date_created,
-									date_modified: item.date_modified
-								}))
-							}
-						])
-					)
+					new ReactiveMap(Array.from<[TemplateSectionID, TemplateSection]>(sectionMap))
 				])
 			)
 		}
 		templates.set(id, templateGroup)
 	})
 
-	setAvailableBadges(Array.from(badge.values()) as Badge[])
+	setAvailableBadges(Array.from<Badge>(badge.values()))
 	setNextOrder(parsed.nextOrder)
 	return {
 		groups: entityGroups,

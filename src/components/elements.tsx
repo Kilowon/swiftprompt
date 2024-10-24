@@ -195,7 +195,7 @@ export default function Elements(props: ElementsProps) {
 			storeEntityMap()
 			setIsRevert(false)
 			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
-			toast("Reverted to Previous Version - " + props.item.selectedVersion + " to new version - " + version, {
+			toast("Reverted to Previous Version: " + props.item.selectedVersion + " to new version: " + version, {
 				duration: 5000,
 				position: "bottom-center"
 			})
@@ -212,7 +212,7 @@ export default function Elements(props: ElementsProps) {
 			props.handleUpdateAttributes(props.item, inputValueTitle(), inputValueSummary(), body, version, version, true)
 			storeEntityMap()
 			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
-			toast("Saved to new version - " + version, { duration: 2000, position: "bottom-center" })
+			toast("Saved to new version: " + version, { duration: 2000, position: "bottom-center" })
 			return
 		} else {
 			toast("No Changes to Save", { duration: 5000, position: "bottom-center" })
@@ -303,9 +303,9 @@ export default function Elements(props: ElementsProps) {
 
 	// Keep an eye on this ugly thing if slowdowns occur look here first
 	const usedInSections = ({ id, group }: { id: ElementID; group: GroupID }) => {
-		const sections = Array.from(templates.values()).flatMap((template: any) =>
-			[template.sections.get(selectedTemplateVersion()!)?.values() ?? []].flatMap(section =>
-				section.items?.some((item: PromptItem) => item.id === id && item.group === group)
+		const sections = Array.from(templates.values()).flatMap(template =>
+			Array.from(template.sections.get(selectedTemplateVersion()!)?.values() ?? []).flatMap(section =>
+				section.items?.some(item => item.id === id && item.group === group)
 					? [{ templateId: template.id, sectionId: section.id }]
 					: []
 			)

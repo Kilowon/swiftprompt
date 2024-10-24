@@ -44,7 +44,6 @@ export const sortByOrder = (entities: Entity[]) => {
 export const updateBadge = (badgeId: BadgeID, icon: string, name: string) => {
 	badge.set(badgeId, { id: badgeId, name: name, icon: icon })
 	storeEntityMap()
-	badgeToDB(badgeId, icon, name)
 }
 
 export const saveUpdatedBadgesItem = (groupId: GroupID, id: ElementID, badges: Badge[]) => {
@@ -192,7 +191,6 @@ export const incrementTemplateGroupVersion = (id: TemplateGroupID) => {
 		templates.set(id, updatedGroup)
 		templates.get(id)?.sections.set(updatedGroup.versionCounter, newVersionSections)
 		storeEntityMap()
-
 		toast.success("Template version incremented to new version: " + updatedGroup.versionCounter, {
 			duration: 5000,
 			position: "bottom-center"
@@ -572,12 +570,12 @@ export const deleteItem = (groupId: GroupID, id: ElementID) => {
 	console.log("deleteItem", id, itemBadges?.labels)
 	templates.forEach(template => {
 		const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
-			Array.from(template.sections.entries()).map(([version, sections]) => [
+			[...template.sections.entries()].map(([version, sections]) => [
 				version,
 				new ReactiveMap<TemplateSectionID, TemplateSection>(
-					Array.from(sections.entries()).map(([sectionId, section]) => [
+					[...sections.entries()].map(([sectionId, section]) => [
 						sectionId,
-						{ ...section, items: section.items.filter(item => item.id !== id) }
+						{ ...section, items: section.items.filter((item: Item) => item.id !== id) }
 					])
 				)
 			])
@@ -638,12 +636,15 @@ export const moveItemToGroup = (groupId: GroupID, itemId: ElementID, newGroupId:
 		// Updates the item in the templates with the new groupId
 		templates.forEach(template => {
 			const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
-				Array.from(template.sections.entries()).map(([version, sections]) => [
+				[...template.sections.entries()].map(([version, sections]) => [
 					version,
 					new ReactiveMap<TemplateSectionID, TemplateSection>(
-						Array.from(sections.entries()).map(([sectionId, section]) => [
+						[...sections.entries()].map(([sectionId, section]) => [
 							sectionId,
-							{ ...section, items: section.items.map(item => (item.id === itemId ? { ...item, group: newGroupId } : item)) }
+							{
+								...section,
+								items: section.items.map((item: Item) => (item.id === itemId ? { ...item, group: newGroupId } : item))
+							}
 						])
 					)
 				])
@@ -701,22 +702,22 @@ export const groups = () =>
 
 export const groupsMap = () => entityGroups
 
-export const groupIds = () => Array.from(entityGroups.keys())
+export const groupIds = () => [...entityGroups.keys()]
 
 export const groupItems = (groupId: GroupID) => {
 	const groupItems = entityItems.get(groupId)
 	if (groupItems) {
-		return Array.from(groupItems.values())
+		return [...groupItems.values()]
 	}
 	return []
 }
 
-export const groupOrders = () => Array.from(entityGroups.values()).map(group => group.order)
+export const groupOrders = () => [...entityGroups.values()].map(group => group.order)
 
-export const groupItemIds = (groupId: GroupID) => Array.from(entityItems.get(groupId)?.keys() ?? [])
+export const groupItemIds = (groupId: GroupID) => [...(entityItems.get(groupId)?.keys() ?? [])]
 
 export const groupItemOrders = (groupId: GroupID) =>
-	Array.from(entityItems.get(groupId)?.values() ?? []).map(item => item.order)
+	[...(entityItems.get(groupId)?.values() ?? [])].map(item => item.order)
 
 export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangingGroup = true) => {
 	if (!draggable || !droppable) return
