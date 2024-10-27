@@ -36,14 +36,14 @@ interface Category {
 	options: Food[]
 }
 
-interface BadgeIconsProps {
+interface ElementsBadgeIconProps {
 	itemId: ElementID
 	badgeId: BadgeID
 	iconSelection: Accessor<{ icon: string; name: string }>
 	isBadgeHover: boolean
 	handleUpdateBadge: (badgeId: BadgeID, icon: string, name: string) => void
 }
-const BadgeIcons = (props: BadgeIconsProps) => {
+export default function ElementsBadgeIcon(props: ElementsBadgeIconProps) {
 	const [isBadgeHover, setIsBadgeHover] = createSignal<boolean>(false)
 	const [iconSelection, setIconSelection] = createSignal<{ icon: string; name: string }>(props.iconSelection())
 
@@ -75,6 +75,7 @@ const BadgeIcons = (props: BadgeIconsProps) => {
 				<DropdownMenu
 					placement="bottom-start"
 					open={isBadgeHover()}
+					onOpenChange={isOpen => setIsBadgeHover(isOpen)}
 				>
 					<DropdownMenuTrigger class="hover:cursor-pointer hover:bg-accent hover:rounded-sm focus:outline-none focus:ring-none">
 						<div>
@@ -89,20 +90,6 @@ const BadgeIcons = (props: BadgeIconsProps) => {
 					<DropdownMenuContent>
 						<DropdownMenuSub overlap>
 							<DropdownMenuSubTrigger class="text-xs">Change Icon</DropdownMenuSubTrigger>
-							<DropdownMenuPortal>
-								<DropdownMenuSubContent>
-									<ComboboxDemo
-										setIsBadgeHover={setIsBadgeHover}
-										badgeId={props.badgeId}
-										handleUpdateBadge={props.handleUpdateBadge}
-										iconSelection={props.iconSelection}
-										setIconSelection={setIconSelection}
-									/>
-								</DropdownMenuSubContent>
-							</DropdownMenuPortal>
-						</DropdownMenuSub>
-						<DropdownMenuSub overlap>
-							<DropdownMenuSubTrigger class="text-xs">Change Color</DropdownMenuSubTrigger>
 							<DropdownMenuPortal>
 								<DropdownMenuSubContent>
 									<ComboboxDemo
@@ -161,12 +148,15 @@ function ComboboxDemo(props: {
 				</ComboboxItem>
 			)}
 			sectionComponent={props => <ComboboxSection class="text-xs">{props.section.rawValue.label}</ComboboxSection>}
+			onOpenChange={isOpen => {
+				if (!isOpen) props.setIsBadgeHover(false)
+			}}
 		>
 			<ComboboxControl aria-label="Food">
 				<ComboboxInput class="text-xs" />
 				<ComboboxTrigger />
+				<ComboboxContent class="max-h-[200px] overflow-y-auto" />
 			</ComboboxControl>
-			<ComboboxContent class="max-h-[200px] overflow-y-auto" />
 		</Combobox>
 	)
 }
@@ -179,5 +169,3 @@ const IconDisplayUI = (props: { value: string; label: string }) => {
 		</div>
 	)
 }
-
-export default BadgeIcons

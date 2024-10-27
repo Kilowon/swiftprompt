@@ -71,6 +71,14 @@ export default function PromptDisplay() {
 		)
 	}
 
+	function replaceDelimiters(inputString: string, values: any) {
+		return inputString.replace(/{{(.*?)}}/g, (match: string, p1: string) => {
+			const key = p1.trim()
+			const lowerKey = key.toLowerCase()
+			return values[lowerKey] || values[key] || match
+		})
+	}
+
 	createEffect(() => {
 		const totalTokens = estimateTokens(contentCounter().wordCount)
 		setTokenCount(totalTokens)
@@ -93,9 +101,19 @@ export default function PromptDisplay() {
 			])
 			.join("\n\n")
 
-		setScreenWriter(content)
-	})
+		// Define the values for replacement
+		const values = {
+			delimiter: "Comma",
+			color: "Blue",
+			pdf: "Document",
+			items: "my island!"
+		}
 
+		// Use the replaceDelimiters function
+		const replacedContent = replaceDelimiters(content, values)
+
+		setScreenWriter(replacedContent)
+	})
 	const handleCopyToClipboard = () => {
 		writeClipboard(promptWriter() === "" ? screenWriter() : promptWriter())
 	}
@@ -181,7 +199,7 @@ export default function PromptDisplay() {
 							fallback={
 								<Editor
 									wordWrap={true}
-									readOnly={true}
+									readOnly={false}
 									lineNumbers={true}
 									language={"markdown"}
 									value={screenWriter()}

@@ -92,6 +92,14 @@ export interface TemplateSectionID {
 	id: Id
 }
 
+export interface GlobalModifiersID {
+	id: Id
+}
+
+export interface ModifierID {
+	id: Id
+}
+
 export interface TemplateGroup {
 	id: TemplateGroupID
 	order: string

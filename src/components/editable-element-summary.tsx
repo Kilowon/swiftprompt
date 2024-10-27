@@ -1,7 +1,7 @@
 import { PromptItem } from "~/types/entityType"
 import { TextField, TextFieldInput, TextFieldLabel } from "~/registry/ui/text-field"
 
-export const EditableItemSummary = (props: {
+export const EditableElementSummary = (props: {
 	item: PromptItem
 	summary?: string
 	inputValueSummary: string

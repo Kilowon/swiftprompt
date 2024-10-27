@@ -6,7 +6,6 @@ import { entityItems, selected, selectedTemplateGroup, setColorFooter, templates
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
-import { Tabs, TabsContent } from "~/registry/ui/tabs"
 import { Navigate } from "~/components/navigate"
 import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
@@ -18,6 +17,7 @@ import { ReactiveMap } from "@solid-primitives/map"
 import TemplateVersions from "~/components/template-versions"
 import TemplateContainer from "~/components/template-container"
 import PromptDisplay from "~/components/prompt-display"
+import TemplateModifiersContainer from "~/components/template-modifiers-container"
 
 let body = new ReactiveMap<VersionID, string>()
 
@@ -144,7 +144,7 @@ export default function Home() {
 						onSizesChange={setSizes}
 						class="h-full"
 					>
-						{/* Menu Switcher */}
+						{/* Side Menu */}
 						<ResizablePanel
 							initialSize={sizes()[0] ?? 0.1}
 							minSize={0.1}
@@ -159,7 +159,6 @@ export default function Home() {
 							}}
 							class={cn(isCollapsedMenu() && "min-w-[50px] transition-all duration-150 ease-in-out overflow-hidden")}
 						>
-							{/* <AccountSwitcher isCollapsed={isCollapsed()} /> */}
 							<div class="px-2 flex items-center justify-center bg-background-secondary min-h-14">
 								<div
 									class={cn(
@@ -279,7 +278,10 @@ export default function Home() {
 											<TemplateVersions version={templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0} />
 										</Show>
 									</div>
-									<div class="flex-1 p-4 bg-background-secondary overflow-auto pb-10">
+									<div class="bg-background overflow-auto">
+										<TemplateModifiersContainer />
+									</div>
+									<div class="flex-1 bg-background-secondary overflow-auto pb-10">
 										<TemplateContainer
 											isEditingTemplateSection={isEditingTemplateSection}
 											setIsEditingTemplateSection={setIsEditingTemplateSection}

@@ -41,7 +41,7 @@ export const EditableTemplateTitle = (props: {
 						props.setInputValueTemplateTitle(e.target.value)
 						props.handleTemplateNameChange(e.target.value)
 					}}
-					class="w-full min-h-6 h-8 border-none outline-none  text-xs bg-background px-1 py-0.5 text-sm font-bold capitalize"
+					class="w-full min-h-6 h-8 border-none outline-none text-[0.8rem]   bg-background px-1 py-0.5  font-bold capitalize"
 				/>
 			</TextField>
 		</div>

@@ -37,14 +37,14 @@ import {
 } from "~/registry/ui/dropdown-menu"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
-import { EditableItemTitle } from "./editable-item-title"
-import { EditableItemSummary } from "./editable-item-summary"
-import { EditableItemBody } from "./editable-item-body"
-import { EditableItemPrism } from "./editable-item-prism"
+import { EditableElementTitle } from "./editable-element-title"
+import { EditableElementSummary } from "./editable-element-summary"
+import { EditableElementBody } from "./editable-element-body"
+import { EditableElementPrism } from "./editable-element-prism"
 import { createTimeAgo } from "@solid-primitives/date"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~/registry/ui/select"
-import { SelectBadge } from "./select-badge"
-import BadgeIcons from "./badge-icons"
+import ElementsBadge from "./elements-badge"
+import ElementsBadgeIcon from "./elements-badge-icon"
 import { storeEntityMap } from "~/helpers/entityHelpers"
 import { addItemToTemplateSection } from "~/helpers/actionHelpers"
 import { Progress, ProgressValueLabel } from "~/registry/ui/progress"
@@ -333,6 +333,8 @@ export default function Elements(props: ElementsProps) {
 		return templateNames
 	}
 
+	const placeholdersTest = ["color", "hair", "bread", "couch", "money"]
+
 	return (
 		<div>
 			<Button
@@ -425,7 +427,7 @@ export default function Elements(props: ElementsProps) {
 									</div>
 								}
 							>
-								<EditableItemTitle
+								<EditableElementTitle
 									inputValueTitle={inputValueTitle}
 									setInputValueTitle={setInputValueTitle}
 									item={props.item}
@@ -447,7 +449,7 @@ export default function Elements(props: ElementsProps) {
 								</div>
 							}
 						>
-							<EditableItemSummary
+							<EditableElementSummary
 								item={props.item}
 								summary={props.item.summary}
 								inputValueSummary={inputValueSummary()}
@@ -463,7 +465,6 @@ export default function Elements(props: ElementsProps) {
 						fallback={
 							<div class="text-xs w-full">
 								<div class="flex flex-col w-full gap-1">
-									<div class="flex justify-between text-foreground/60"></div>
 									<Progress
 										value={contentPreview()?.wordCount || 0}
 										minValue={0}
@@ -471,22 +472,39 @@ export default function Elements(props: ElementsProps) {
 										getValueLabel={({ value, max }) => ``}
 										class="w-[300px] space-y-1"
 									>
-										<div class="flex justify-between">
+										<div class="flex justify-between min-h-5">
 											<div class="text-foreground/60 text-xs flex items-center gap-4">
-												<div class="flex items-center gap-1">
+												<div class="flex items-center gap-1 text-[.6rem]">
 													<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
 													<span class="text-[.6rem] mr-2">tokens</span>
 												</div>
-												<div class="flex items-center gap-1">
+												<div class="flex items-center gap-1 text-[.6rem]">
 													<span>{`${usedInSections({ id: props.item.id, group: props.item.group }).sections.length}`}</span>
 													<span class="text-[.6rem] mr-2">Sections</span>
 												</div>
-												<div class="flex items-center gap-1">
+												<div class="flex items-center gap-1 text-[.6rem]">
 													<span>{`${
 														Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length
 													}`}</span>
 													<span class="text-[.6rem] mr-2">Templates</span>
 												</div>
+												<Show when={placeholdersTest.length > 0}>
+													<div class="flex gap-1 text-foreground/60 text-[.6rem] items-center ">
+														Fields:
+														<For each={placeholdersTest.slice(0, 3)}>
+															{(placeholder: any) => (
+																<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
+																	{placeholder}
+																</div>
+															)}
+														</For>
+														<Show when={placeholdersTest.length > 3}>
+															<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
+																+{placeholdersTest.length - 3}
+															</div>
+														</Show>
+													</div>
+												</Show>
 											</div>
 											<ProgressValueLabel />
 										</div>
@@ -498,7 +516,7 @@ export default function Elements(props: ElementsProps) {
 						<Show
 							when={isPrism()}
 							fallback={
-								<EditableItemBody
+								<EditableElementBody
 									inputValueBody={inputValueBody}
 									setInputValueBody={setInputValueBody}
 									item={props.item}
@@ -508,7 +526,7 @@ export default function Elements(props: ElementsProps) {
 								/>
 							}
 						>
-							<EditableItemPrism
+							<EditableElementPrism
 								item={props.item}
 								inputValueBody={inputValueBodyPrism}
 								setInputValueBody={setInputValueBodyPrism}
@@ -590,7 +608,7 @@ export default function Elements(props: ElementsProps) {
 																	>
 																		{(option as any).name || ""}
 
-																		<BadgeIcons
+																		<ElementsBadgeIcon
 																			itemId={props.item.id}
 																			iconSelection={iconSelection}
 																			isBadgeHover={false}
@@ -625,7 +643,7 @@ export default function Elements(props: ElementsProps) {
 																>
 																	{(option as any).name || ""}
 
-																	<BadgeIcons
+																	<ElementsBadgeIcon
 																		itemId={props.item.id}
 																		iconSelection={iconSelection}
 																		isBadgeHover={false}
@@ -681,7 +699,7 @@ export default function Elements(props: ElementsProps) {
 								</div>
 							}
 						>
-							<SelectBadge
+							<ElementsBadge
 								item={props.item}
 								isBadgeSelectEdit={isBadgeSelectEdit()}
 								setIsBadgeSelectEdit={setIsBadgeSelectEdit}

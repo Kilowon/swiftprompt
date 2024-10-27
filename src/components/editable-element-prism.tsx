@@ -22,7 +22,7 @@ import { cn } from "~/lib/utils"
 import { TextField, TextFieldLabel } from "~/registry/ui/text-field"
 import { createShortcut } from "@solid-primitives/keyboard"
 
-export const EditableItemPrism = (props: {
+export const EditableElementPrism = (props: {
 	item: PromptItem
 	inputValueBody: Accessor<string>
 	setInputValueBody: (value: string) => void

@@ -27,7 +27,7 @@ export const EditableSectionTitle = (props: {
 	let inputRef: HTMLSpanElement | undefined
 
 	return (
-		<div class="flex items-center ml-2 min-h-12">
+		<div class="flex items-center  ml-2 min-h-12">
 			<TextField>
 				<TextFieldInput
 					ref={(el: HTMLSpanElement) => {
@@ -43,7 +43,7 @@ export const EditableSectionTitle = (props: {
 						props.setInputValueSectionTitle(e.target.value)
 						props.handleSectionNameChange(e.target.value)
 					}}
-					class="w-full h-8 border-none outline-none  text-xs bg-background px-1 py-0.5 text-sm font-bold capitalize"
+					class="w-full h-8 border-none outline-none  text-[0.8rem] bg-background px-1 py-0.5  font-bold capitalize"
 				></TextFieldInput>
 			</TextField>
 			<Button

@@ -1,4 +1,4 @@
-import { createEffect, Show, createSignal } from "solid-js"
+import { createEffect, Show, createSignal, For } from "solid-js"
 import { toast } from "solid-sonner"
 import { cn } from "~/lib/utils"
 import {
@@ -116,6 +116,8 @@ function ElementsCompact(props: ElementsCompactProps) {
 		setIsEditingItem({ status: "editing", id: itemId, label: "all" })
 	}
 
+	const placeholdersTest = ["color_fire", "hair_bever", "color", "hair", "color", "hair"]
+
 	return (
 		<div>
 			<Button
@@ -132,7 +134,7 @@ function ElementsCompact(props: ElementsCompactProps) {
 					<div class="flex flex-col items-start justify-between w-full relative">
 						{/* Title Prompts */}
 						<div class="flex items-center gap-2 pr-10 group flex-grow">
-							<div class="flex items-center gap-2">
+							<div class="flex items-center gap-10">
 								<div
 									class={cn(
 										"text-[0.6rem] font-semibold text-foreground/80 pl-3",
@@ -170,127 +172,147 @@ function ElementsCompact(props: ElementsCompactProps) {
 									<div class="i-material-symbols-light:push-pin text-foreground/80 w-4 h-4 group-hover:text-accent-foreground"></div>
 								</Button>
 							</Show>
-
-							<Show when={selectedItem() === props.item.id}>
-								<Tooltip
-									openDelay={1000}
-									closeDelay={0}
-								>
-									<TooltipTrigger
-										as={Button}
-										onClick={() => {
-											handleOpenItem(props.item.id, props.item.group)
-										}}
-										variant="ghost"
-										size="icon"
-										class=" text-accent hover:text-accent-foreground max-h-8"
+							<Show
+								when={false}
+								fallback={
+									<Show when={placeholdersTest.length > 0}>
+										<div class="flex gap-1 text-foreground/60 text-[.6rem] items-center min-w-40 pr-3">
+											Fields:
+											<For each={placeholdersTest.slice(0, 3)}>
+												{(placeholder: any) => (
+													<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">{placeholder}</div>
+												)}
+											</For>
+											<Show when={placeholdersTest.length > 3}>
+												<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
+													+{placeholdersTest.length - 3}
+												</div>
+											</Show>
+										</div>
+									</Show>
+								}
+							>
+								<Show when={selectedItem() === props.item.id}>
+									<Tooltip
+										openDelay={1000}
+										closeDelay={0}
 									>
-										<div class="i-mdi:file-edit w-4 h-4" />
-										<span class="sr-only">Edit Prompt</span>
-									</TooltipTrigger>
-									<TooltipContent>Edit Prompt</TooltipContent>
-								</Tooltip>
-							</Show>
-							<Show when={selectedItem() === props.item.id}>
-								<Tooltip
-									openDelay={1000}
-									closeDelay={0}
-								>
-									<TooltipTrigger
-										as={Button}
-										variant="ghost"
-										size="icon"
-										class="text-accent hover:text-accent-foreground max-h-8"
-										onClick={() => {
-											handleDebounce()
-										}}
+										<TooltipTrigger
+											as={Button}
+											onClick={() => {
+												handleOpenItem(props.item.id, props.item.group)
+											}}
+											variant="ghost"
+											size="icon"
+											class=" text-accent hover:text-accent-foreground max-h-8"
+										>
+											<div class="i-mdi:file-edit w-4 h-4" />
+											<span class="sr-only">Edit Prompt</span>
+										</TooltipTrigger>
+										<TooltipContent>Edit Prompt</TooltipContent>
+									</Tooltip>
+								</Show>
+								<Show when={selectedItem() === props.item.id}>
+									<Tooltip
+										openDelay={1000}
+										closeDelay={0}
 									>
-										<div class="i-mdi:file-document-arrow-right w-1.25em h-1.25em"></div>
-										<span class="sr-only">Add to Template</span>
-									</TooltipTrigger>
-									<TooltipContent>Add to Template</TooltipContent>
-								</Tooltip>
-							</Show>
-							<Show when={selectedItem() === props.item.id}>
-								<div>
-									<DropdownMenu placement="bottom-end">
-										<DropdownMenuTrigger
+										<TooltipTrigger
 											as={Button}
 											variant="ghost"
 											size="icon"
 											class="text-accent hover:text-accent-foreground max-h-8"
+											onClick={() => {
+												handleDebounce()
+											}}
 										>
-											<div class="i-mdi:dots-vertical w-1.25em h-1.25em"></div>
-											<span class="sr-only">More</span>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent>
-											<DropdownMenuItem onSelect={() => props.handleDuplicateItem(props.item)}>
-												<div class="i-octicon:duplicate-16 w-1.25em h-1.25em mr-2"></div>
-												Duplicate Element
-											</DropdownMenuItem>
-											<DropdownMenuItem onSelect={() => console.log("Clear Prompt")}>
-												<div class="i-icon-park-outline:clear-format w-1.25em h-1.25em mr-2"></div> Clear Prompt
-											</DropdownMenuItem>
-											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.group, props.item.id)}>
-												<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Element
-											</DropdownMenuItem>
-											<DropdownMenuItem
-												onSelect={() => {
-													handlePinToggle()
-
-													toast(
-														<div class="flex items-center gap-2">
-															<div class="i-material-symbols:check-box w-4 h-4 text-success" />
-															<span class="text-xs font-medium">
-																{props.item.name} {isPinned() ? "Unpinned" : "Pinned"}
-															</span>
-														</div>,
-														{ duration: 2000, position: "bottom-center" }
-													)
-												}}
+											<div class="i-mdi:file-document-arrow-right w-1.25em h-1.25em"></div>
+											<span class="sr-only">Add to Template</span>
+										</TooltipTrigger>
+										<TooltipContent>Add to Template</TooltipContent>
+									</Tooltip>
+								</Show>
+								<Show when={selectedItem() === props.item.id}>
+									<div>
+										<DropdownMenu placement="bottom-end">
+											<DropdownMenuTrigger
+												as={Button}
+												variant="ghost"
+												size="icon"
+												class="text-accent hover:text-accent-foreground max-h-8"
 											>
-												<div
-													class={cn(
-														" w-1.25em h-1.25em mr-2",
-														isPinned() && "i-material-symbols-light:toggle-on w-5 h-5",
-														!isPinned() && "i-material-symbols-light:toggle-off-outline w-5 h-5"
-													)}
-												></div>{" "}
-												<Show when={isPinned()}>Unpin Element</Show>
-												<Show when={!isPinned()}>Pin Element</Show>
-											</DropdownMenuItem>
+												<div class="i-mdi:dots-vertical w-1.25em h-1.25em"></div>
+												<span class="sr-only">More</span>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent>
+												<DropdownMenuItem onSelect={() => props.handleDuplicateItem(props.item)}>
+													<div class="i-octicon:duplicate-16 w-1.25em h-1.25em mr-2"></div>
+													Duplicate Element
+												</DropdownMenuItem>
+												<DropdownMenuItem onSelect={() => console.log("Clear Prompt")}>
+													<div class="i-icon-park-outline:clear-format w-1.25em h-1.25em mr-2"></div> Clear Prompt
+												</DropdownMenuItem>
+												<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.group, props.item.id)}>
+													<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Element
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													onSelect={() => {
+														handlePinToggle()
 
-											<DropdownMenuSub overlap>
-												<DropdownMenuSubTrigger>
-													<div class="i-solar:download-linear w-1.25em h-1.25em mr-2" />
-													Move Element
-												</DropdownMenuSubTrigger>
-												<DropdownMenuPortal>
-													<DropdownMenuSubContent>
-														<Select
-															onChange={(e: any) => handleNewGroup(e)}
-															options={groupOptions}
-															optionValue={"value" as any}
-															optionTextValue={"label" as any}
-															placeholder="Move to Group..."
-															itemComponent={props => <SelectItem item={props.item}>{(props.item as any).rawValue.label}</SelectItem>}
-														>
-															<SelectTrigger
-																aria-label="Group"
-																class="w-[180px]"
+														toast(
+															<div class="flex items-center gap-2">
+																<div class="i-material-symbols:check-box w-4 h-4 text-success" />
+																<span class="text-xs font-medium">
+																	{props.item.name} {isPinned() ? "Unpinned" : "Pinned"}
+																</span>
+															</div>,
+															{ duration: 2000, position: "bottom-center" }
+														)
+													}}
+												>
+													<div
+														class={cn(
+															" w-1.25em h-1.25em mr-2",
+															isPinned() && "i-material-symbols-light:toggle-on w-5 h-5",
+															!isPinned() && "i-material-symbols-light:toggle-off-outline w-5 h-5"
+														)}
+													></div>{" "}
+													<Show when={isPinned()}>Unpin Element</Show>
+													<Show when={!isPinned()}>Pin Element</Show>
+												</DropdownMenuItem>
+
+												<DropdownMenuSub overlap>
+													<DropdownMenuSubTrigger>
+														<div class="i-solar:download-linear w-1.25em h-1.25em mr-2" />
+														Move Element
+													</DropdownMenuSubTrigger>
+													<DropdownMenuPortal>
+														<DropdownMenuSubContent>
+															<Select
+																onChange={(e: any) => handleNewGroup(e)}
+																options={groupOptions}
+																optionValue={"value" as any}
+																optionTextValue={"label" as any}
+																placeholder="Move to Group..."
+																itemComponent={props => <SelectItem item={props.item}>{(props.item as any).rawValue.label}</SelectItem>}
 															>
-																<SelectValue<{ value: string; label: string }>>
-																	{state => state.selectedOption()?.label || "Move to Group..."}
-																</SelectValue>
-															</SelectTrigger>
-															<SelectContent />
-														</Select>
-													</DropdownMenuSubContent>
-												</DropdownMenuPortal>
-											</DropdownMenuSub>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</div>
+																<SelectTrigger
+																	aria-label="Group"
+																	class="w-[180px]"
+																>
+																	<SelectValue<{ value: string; label: string }>>
+																		{state => state.selectedOption()?.label || "Move to Group..."}
+																	</SelectValue>
+																</SelectTrigger>
+																<SelectContent />
+															</Select>
+														</DropdownMenuSubContent>
+													</DropdownMenuPortal>
+												</DropdownMenuSub>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
+								</Show>
 							</Show>
 						</div>
 					</div>

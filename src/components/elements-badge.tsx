@@ -19,7 +19,7 @@ import { BadgeID, Item } from "~/types/entityType"
 import { storeEntityMap } from "~/helpers/entityHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
 
-interface SelectBadgeProps {
+interface ElementsBadgeProps {
 	item: Item
 	isBadgeSelectEdit: boolean
 	setIsBadgeSelectEdit: (value: boolean) => void
@@ -28,7 +28,7 @@ interface SelectBadgeProps {
 	body?: string
 }
 
-export const SelectBadge = (props: SelectBadgeProps) => {
+export default function ElementsBadge(props: ElementsBadgeProps) {
 	const createValue = (name: string, icon: string) => {
 		return { id: crypto.randomUUID(), name, icon, itemsIds: [] } as unknown as BadgeType
 	}

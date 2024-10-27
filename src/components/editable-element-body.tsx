@@ -6,7 +6,7 @@ import { TextField, TextFieldLabel, TextFieldTextArea } from "~/registry/ui/text
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
 import { cn } from "~/lib/utils"
 
-export const EditableItemBody = (props: {
+export const EditableElementBody = (props: {
 	item: PromptItem
 	inputValueBody: Accessor<string>
 	setInputValueBody: (value: string) => void

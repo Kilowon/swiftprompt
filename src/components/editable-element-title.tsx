@@ -2,7 +2,7 @@ import { Accessor, onMount } from "solid-js"
 import { PromptItem } from "~/types/entityType"
 import { TextField, TextFieldInput, TextFieldLabel } from "~/registry/ui/text-field"
 
-export const EditableItemTitle = (props: {
+export const EditableElementTitle = (props: {
 	item: PromptItem
 	name?: string
 	inputValueTitle: Accessor<string>
