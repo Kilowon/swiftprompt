@@ -98,7 +98,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 			<Show
 				when={[...templates.keys()].length > 0 && selectedTemplateGroup() !== null}
 				fallback={
-					<div class="flex flex-col items-center justify-center mt-3 h-full">
+					<div class="flex flex-col items-center justify-center mt-3 h-full mb-11">
 						<div class="text-2xl font-bold mb-4">No template selected</div>
 						<div class="text-gray-600 mb-6">Create a new template to get started!</div>
 					</div>

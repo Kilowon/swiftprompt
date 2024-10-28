@@ -43,7 +43,7 @@ export default function Home() {
 	const [initializedUserElement, setInitializedUserElement] = createSignal(false)
 	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
 	const [isFullElements, setIsFullElements] = createSignal<boolean>(true)
-
+	const [isFullModifiers, setIsFullModifiers] = createSignal<boolean>(true)
 	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
 		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
 	] as PromptItem[])
@@ -243,7 +243,10 @@ export default function Home() {
 										}
 									>
 										<div class="items-center px-2 py-2 min-h-14">
-											<ModifiersMenu />
+											<ModifiersMenu
+												isFullModifiers={isFullModifiers}
+												setIsFullModifiers={setIsFullModifiers}
+											/>
 										</div>
 									</Show>
 
@@ -272,7 +275,15 @@ export default function Home() {
 									>
 										<div class="flex flex-col h-full">
 											<div class="flex-1 overflow-auto pb-10">
-												<ModifiersContainer />
+												<ModifiersContainer
+													type="all"
+													sizes={sizes()}
+													items={itemsList}
+													initializedUserElement={initializedUserElement}
+													initializedUserGroup={initializedUserGroup}
+													isFullModifiers={isFullModifiers}
+													setIsFullModifiers={setIsFullModifiers}
+												/>
 											</div>
 										</div>
 									</Show>
