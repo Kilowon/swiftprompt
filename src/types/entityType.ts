@@ -33,6 +33,13 @@ export interface Item extends Base {
 	pinned?: boolean
 }
 
+export interface Modifier {
+	id: ModifierID
+	name: string
+	order: string
+	modifier: string
+}
+
 export interface Prompt extends Item {
 	prompts: string
 }
@@ -120,7 +127,20 @@ export interface TemplateSection {
 	isLocked: boolean
 	order: string
 	name: string
-	items: { id: ElementID; group: GroupID; order: string; date_created?: string; date_modified?: string }[]
+	items: {
+		id: ElementID
+		group: GroupID
+		order: string
+		fields?: TemplateField[]
+		date_created?: string
+		date_modified?: string
+	}[]
+}
+
+export interface TemplateField {
+	name: string
+	order: string
+	modifierId?: ModifierID
 }
 
 export type Filter =

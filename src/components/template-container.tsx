@@ -322,20 +322,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																						<Show when={elementToElementMatch()}>
 																							<div class="i-mdi:checkbox-blank-circle text-success w-1em h-1em mr-1"></div>
 																						</Show>
-																						<div
-																							onclick={() => {
-																								setIsFieldsSelected(!isFieldsSelected())
-																							}}
-																							class={cn(
-																								"text-[0.6rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 bg-accent/15 hover:cursor-pointer hover:text-primary-foreground hover:bg-primary",
-																								isFieldsSelected() && "text-primary-foreground bg-primary"
-																								//!isFieldsSelected() && "text-foreground/40 bg-error text-error-foreground"
-																								//!isFieldsSelected() && "text-foreground/40 bg-warning text-warning-foreground",
-																								//!isFieldsSelected() && "text-foreground/40 bg-success text-success-foreground"
-																							)}
-																						>
-																							Fields
-																						</div>
+
 																						<div class="truncate mr-2">{entityGroups.get(item.group)?.name}</div>
 																					</div>
 																					<Show
@@ -408,6 +395,24 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																							</Show>
 																						</div>
 																					</Show>
+																					<div class="min-w-13">
+																						<Show when={true}>
+																							<div
+																								onclick={() => {
+																									setIsFieldsSelected(!isFieldsSelected())
+																								}}
+																								class={cn(
+																									"items-center justify-center text-[0.6rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 bg-accent/15 hover:cursor-pointer hover:text-primary-foreground hover:bg-primary",
+																									isFieldsSelected() && "text-primary-foreground bg-primary"
+																									//!isFieldsSelected() && " bg-error text-error-foreground"
+																									//!isFieldsSelected() && " text-warning bg-warning/15"
+																									//!isFieldsSelected() && " bg-success text-success-foreground"
+																								)}
+																							>
+																								Fields
+																							</div>
+																						</Show>
+																					</div>
 																				</div>
 																			</div>
 																		</button>
@@ -419,9 +424,14 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 
 																				return (
 																					<div class="w-full text-[0.6rem] text-foreground/40">
-																						<div class="w-full h-8 flex items-center px-2 py-1  ">Field: One</div>
+																						<div class="w-full h-8 flex items-center px-2 py-1  ">
+																							Global Field: One
+																							<div class="bg-background text-foreground text-[0.6rem] rounded-sm px-1 ml-2">
+																								Global Modifier One
+																							</div>
+																						</div>
 																						<div class="w-full  h-8 flex items-center px-2 py-1 border-t border-accent/20 ">
-																							Field: Two{" "}
+																							Field: Two
 																							<div class="bg-background text-foreground text-[0.6rem] rounded-sm px-1 ml-2">Modifier One</div>
 																						</div>
 																						<div class="w-full  h-8 flex items-center px-2 py-1 border-t border-accent/20 ">Field: Three</div>

@@ -2,7 +2,20 @@ import { createShortcut } from "@solid-primitives/keyboard"
 import { createEffect, createSignal, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
-import { entityItems, selected, selectedTemplateGroup, setColorFooter, templates } from "~/global_state"
+import {
+	entityItems,
+	selected,
+	selectedTemplateGroup,
+	setColorFooter,
+	templates,
+	isShowModifiers,
+	isShowTesting,
+	isShowMenu,
+	isShowDisplay,
+	setIsShowDisplay,
+	isCollapsedViewer,
+	setIsCollapsedViewer
+} from "~/global_state"
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
@@ -18,60 +31,14 @@ import TemplateVersions from "~/components/template-versions"
 import TemplateContainer from "~/components/template-container"
 import PromptDisplay from "~/components/prompt-display"
 import TemplateModifiersContainer from "~/components/template-modifiers-container"
-
-let body = new ReactiveMap<VersionID, string>()
-
-body.set(1, "Body Version One")
-body.set(2, "Body Version Two")
-
-const testNavArray: PromptItem[] = [
-	{
-		name: "Element One",
-		type: "item",
-		description: "description One",
-		summary: "summary One",
-		body: body,
-		date_created: "2024-01-01",
-		date_modified: "2024-01-01",
-		id: { id: "1" },
-		group: { id: "1" },
-		labels: [
-			{ name: "Label One", id: "1" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" },
-			{ name: "Label Two", id: "2" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" }
-		],
-		versionCounter: 1,
-		selectedVersion: 1,
-		order: "1",
-		status: "active"
-	},
-	{
-		name: "Element Two",
-		type: "item",
-		description: "description Two",
-		summary: "summary Two",
-		body: body,
-		date_created: "2024-01-01",
-		date_modified: "2024-01-01",
-		id: { id: "1" },
-		group: { id: "1" },
-		labels: [
-			{ name: "Label One", id: "1" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" },
-			{ name: "Label Two", id: "2" as unknown as BadgeID, icon: "i-material-symbols-light:push-pin" }
-		],
-		versionCounter: 1,
-		selectedVersion: 1,
-		order: "2",
-		status: "active"
-	}
-]
-
-const [testNav, setTestNav] = createSignal<PromptItem[]>(testNavArray)
+import ModifiersContainer from "~/components/modifiers-container"
+import ModifiersMenu from "~/components/modifiers-menu"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
 	const [isCollapsedGroup, setIsCollapsedGroup] = createSignal(false)
 	const [isCollapsedTemplate, setIsCollapsedTemplate] = createSignal(false)
-	const [isCollapsedViewer, setIsCollapsedViewer] = createSignal(false)
+
 	const [isEditingTemplateSection, setIsEditingTemplateSection] = createSignal({ status: "saved" })
 	const [initializedUserElement, setInitializedUserElement] = createSignal(false)
 	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
@@ -90,6 +57,8 @@ export default function Home() {
 			path: "/"
 		}
 	})
+
+	const [panelRef, setPanelRef] = createSignal<any>(null)
 
 	createEffect(() => {
 		setItemsList([...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])] as PromptItem[])
@@ -131,6 +100,48 @@ export default function Home() {
 			preventDefault: true
 		}
 	)
+
+	createEffect(() => {
+		// Combined panel state management
+		setSizes(prev => {
+			const newSizes = [...prev]
+
+			// Default sizes
+			let menuSize = 0.1
+			let group = 0.3
+			let template = 0.3
+			let display = 0.3
+
+			// Handle menu closed
+			if (!isShowMenu()) {
+				menuSize = 0
+				group = 0.35
+				template = 0.35
+				display = isShowDisplay() ? 0.3 : 0
+			}
+
+			// Handle display closed
+			if (!isShowDisplay()) {
+				display = 0
+				// Only redistribute space if menu is showing
+				if (isShowMenu()) {
+					template = 0.45 // Reduced to allow for proper distribution
+					group = 0.45 // Increased to match template
+					menuSize = 0.1 // Original menu size
+				} else {
+					template = 0.5
+					group = 0.5
+				}
+			}
+
+			newSizes[0] = menuSize
+			newSizes[1] = group
+			newSizes[2] = template
+			newSizes[3] = display
+
+			return newSizes
+		})
+	})
 
 	return (
 		<main
@@ -190,11 +201,17 @@ export default function Home() {
 											...template
 										}
 									})}
+									modifiers={Array.from(templates.values()).map((modifier: any) => {
+										return {
+											title: modifier.name,
+											...modifier
+										}
+									})}
 								/>
 							</div>
 						</ResizablePanel>
 						<ResizableHandle withHandle />
-						{/* Group + Elements */}
+						{/* Group + Elements or Modifiers */}
 						<ResizablePanel
 							initialSize={sizes()[1] ?? 0.3}
 							minSize={0.15}
@@ -217,26 +234,48 @@ export default function Home() {
 								}
 							>
 								<div class="flex flex-col h-full">
-									<div class="items-center px-2 py-2 min-h-14">
-										<GroupContainerMenu />
-									</div>
+									<Show
+										when={isShowModifiers()}
+										fallback={
+											<div class="items-center px-2 py-2 min-h-14">
+												<GroupContainerMenu />
+											</div>
+										}
+									>
+										<div class="items-center px-2 py-2 min-h-14">
+											<ModifiersMenu />
+										</div>
+									</Show>
 
 									<Separator />
-									<GroupContainerSearch
-										isFullElements={isFullElements}
-										setIsFullElements={setIsFullElements}
-									/>
-									<div class="flex-1 overflow-auto pb-10">
-										<ElementsContainer
-											type="all"
-											sizes={sizes()}
-											items={itemsList}
-											initializedUserElement={initializedUserElement}
-											initializedUserGroup={initializedUserGroup}
-											isFullElements={isFullElements}
-											setIsFullElements={setIsFullElements}
-										/>
-									</div>
+									<Show
+										when={isShowModifiers()}
+										fallback={
+											<div class="flex flex-col h-full">
+												<GroupContainerSearch
+													isFullElements={isFullElements}
+													setIsFullElements={setIsFullElements}
+												/>
+												<div class="flex-1 overflow-auto pb-30">
+													<ElementsContainer
+														type="all"
+														sizes={sizes()}
+														items={itemsList}
+														initializedUserElement={initializedUserElement}
+														initializedUserGroup={initializedUserGroup}
+														isFullElements={isFullElements}
+														setIsFullElements={setIsFullElements}
+													/>
+												</div>
+											</div>
+										}
+									>
+										<div class="flex flex-col h-full">
+											<div class="flex-1 overflow-auto pb-10">
+												<ModifiersContainer />
+											</div>
+										</div>
+									</Show>
 								</div>
 							</Show>
 						</ResizablePanel>
@@ -278,10 +317,10 @@ export default function Home() {
 											<TemplateVersions version={templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0} />
 										</Show>
 									</div>
-									<div class="bg-background overflow-auto">
+									<div class="bg-background-secondary overflow-auto">
 										<TemplateModifiersContainer />
 									</div>
-									<div class="flex-1 bg-background-secondary overflow-auto pb-10">
+									<div class="flex-1 bg-background-secondary overflow-auto pb-20">
 										<TemplateContainer
 											isEditingTemplateSection={isEditingTemplateSection}
 											setIsEditingTemplateSection={setIsEditingTemplateSection}
@@ -294,6 +333,7 @@ export default function Home() {
 						<ResizableHandle withHandle />
 						{/* Prompt + Response Display */}
 						<ResizablePanel
+							ref={setPanelRef}
 							initialSize={sizes()[3] ?? 0.3}
 							minSize={0.3}
 							maxSize={0.4}
@@ -301,11 +341,13 @@ export default function Home() {
 							collapseThreshold={0.01}
 							onCollapse={e => {
 								setIsCollapsedViewer(e === 0)
+								setIsShowDisplay(false)
 							}}
 							onExpand={() => {
 								setIsCollapsedViewer(false)
+								setIsShowDisplay(true)
 							}}
-							class={cn(isCollapsedViewer() && "min-w-10 transition-all duration-300 ease-in-out overflow-hidden")}
+							class={cn(isCollapsedViewer() && "transition-all duration-300 ease-in-out overflow-hidden")}
 						>
 							<div class="h-100% pb-10">
 								<PromptDisplay />

@@ -106,3 +106,29 @@ export { searchSelectedBadges, setSearchSelectedBadges }
 const [allBadgesGroup, setAllBadgesGroup] = createSignal<Badge[]>([])
 
 export { allBadgesGroup, setAllBadgesGroup }
+
+const [isShowModifiers, setIsShowModifiers] = createSignal<boolean>(false)
+
+export { isShowModifiers, setIsShowModifiers }
+
+const [isShowTesting, setIsShowTesting] = createSignal<boolean>(false)
+
+export { isShowTesting, setIsShowTesting }
+
+const [isShowMenu, setIsShowMenu] = createSignal<boolean>(true)
+
+export { isShowMenu, setIsShowMenu }
+
+const [isShowDisplay, setIsShowDisplay] = createSignal<boolean>(true)
+
+export { isShowDisplay, setIsShowDisplay }
+
+const [isCollapsedViewer, setIsCollapsedViewer] = createSignal(false)
+
+export { isCollapsedViewer, setIsCollapsedViewer }
+
+const [panelRef, setPanelRef] = createSignal<any>(null)
+export { panelRef, setPanelRef }
+
+const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
+export { isCollapsedMenu, setIsCollapsedMenu }
