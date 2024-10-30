@@ -14,7 +14,11 @@ import {
 	setSelectedTemplateVersion,
 	setSelectedModifierGroup,
 	selectedModifierGroup,
-	entityModifiers
+	entityModifiers,
+	isShowModifiers,
+	setIsShowModifiers,
+	setIsShowTesting,
+	isShowTesting
 } from "~/global_state"
 import {
 	Group,
@@ -67,6 +71,9 @@ export function Navigate(props: NavProps) {
 
 	const handleSelect = (id: GroupID) => {
 		setSelected(id)
+		if (selected() === id && isShowModifiers() === true) {
+			setIsShowModifiers(false)
+		}
 	}
 
 	const handleSelectTemplateGroup = (id: TemplateGroupID) => {
@@ -78,6 +85,9 @@ export function Navigate(props: NavProps) {
 	const handleSelectModifierGroup = (id: ModifierGroupID) => {
 		setSelectedSection(null)
 		setSelectedModifierGroup(id)
+		if (selectedModifierGroup() === id && isShowModifiers() === false) {
+			setIsShowModifiers(true)
+		}
 	}
 
 	const toggleSection = (section: "groups" | "templates" | "modifiers") => {

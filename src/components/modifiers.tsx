@@ -46,16 +46,10 @@ interface ModifiersProps {
 export default function Modifiers(props: ModifiersProps) {
 	const [inputValueTitle, setInputValueTitle] = createSignal(props.item.name || "")
 	const [inputValueSummary, setInputValueSummary] = createSignal(props.item.summary || "")
-	//const [inputValueBody, setInputValueBody] = createSignal(props.item.body.get(props.item.selectedVersion) || "")
 	const [inputValueBodyPrism, setInputValueBodyPrism] = createSignal(props.item.modifier)
 	const [isPrism, setIsPrism] = createSignal(true)
 	const [prismValue, setPrismValue] = createSignal("")
 	let el: HTMLButtonElement | undefined
-
-	createEffect(() => {
-		//setInputValueBody(props.item.body.get(props.item.selectedVersion) || "")
-		//setInputValueBodyPrism(props.item.body.get(props.item.selectedVersion) || "")
-	})
 
 	createEffect(() => {
 		if (selectedSectionItem() === props.item.id) {
@@ -94,9 +88,20 @@ export default function Modifiers(props: ModifiersProps) {
 		}
 	}
 
+	const contentPreview = createMemo(() => {
+		const body = props.item.modifier || ""
+		const wordCount = body.trim() ? body.split(/\s+/).length : 0
+		return { wordCount }
+	})
+
 	const estimateTokens = (wordCount: number): number => {
 		return Math.ceil(wordCount * 1.33)
 	}
+
+	createEffect(() => {
+		console.log("wordCount", estimateTokens(contentPreview().wordCount))
+	})
+
 	return (
 		<div>
 			<Button
@@ -136,7 +141,8 @@ export default function Modifiers(props: ModifiersProps) {
 							<Show
 								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
 								fallback={
-									<div class="flex items-center gap-2">
+									<div class="flex items-center gap-1">
+										<div class="i-material-symbols:view-column-outline-sharp w-4 h-4 text-accent"></div>
 										<div class={cn("text-sm font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}>
 											{props.item?.name || "Add Title"}
 										</div>
@@ -184,7 +190,7 @@ export default function Modifiers(props: ModifiersProps) {
 									<div class="flex justify-between min-h-5">
 										<div class="text-foreground/60 text-xs flex items-center gap-4">
 											<div class="flex items-center gap-1 text-[.6rem]">
-												{/* <span>{`${estimateTokens(contentPreview().wordCount)}`}</span> */}
+												<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
 												<span class="text-[.6rem] mr-2">tokens</span>
 											</div>
 										</div>

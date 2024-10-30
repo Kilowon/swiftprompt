@@ -36,6 +36,7 @@ import PromptDisplay from "~/components/prompt-display"
 import TemplateModifiersContainer from "~/components/template-modifiers-container"
 import ModifiersContainer from "~/components/modifiers-container"
 import ModifiersMenu from "~/components/modifiers-menu"
+import ModifiersContainerSearch from "~/components/modifiers-container-search"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
@@ -304,6 +305,10 @@ export default function Home() {
 										}
 									>
 										<div class="flex flex-col h-full">
+											<ModifiersContainerSearch
+												isFullModifiers={isFullModifiers()}
+												setIsFullModifiers={setIsFullModifiers}
+											/>
 											<div class="flex-1 overflow-auto pb-10">
 												<ModifiersContainer
 													type="all"

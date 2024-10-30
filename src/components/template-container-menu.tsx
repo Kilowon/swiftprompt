@@ -8,8 +8,10 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import {
 	addTemplateGroup,
 	addTemplateSection,
+	deleteTemplateGroup,
 	editTemplateGroup,
-	updateTemplateGroupSort
+	updateTemplateGroupSort,
+	duplicateTemplateGroup
 } from "../helpers/actionHelpers"
 
 import {
@@ -60,10 +62,6 @@ const handleUpdateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilter
 	updateTemplateGroupSort(id, sort)
 }
 
-const handleIncrementVersion = () => {
-	//console.log("Increment Version")
-}
-
 const handleNewTemplateSection = () => {
 	if (selectedTemplateVersion() === 0) {
 		//console.log("Increment Version", selectedTemplateVersion())
@@ -85,27 +83,8 @@ const handleTemplateNameChange = (newName: string) => {
 	setInputValueTemplateTitle("")
 }
 
-const handleFocusElement = () => {
-	if (selectedItem()) {
-		setSelectedSectionItem(selectedItem() as unknown as ElementID)
-		if (selectedSectionItemEl()) {
-			selectedSectionItemEl()?.focus()
-			setIsEditingItem({ status: "saved", id: selectedItem() as unknown as ElementID, label: "" })
-		}
-	}
-	if (!selectedItem()) {
-		setSelectedItem(
-			entityItems
-				.get(selected() as unknown as GroupID)
-				?.keys()
-				.next().value as unknown as ElementID
-		)
-		setSelectedSectionItem(selectedItem() as unknown as ElementID)
-		if (selectedSectionItemEl()) {
-			selectedSectionItemEl()?.focus()
-			setIsEditingItem({ status: "saved", id: selectedItem() as unknown as ElementID, label: "" })
-		}
-	}
+const handleDuplicateTemplateGroup = () => {
+	duplicateTemplateGroup(selectedTemplateGroup() as unknown as TemplateGroupID)
 }
 
 export default function TemplateContainerMenu() {
@@ -280,7 +259,13 @@ export default function TemplateContainerMenu() {
 									</DialogTrigger>
 								</DropdownMenuItem>
 								<DropdownMenuItem>
-									<div class="i-octicon:duplicate-16 w-1.25em h-1.25em mr-2"></div> Duplicate Template
+									<div
+										onClick={() => {
+											handleDuplicateTemplateGroup()
+										}}
+										class="i-octicon:duplicate-16 w-1.25em h-1.25em mr-2"
+									></div>{" "}
+									Duplicate Template
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -289,6 +274,7 @@ export default function TemplateContainerMenu() {
 							<DialogDescription>This action cannot be undone.</DialogDescription>
 							<Button
 								onClick={() => {
+									deleteTemplateGroup(selectedTemplateGroup() as unknown as TemplateGroupID)
 									toast(
 										<div class="flex items-center gap-2">
 											<div class="i-material-symbols:check-box w-4 h-4 text-success" />

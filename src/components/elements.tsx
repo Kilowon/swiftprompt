@@ -420,7 +420,8 @@ export default function Elements(props: ElementsProps) {
 							<Show
 								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
 								fallback={
-									<div class="flex items-center gap-2">
+									<div class="flex items-center gap-1">
+										<div class="i-material-symbols:grid-view-outline w-4 h-4 text-accent" />
 										<div class={cn("text-sm font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}>
 											{props.item?.name || "Add Title"}
 										</div>

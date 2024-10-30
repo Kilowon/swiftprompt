@@ -145,6 +145,7 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 									onClick={(e: MouseEvent) => handleEdit(e, selected() as unknown as string)}
 									class="flex items-center min-w-40 group"
 								>
+									<div class="i-material-symbols:grid-view w-5 h-5 mr-2 text-accent" />
 									<h1 class="text-sm font-bold mt-1.5 mb-1.5 capitalize truncate max-w-60">
 										{groupsMap().get(selected() as unknown as GroupID)?.name}
 									</h1>

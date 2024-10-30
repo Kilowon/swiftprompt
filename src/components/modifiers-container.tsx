@@ -153,7 +153,7 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 				}
 			>
 				<Show
-					when={true}
+					when={props.isFullModifiers()}
 					fallback={
 						<For each={props.items()}>
 							{item => {

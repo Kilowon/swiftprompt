@@ -148,6 +148,7 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 									onClick={(e: MouseEvent) => handleEdit(e, selectedModifierGroup() as unknown as string)}
 									class="flex items-center min-w-40 group"
 								>
+									<div class="i-mdi:view-column w-5 h-5 mr-2 text-accent" />
 									<h1 class="text-sm font-bold mt-1.5 mb-1.5 capitalize truncate max-w-60">
 										{entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID)?.name}
 									</h1>
@@ -196,25 +197,7 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 							{groupModifierFilter() || "collection"}
 						</span>
 					</Show>
-					<Tooltip
-						openDelay={1000}
-						closeDelay={0}
-					>
-						<TooltipTrigger
-							as={Button}
-							onClick={() => props.setIsFullModifiers(!props.isFullModifiers())}
-							variant="ghost"
-							size="icon"
-							class="h-9 "
-						>
-							{props.isFullModifiers() ? (
-								<div class="i-mdi:view-list w-1.25em h-1.25em "></div>
-							) : (
-								<div class="i-mdi:view-grid-outline w-1.25em h-1.25em"></div>
-							)}
-						</TooltipTrigger>
-						<TooltipContent>{props.isFullModifiers() ? "Toggle List Modifiers" : "Toggle Grid Modifiers"}</TooltipContent>
-					</Tooltip>
+
 					<Tooltip
 						openDelay={1000}
 						closeDelay={0}
