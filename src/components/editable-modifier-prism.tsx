@@ -14,7 +14,7 @@ import { highlightBracketPairs } from "solid-prism-editor/highlight-brackets"
 import { indentGuides } from "solid-prism-editor/guides"
 import { highlightSelectionMatches, searchWidget } from "solid-prism-editor/search"
 import { highlightMatchingTags, matchTags } from "solid-prism-editor/match-tags"
-import { PromptItem } from "~/types/entityType"
+import { Modifier } from "~/types/entityType"
 import { Accessor } from "solid-js"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
 import { Button } from "~/registry/ui/button"
@@ -23,7 +23,7 @@ import { TextField, TextFieldLabel } from "~/registry/ui/text-field"
 import { createShortcut } from "@solid-primitives/keyboard"
 
 export const EditableModifierPrism = (props: {
-	item: PromptItem
+	item: Modifier
 	inputValueBody: Accessor<string>
 	setInputValueBody: (value: string) => void
 	body?: string

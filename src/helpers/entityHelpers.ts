@@ -7,7 +7,9 @@ import {
 	groupBadge,
 	badge,
 	setAvailableBadges,
-	templates
+	templates,
+	entityModifiers,
+	entityModifierGroups
 } from "~/global_state"
 import {
 	ElementID,
@@ -31,8 +33,10 @@ const entitiesToEntityMap = (): EntityMap => {
 	const groupBadges = groupBadge
 	const badges = badge
 	const template = templates
+	const modifierGroups = entityModifierGroups
+	const modifiers = entityModifiers
 
-	return { groups, items, groupBadges, badges, template, nextOrder: nextOrder() }
+	return { groups, items, modifierGroups, modifiers, groupBadges, badges, template, nextOrder: nextOrder() }
 }
 
 const serializeEntityMap = (entityMap: EntityMap): string => {
@@ -139,6 +143,8 @@ const deserializeEntityMap = (serialized: string): EntityMap => {
 	return {
 		groups: entityGroups,
 		items: entityItems,
+		modifierGroups: entityModifierGroups,
+		modifiers: entityModifiers,
 		groupBadges: groupBadge,
 		badges: badge,
 		template: templates,

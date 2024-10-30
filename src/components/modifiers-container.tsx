@@ -4,16 +4,22 @@ import { For, Show, createEffect, createMemo, Accessor } from "solid-js"
 import { createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { ReactiveSet } from "@solid-primitives/set"
-import { setIsEditingItem, searchSelectedBadges, groupBadge, selected } from "~/global_state"
-import { deleteItem, duplicateItem, changeItemAttributes, moveItemToGroup } from "~/helpers/actionHelpers"
-import { PromptItem, ElementID, GroupID, VersionID } from "~/types/entityType"
+import { setIsEditingItem, searchSelectedBadges, groupBadge, selected, setIsEditingModifier } from "~/global_state"
+import {
+	deleteItem,
+	duplicateItem,
+	changeItemAttributes,
+	moveItemToGroup,
+	changeModifierAttributes
+} from "~/helpers/actionHelpers"
+import { Modifier, ModifierGroupID, ModifierID } from "~/types/entityType"
 import Elements from "./elements"
 import ElementsCompact from "./elements-compact"
 
 interface ModifiersContainerProps {
 	type: "all" | "unread"
 	sizes: number[]
-	items: Accessor<PromptItem[]>
+	items: Accessor<Modifier[]>
 	initializedUserElement: Accessor<boolean>
 	initializedUserGroup: Accessor<boolean>
 	isFullModifiers: Accessor<boolean>
@@ -26,7 +32,7 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 	const [labelLimit, setLabelLimit] = createSignal<number>(18)
 	const [items, setItems] = createStore(props.items)
 
-	const handleDeleteItem = (groupId: GroupID, itemId: ElementID) => {
+	const handleDeleteItem = (groupId: ModifierGroupID, itemId: ModifierID) => {
 		setItems(
 			produce(items => {
 				const index = items().findIndex(item => item.id === itemId)
@@ -38,40 +44,38 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 		deleteItem(groupId, itemId)
 	}
 
-	const duplicateItemHandler = (item: PromptItem) => {
+	const duplicateItemHandler = (item: Modifier) => {
 		if (item.id) {
-			duplicateItem(item.group, item.id)
+			duplicateItem(item.modifierGroupId, item.id)
 		}
 	}
 
-	const moveItemToNewGroup = (item: PromptItem, newGroupId: GroupID) => {
+	const moveItemToNewGroup = (item: Modifier, newGroupId: ModifierGroupID) => {
 		if (item.id) {
-			moveItemToGroup(item.group, item.id, newGroupId)
+			moveItemToGroup(item.modifierGroupId, item.id, newGroupId)
 		}
 	}
 
 	const handleEditing = (
-		item: PromptItem,
+		item: Modifier,
 		label: "title" | "summary" | "body",
 		status: "saved" | "editing",
 		id: string
 	) => {
 		if (item.id) {
-			setIsEditingItem({ label, status, id: id as unknown as ElementID })
+			setIsEditingModifier({ label, status, id: id as unknown as ModifierID })
 		}
 	}
 
 	const handleUpdateAttributes = (
-		item: PromptItem,
+		item: Modifier,
 		name: string,
 		summary: string,
 		body: string,
-		version: VersionID,
-		versionCounter: VersionID,
-		updatedBody: boolean
+		modifierGroupId: ModifierGroupID
 	) => {
 		if (item.id) {
-			changeItemAttributes(item.group, item.id, name, summary, body, version, versionCounter, updatedBody)
+			changeModifierAttributes(item.modifierGroupId, item.id, name, summary, body)
 		}
 	}
 
@@ -81,10 +85,10 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 		}
 	})
 
-	const filterElements = new ReactiveSet<ElementID>()
+	const filterElements = new ReactiveSet<ModifierID>()
 
 	createEffect(() => {
-		const selectedGroup = selected() as GroupID
+		const selectedGroup = selected() as ModifierGroupID
 		const selectedBadges = searchSelectedBadges()
 
 		filterElements.clear()
@@ -99,14 +103,14 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 	})
 
 	const [visibleCount, setVisibleCount] = createSignal(0)
-	const [visibleItems, setVisibleItems] = createSignal<PromptItem[]>([])
+	const [visibleItems, setVisibleItems] = createSignal<Modifier[]>([])
 
 	const incrementalRender = 25
 
 	const filteredItems = createMemo(() => {
 		const items = props.items()
 		const filters = Array.from(filterElements.values()).flat()
-		return items.filter(item => !item.pinned && (filters.length === 0 || filters.includes(item.id))).reverse()
+		return items.filter(item => filters.length === 0 || filters.includes(item.id)).reverse()
 	})
 
 	createEffect(() => {
@@ -119,88 +123,39 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 		}
 	}
 
+	createEffect(() => {
+		console.log("items", props.items())
+	})
+
 	return (
 		<div
 			onScroll={handleScroll}
 			onChange={handleScroll}
 			class="flex flex-col gap-2 overflow-auto p-4 pt-2 h-full scrollbar-default scrollbar-gutter"
 		>
-			<Show when={!isLoading()}>
-				<Show
-					when={props.isFullModifiers() === true}
-					fallback={
-						<For
-							each={props
-								.items()
-								.filter(item => item.pinned)
-								.reverse()}
-						>
-							{item => {
-								return (
-									<ModifiersCompact
-										item={item}
-										handleEditing={handleEditing}
-										handleUpdateAttributes={handleUpdateAttributes}
-										handleDeleteItem={handleDeleteItem}
-										handleDuplicateItem={duplicateItemHandler}
-										labelLimit={labelLimit}
-										handleMoveItem={moveItemToNewGroup}
-										items={items()}
-										sizes={props.sizes}
-										setIsFullModifiers={props.setIsFullModifiers}
-									/>
-								)
-							}}
-						</For>
-					}
-				>
-					<For
-						each={props
-							.items()
-							.filter(item => item.pinned)
-							.reverse()}
-					>
-						{item => {
-							return (
-								<Modifiers
-									item={item}
-									handleEditing={handleEditing}
-									handleUpdateAttributes={handleUpdateAttributes}
-									handleDeleteItem={handleDeleteItem}
-									handleDuplicateItem={duplicateItemHandler}
-									labelLimit={labelLimit}
-									handleMoveItem={moveItemToNewGroup}
-									items={items()}
-									sizes={props.sizes}
-								/>
-							)
-						}}
-					</For>
-				</Show>
-			</Show>
 			<Show
-				when={!isLoading() && visibleItems().length > 0 && props.initializedUserElement() === true}
+				when={true}
 				fallback={
 					<Show
 						when={selected() !== null && selected() !== undefined && props.initializedUserGroup() === true}
 						fallback={
 							<div class="flex flex-col items-center justify-center h-full">
-								<div class="text-2xl font-bold mb-4">No group selected</div>
-								<div class="text-gray-600 mb-6">Create a new group to get started!</div>
+								<div class="text-2xl font-bold mb-4">No modifier group selected</div>
+								<div class="text-gray-600 mb-6">Create a new modifier group to get started!</div>
 							</div>
 						}
 					>
 						<div class="flex flex-col items-center justify-center h-full">
-							<div class="text-2xl font-bold mb-4">No items yet</div>
-							<div class="text-gray-600 mb-6">Create your first item to get started!</div>
+							<div class="text-2xl font-bold mb-4">No modifiers yet</div>
+							<div class="text-gray-600 mb-6">Create your first modifier to get started!</div>
 						</div>
 					</Show>
 				}
 			>
 				<Show
-					when={props.isFullModifiers() === true}
+					when={true}
 					fallback={
-						<For each={visibleItems()}>
+						<For each={props.items()}>
 							{item => {
 								return (
 									<ModifiersCompact
@@ -220,8 +175,11 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 						</For>
 					}
 				>
-					<For each={visibleItems()}>
+					<For each={props.items()}>
 						{item => {
+							createEffect(() => {
+								console.log("item DIS EN", item)
+							})
 							return (
 								<Modifiers
 									item={item}

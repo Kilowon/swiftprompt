@@ -11,7 +11,10 @@ import {
 	entityItems,
 	templates,
 	selectedTemplateVersion,
-	setSelectedTemplateVersion
+	setSelectedTemplateVersion,
+	setSelectedModifierGroup,
+	selectedModifierGroup,
+	entityModifiers
 } from "~/global_state"
 import {
 	Group,
@@ -21,7 +24,8 @@ import {
 	VersionID,
 	TemplateSectionID,
 	TemplateSection,
-	TemplateFilter
+	TemplateFilter,
+	ModifierGroupID
 } from "~/types/entityType"
 import { ReactiveMap } from "@solid-primitives/map"
 
@@ -44,7 +48,7 @@ interface NavProps {
 	modifiers: {
 		title: string
 		label: string
-		sort: TemplateFilter
+		sort: Filter
 		id: TemplateGroupID
 		versionCounter: VersionID
 		sections: ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>
@@ -58,6 +62,7 @@ interface Selected {
 export function Navigate(props: NavProps) {
 	const [templateFilter, setTemplateFilter] = createSignal<TemplateFilter>("all")
 	const [groupFilter, setGroupFilter] = createSignal<Filter>("all")
+	const [modifierFilter, setModifierFilter] = createSignal<Filter>("all")
 	const [expandedSections, setExpandedSections] = createSignal<Set<"groups" | "templates" | "modifiers">>(new Set())
 
 	const handleSelect = (id: GroupID) => {
@@ -68,6 +73,11 @@ export function Navigate(props: NavProps) {
 		setSelectedSection(null)
 		setSelectedTemplateGroup(id)
 		setSelectedTemplateVersion(null)
+	}
+
+	const handleSelectModifierGroup = (id: ModifierGroupID) => {
+		setSelectedSection(null)
+		setSelectedModifierGroup(id)
 	}
 
 	const toggleSection = (section: "groups" | "templates" | "modifiers") => {
@@ -362,7 +372,7 @@ export function Navigate(props: NavProps) {
 					<div
 						onClick={e => {
 							e.stopPropagation()
-							setTemplateFilter(prev =>
+							setModifierFilter(prev =>
 								prev === "all"
 									? "preset"
 									: prev === "preset"
@@ -399,12 +409,12 @@ export function Navigate(props: NavProps) {
 							)
 						}}
 						class={`text-[10px] font-semibold group-[[data-collapsed=true]]:invisible mr-2 py-1 px-2 rounded-md cursor-pointer ${
-							templateFilter() === "all"
+							modifierFilter() === "all"
 								? "text-accent bg-background border border-border"
 								: "text-accent-foreground bg-accent"
 						}`}
 					>
-						<span class="select-none">{templateFilter() === "all" ? "All" : templateFilter()}</span>
+						<span class="select-none">{modifierFilter() === "all" ? "All" : modifierFilter()}</span>
 					</div>
 				</div>
 				<hr class="w-full border-muted" />
@@ -416,9 +426,9 @@ export function Navigate(props: NavProps) {
 					<div class="pb-30">
 						<For
 							each={
-								templateFilter() === "all"
+								modifierFilter() === "all"
 									? props.modifiers
-									: props.modifiers.filter(modifier => modifier.sort === templateFilter())
+									: props.modifiers.filter(modifier => modifier.sort === modifierFilter())
 							}
 						>
 							{template => {
@@ -427,21 +437,21 @@ export function Navigate(props: NavProps) {
 										when={props.isCollapsed}
 										fallback={
 											<a
-												onClick={() => handleSelectTemplateGroup(template.id)}
+												onClick={() => handleSelectModifierGroup(template.id)}
 												class={cn(
 													buttonVariants({
-														variant: selectedTemplateGroup() === template.id ? "outline_selected" : "outline_only",
+														variant: selectedModifierGroup() === template.id ? "outline_selected" : "outline_only",
 														size: "sm",
 														class:
 															"flex justify-between text-xs capitalize cursor-pointer hover:border-accent group-[[data-collapsed=false]]:max-h-7.5"
 													}),
-													selectedTemplateGroup() === template.id && " bg-accent border-background text-accent-foreground",
+													selectedModifierGroup() === template.id && " bg-accent border-background text-accent-foreground",
 													"justify-start"
 												)}
 											>
 												<span class="truncate max-w-30 select-none">{template.title}</span>
-												<span class={cn("flex-shrink-0 ml-auto", selectedTemplateGroup() === template.id && " dark:text-white")}>
-													{template.sections.get(template.versionCounter as VersionID)?.size ?? 0}
+												<span class={cn("flex-shrink-0 ml-auto", selectedModifierGroup() === template.id && " dark:text-white")}>
+													{entityModifiers.get(template.id)?.size ?? 0}
 												</span>
 											</a>
 										}
@@ -454,14 +464,14 @@ export function Navigate(props: NavProps) {
 											<TooltipTrigger
 												as="a"
 												href="#"
-												onClick={() => handleSelectTemplateGroup(template.id)}
+												onClick={() => handleSelectModifierGroup(template.id)}
 												class={cn(
 													buttonVariants({
-														variant: selectedTemplateGroup() === template.id ? "outline_selected" : "outline_only",
+														variant: selectedModifierGroup() === template.id ? "outline_selected" : "outline_only",
 														size: "icon"
 													}),
 													"size-9 capitalize hover:border-accent",
-													selectedTemplateGroup() === template.id && "bg-accent border-background text-accent-foreground"
+													selectedModifierGroup() === template.id && "bg-accent border-background text-accent-foreground"
 												)}
 											>
 												<div class="flex items-center justify-center size-6 rounded-full text-sm">{template.title.slice(0, 2)}</div>
@@ -469,8 +479,8 @@ export function Navigate(props: NavProps) {
 											</TooltipTrigger>
 											<TooltipContent class="flex items-center gap-4">
 												{template.title}
-												<span class={cn("ml-auto", selectedTemplateGroup() === template.id && "dark:text-white")}>
-													{template.sections.get(template.versionCounter as VersionID)?.size ?? 0}
+												<span class={cn("ml-auto", selectedModifierGroup() === template.id && "dark:text-white")}>
+													{entityModifiers.get(template.id)?.size ?? 0}
 												</span>
 											</TooltipContent>
 										</Tooltip>

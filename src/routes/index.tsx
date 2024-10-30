@@ -14,7 +14,10 @@ import {
 	isShowDisplay,
 	setIsShowDisplay,
 	isCollapsedViewer,
-	setIsCollapsedViewer
+	setIsCollapsedViewer,
+	entityModifiers,
+	entityModifierGroups,
+	selectedModifierGroup
 } from "~/global_state"
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
@@ -24,7 +27,7 @@ import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
-import { PromptItem, GroupID, VersionID, BadgeID } from "~/types/entityType"
+import { PromptItem, GroupID, VersionID, BadgeID, ModifierGroupID, Modifier } from "~/types/entityType"
 import { groupsMap } from "~/helpers/actionHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
 import TemplateVersions from "~/components/template-versions"
@@ -44,9 +47,30 @@ export default function Home() {
 	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
 	const [isFullElements, setIsFullElements] = createSignal<boolean>(true)
 	const [isFullModifiers, setIsFullModifiers] = createSignal<boolean>(true)
+
 	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
 		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
 	] as PromptItem[])
+
+	createEffect(() => {
+		console.log("selectedModifierGroup", selectedModifierGroup())
+	})
+
+	const [modifiersList, setModifiersList] = createSignal<Modifier[]>([
+		...(entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() ?? [])
+	] as Modifier[])
+
+	createEffect(() => {
+		console.log("modifiersList", modifiersList())
+	})
+
+	createEffect(() => {
+		console.log("entityModifiers", Array.from(entityModifiers.keys()))
+	})
+
+	createEffect(() => {
+		console.log("entityModifierGroups", Array.from(entityModifierGroups.keys()))
+	})
 
 	const [isClientSide, setIsClientSide] = createSignal(false)
 	const [initialized, setInitialized] = createSignal(false)
@@ -62,6 +86,12 @@ export default function Home() {
 
 	createEffect(() => {
 		setItemsList([...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])] as PromptItem[])
+	})
+
+	createEffect(() => {
+		setModifiersList([
+			...(entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() ?? [])
+		] as Modifier[])
 	})
 
 	createEffect(() => {
@@ -201,7 +231,7 @@ export default function Home() {
 											...template
 										}
 									})}
-									modifiers={Array.from(templates.values()).map((modifier: any) => {
+									modifiers={Array.from(entityModifierGroups.values()).map((modifier: any) => {
 										return {
 											title: modifier.name,
 											...modifier
@@ -278,7 +308,7 @@ export default function Home() {
 												<ModifiersContainer
 													type="all"
 													sizes={sizes()}
-													items={itemsList}
+													items={modifiersList}
 													initializedUserElement={initializedUserElement}
 													initializedUserGroup={initializedUserGroup}
 													isFullModifiers={isFullModifiers}

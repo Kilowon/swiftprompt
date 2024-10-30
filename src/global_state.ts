@@ -12,7 +12,11 @@ import {
 	TemplateGroupID,
 	TemplateGroup,
 	TemplateSectionID,
-	VersionID
+	VersionID,
+	ModifierGroupID,
+	ModifierID,
+	ModifierGroup,
+	Modifier
 } from "~/types/entityType"
 import { Id } from "@thisbeyond/solid-dnd"
 import { Badge } from "~/types/badgeType"
@@ -28,6 +32,11 @@ const entityItems = new ReactiveMap<
 >()
 
 export { entityGroups, entityItems }
+
+const entityModifierGroups = new ReactiveMap<ModifierGroupID, ModifierGroup>()
+const entityModifiers = new ReactiveMap<ModifierGroupID, ReactiveMap<ModifierID, Modifier>>()
+
+export { entityModifierGroups, entityModifiers }
 
 const groupBadge = new ReactiveMap<GroupID, ReactiveMap<BadgeID, ElementID[]>>()
 
@@ -51,7 +60,13 @@ const [isEditingGroup, setIsEditingGroup] = createSignal<EditingItem>({
 	label: ""
 })
 
-export { isEditingGroup, setIsEditingGroup }
+const [isEditingModifierGroup, setIsEditingModifierGroup] = createSignal<EditingItem>({
+	status: "saved",
+	id: "" as unknown as ModifierGroupID,
+	label: ""
+})
+
+export { isEditingGroup, setIsEditingGroup, isEditingModifierGroup, setIsEditingModifierGroup }
 
 const [isEditingItem, setIsEditingItem] = createSignal<EditingItem>({
 	status: "saved",
@@ -59,7 +74,13 @@ const [isEditingItem, setIsEditingItem] = createSignal<EditingItem>({
 	label: ""
 })
 
-export { isEditingItem, setIsEditingItem }
+const [isEditingModifier, setIsEditingModifier] = createSignal<EditingItem>({
+	status: "saved",
+	id: "" as unknown as ModifierID,
+	label: ""
+})
+
+export { isEditingItem, setIsEditingItem, isEditingModifier, setIsEditingModifier }
 
 export const ORDER_DELTA = 1
 
@@ -98,6 +119,14 @@ export { selectedSectionItemEl, setSelectedSectionItemEl }
 const [selectedSectionItem, setSelectedSectionItem] = createSignal<ElementID | null>(null)
 
 export { selectedSectionItem, setSelectedSectionItem }
+
+const [selectedModifierGroup, setSelectedModifierGroup] = createSignal<ModifierGroupID | null>(null)
+
+export { selectedModifierGroup, setSelectedModifierGroup }
+
+const [selectedModifier, setSelectedModifier] = createSignal<ModifierID | null>(null)
+
+export { selectedModifier, setSelectedModifier }
 
 const [searchSelectedBadges, setSearchSelectedBadges] = createSignal<Badge[]>([])
 

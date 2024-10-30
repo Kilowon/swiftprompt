@@ -35,9 +35,22 @@ export interface Item extends Base {
 
 export interface Modifier {
 	id: ModifierID
+	modifierGroupId: ModifierGroupID
 	name: string
 	order: string
 	modifier: string
+	summary: string
+	date_created?: string
+	date_modified?: string
+}
+
+export interface ModifierGroup {
+	id: ModifierGroupID
+	sort: Filter
+	name: string
+	order: string
+	date_created?: string
+	date_modified?: string
 }
 
 export interface Prompt extends Item {
@@ -49,6 +62,8 @@ export type Entity = Group | Item | PromptItem
 export interface EntityMap {
 	groups: ReactiveMap<GroupID, Group>
 	items: ReactiveMap<GroupID, ReactiveMap<ElementID, Omit<Item, "body"> & { body: ReactiveMap<VersionID, string> }>>
+	modifierGroups: ReactiveMap<ModifierGroupID, ModifierGroup>
+	modifiers: ReactiveMap<ModifierGroupID, ReactiveMap<ModifierID, Modifier>>
 	badges: ReactiveMap<BadgeID, Badge>
 	groupBadges: ReactiveMap<GroupID, ReactiveMap<BadgeID, ElementID[]>>
 	template: ReactiveMap<TemplateGroupID, TemplateGroup>
@@ -104,6 +119,10 @@ export interface GlobalModifiersID {
 }
 
 export interface ModifierID {
+	id: Id
+}
+
+export interface ModifierGroupID {
 	id: Id
 }
 

@@ -14,7 +14,9 @@ import {
 	selectedTemplateVersion,
 	selectedTemplateGroup,
 	selectedSection,
-	setSelectedSection
+	setSelectedSection,
+	entityModifierGroups,
+	entityModifiers
 } from "~/global_state"
 import {
 	Entity,
@@ -28,7 +30,11 @@ import {
 	TemplateSection,
 	VersionID,
 	TemplateFilter,
-	Filter
+	Filter,
+	ModifierGroupID,
+	ModifierID,
+	Modifier,
+	ModifierGroup
 } from "~/types/entityType"
 import { Badge } from "~/types/badgeType"
 import { storeEntityMap } from "./entityHelpers"
@@ -59,31 +65,14 @@ export const saveUpdatedBadgesItem = (groupId: GroupID, id: ElementID, badges: B
 		?.set(id, updatedItem as unknown as Omit<Item, "body"> & { body: ReactiveMap<VersionID, string> })
 }
 
-export const nameChangeGroup = (id: GroupID, name: string) => {
-	const group = entityGroups.get(id)
-
-	const updatedGroup = {
-		...group,
-		name: name
-	}
-
-	try {
-		if (!group) throw new Error("Group not found")
-
-		entityGroups.set(id, updatedGroup as Group)
-
-		storeEntityMap()
-	} catch (error) {
-		console.warn((error as Error).message)
-	}
-}
-
 export const getNextOrder = () => {
 	const current = nextOrder()
 	const next = current + ORDER_DELTA
 	setNextOrder(next)
 	return current.toString()
 }
+
+// Group Functions
 
 export const addGroup = (name: string, sortType: Filter) => {
 	const order = getNextOrder()
@@ -101,6 +90,25 @@ export const addGroup = (name: string, sortType: Filter) => {
 	storeEntityMap()
 
 	return id
+}
+
+export const nameChangeGroup = (id: GroupID, name: string) => {
+	const group = entityGroups.get(id)
+
+	const updatedGroup = {
+		...group,
+		name: name
+	}
+
+	try {
+		if (!group) throw new Error("Group not found")
+
+		entityGroups.set(id, updatedGroup as Group)
+
+		storeEntityMap()
+	} catch (error) {
+		console.warn((error as Error).message)
+	}
 }
 
 export const duplicateGroup = (id: GroupID) => {
@@ -138,6 +146,8 @@ export const updateGroupSort = (id: GroupID, sort: Filter) => {
 		storeEntityMap()
 	}
 }
+
+// Template Functions
 
 export const addTemplateGroup = (name: string, sortType: TemplateFilter) => {
 	const order = getNextOrder()
@@ -459,6 +469,8 @@ export const removeItemFromTemplateSection = (
 	}
 }
 
+// Element Functions
+
 export const addItem = (
 	name: string,
 	group: GroupID,
@@ -657,6 +669,144 @@ export const moveItemToGroup = (groupId: GroupID, itemId: ElementID, newGroupId:
 		storeEntityMap()
 	}
 }
+
+// Modifier Group Functions
+
+export const addModifierGroup = (name: string, sortType: Filter) => {
+	const order = getNextOrder()
+	const id = crypto.randomUUID()
+	entityModifierGroups.set(id as unknown as ModifierGroupID, {
+		name: name,
+		order: order,
+		id: id as unknown as ModifierGroupID,
+		sort: sortType,
+		date_created: new Date().toISOString(),
+		date_modified: new Date().toISOString()
+	})
+	storeEntityMap()
+
+	return id
+}
+
+export const nameChangeModifierGroup = (id: ModifierGroupID, name: string) => {
+	const group = entityModifierGroups.get(id)
+
+	const updatedGroup = {
+		...group,
+		name: name
+	}
+
+	try {
+		if (!group) throw new Error("Group not found")
+
+		entityModifierGroups.set(id, updatedGroup as ModifierGroup)
+
+		storeEntityMap()
+	} catch (error) {
+		console.warn((error as Error).message)
+	}
+}
+
+export const deleteModifierGroup = (id: ModifierGroupID) => {
+	entityModifierGroups.delete(id)
+	entityModifiers.delete(id)
+	storeEntityMap()
+}
+
+export const updateModifierGroupSort = (id: ModifierGroupID, sort: Filter) => {
+	const group = entityModifierGroups.get(id)
+	if (group) {
+		const updatedGroup = { ...group, sort: sort }
+		entityModifierGroups.set(id, updatedGroup as ModifierGroup)
+		storeEntityMap()
+	}
+}
+
+// Modifier Functions
+
+export const addModifier = (name: string, modifierGroupId: ModifierGroupID, summary: string, modifier: string) => {
+	console.log("Start Modifier")
+
+	const id = crypto.randomUUID()
+	const date_created = new Date()
+	const date_modified = new Date()
+	const order = getNextOrder()
+	const summaryCopy = summary || ""
+	const nameCopy = name || ""
+	const modifierToGroup = entityModifiers.get(modifierGroupId) || new ReactiveMap<ModifierID, Modifier>()
+
+	modifierToGroup.set(id as unknown as ModifierID, {
+		id: id as unknown as ModifierID,
+		modifierGroupId: modifierGroupId,
+		summary: summaryCopy,
+		modifier: modifier,
+		order: order,
+		date_created: date_created.toString(),
+		date_modified: date_modified.toString(),
+		name: nameCopy
+	})
+	console.log("End Modifier", modifierToGroup.get(id as unknown as ModifierID))
+	entityModifiers.set(modifierGroupId, modifierToGroup)
+	console.log("End Modifier Set", Array.from(entityModifiers.get(modifierGroupId)?.values() ?? []))
+	storeEntityMap()
+
+	return id
+}
+
+export const changeModifierAttributes = (
+	modifierGroupId: ModifierGroupID,
+	id: ModifierID,
+	name: string,
+	summary: string,
+	modifier: string
+) => {
+	const entity = entityModifiers.get(modifierGroupId)
+	const mod = entity?.get(id)
+
+	if (!entity || !mod) {
+		console.warn(`Modifier not found: modifierGroupId=${modifierGroupId}, id=${id}`)
+		return
+	}
+
+	const date_modified = new Date()
+	const updatedModifier = {
+		...mod,
+		name: name ?? mod?.name,
+		summary: summary ?? mod?.summary,
+		modifier: modifier ?? mod?.modifier,
+		date_modified: date_modified.toString(),
+		type: "modifier" as const
+	}
+
+	entity.set(id, updatedModifier)
+	entityModifiers.set(modifierGroupId, entity)
+	storeEntityMap()
+}
+
+export const deleteModifier = (modifierGroupId: ModifierGroupID, id: ModifierID) => {
+	// Removes the item from the templates before deleting the item from the entityItems
+	/* 	const modifierToGroup = entityModifiers.get(modifierGroupId)
+	console.log("deleteModifier", id, modifierToGroup?.get(id))
+	templates.forEach(template => {
+		const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
+			[...template.sections.entries()].map(([version, sections]) => [
+				version,
+				new ReactiveMap<TemplateSectionID, TemplateSection>(
+					[...sections.entries()].map(([sectionId, section]) => [
+						sectionId,
+						{ ...section, items: section.items.filter((item: Item) => item.id !== id) }
+					])
+				)
+			])
+		)
+		templates.set(template.id, { ...template, sections: updatedSections })
+	})
+ */
+	entityModifiers.get(modifierGroupId)?.delete(id)
+	storeEntityMap()
+}
+
+// DnD Sorting Functions
 
 export const isSortableGroup = (sortable: Draggable | Droppable) => sortable.data.type === "group"
 

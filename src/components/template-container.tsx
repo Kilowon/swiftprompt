@@ -114,10 +114,6 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 							each={[...(templates.get(selectedTemplateGroup()!)?.sections.get(selectedTemplateVersion()!)?.values() ?? [])]}
 						>
 							{(section: TemplateSection) => {
-								createEffect(() => {
-									console.log(`section: ${section.id}`, section)
-								})
-
 								const [mouseOverSection, setMouseOverSection] = createSignal<TemplateSectionID | null>(null)
 								const [mouseOverItem, setMouseOverItem] = createSignal<ElementID | null>(null)
 								const [sectionName, setSectionName] = createSignal("")

@@ -4,24 +4,25 @@ import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/registry/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "~/registry/ui/dialog"
-import { nameChangeGroup, addItem, deleteGroup, updateGroupSort } from "../helpers/actionHelpers"
+import { nameChangeModifierGroup, addModifier, updateModifierGroupSort } from "../helpers/actionHelpers"
 import { initializeEntityMap } from "../helpers/entityHelpers"
-import { addGroup, groupsMap, duplicateGroup } from "../helpers/actionHelpers"
+import { addModifierGroup, groupsMap, deleteModifierGroup } from "../helpers/actionHelpers"
 
 import {
-	selected,
-	setSelected,
-	setSelectedItem,
-	setIsEditingItem,
-	setIsEditingGroup,
-	isEditingGroup,
-	entityItems,
-	entityGroups
+	isEditingModifierGroup,
+	isEditingModifier,
+	setIsEditingModifier,
+	entityModifierGroups,
+	entityModifiers,
+	selectedModifierGroup,
+	setIsEditingModifierGroup,
+	setSelectedModifierGroup,
+	setSelectedModifier
 } from "../global_state"
 
-import { PromptItem, GroupID, ElementID, Filter } from "../types/entityType"
+import { Filter, ModifierGroupID, ModifierID, Modifier } from "../types/entityType"
 
-import { EditableGroupTitle } from "~/components/editable-group-title"
+import { EditableModifierGroupTitle } from "~/components/editable-modifier-group-title"
 
 interface ModifiersMenuProps {
 	isFullModifiers: Accessor<boolean>
@@ -30,76 +31,71 @@ interface ModifiersMenuProps {
 
 export default function ModifiersMenu(props: ModifiersMenuProps) {
 	const [isCollapsedGroup, setIsCollapsedGroup] = createSignal(false)
-	const [itemsList, setItemsList] = createSignal<PromptItem[]>([
-		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
-	] as PromptItem[])
+	const [itemsList, setItemsList] = createSignal<Modifier[]>([
+		...(entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() ?? [])
+	] as Modifier[])
 
 	const [initializedUserGroup, setInitializedUserGroup] = createSignal(false)
 	const [initializedUserElement, setInitializedUserElement] = createSignal(false)
 	const [inputValueTitle, setInputValueTitle] = createSignal("")
 	const [isDialogOpenGroup, setIsDialogOpenGroup] = createSignal(false)
 	const [isDialogOpenAIElement, setIsDialogOpenAIElement] = createSignal(false)
-	const [groupFilter, setGroupFilter] = createSignal<Filter>("collection")
-	const [isFullElements, setIsFullElements] = createSignal(true)
+	const [groupModifierFilter, setGroupModifierFilter] = createSignal<Filter>("collection")
+	const [isFullModifiers, setIsFullModifiers] = createSignal(true)
 
 	createEffect(() => {
-		setItemsList([...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])] as PromptItem[])
+		setItemsList([
+			...(entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() ?? [])
+		] as Modifier[])
 	})
 
 	createEffect(() => {
-		setGroupFilter(entityGroups.get(selected() as unknown as GroupID)?.sort as Filter)
+		setGroupModifierFilter(
+			entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID)?.sort as Filter
+		)
 	})
 
 	const handleEdit = (e: MouseEvent, id: string) => {
 		e.stopPropagation()
-		setIsEditingGroup({ status: "editing", id: id as unknown as ElementID, label: "" })
+		setIsEditingModifierGroup({ status: "editing", id: id as unknown as ModifierID, label: "" })
 	}
 
 	const handleNameChange = (newName: string) => {
-		nameChangeGroup(selected()!, newName)
-		setIsEditingGroup({ status: "saved", id: selected() as unknown as ElementID, label: "" })
+		nameChangeModifierGroup(selectedModifierGroup()!, newName)
+		setIsEditingModifierGroup({ status: "saved", id: selectedModifierGroup() as unknown as ModifierID, label: "" })
 	}
 
 	const handleNewGroup = () => {
-		const newGroupId = addGroup("", "collection")
-		setSelected(newGroupId as unknown as GroupID)
-		setIsEditingGroup({ status: "editing", id: newGroupId as unknown as ElementID, label: "" })
+		const newGroupId = addModifierGroup("", "collection")
+		setSelectedModifierGroup(newGroupId as unknown as ModifierGroupID)
+		setIsEditingModifierGroup({ status: "editing", id: newGroupId as unknown as ModifierID, label: "" })
 		setInputValueTitle("")
 	}
 
-	const handleUpdateGroupSort = (id: GroupID, sort: Filter) => {
-		updateGroupSort(id, sort)
+	const handleUpdateGroupSort = (id: ModifierGroupID, sort: Filter) => {
+		updateModifierGroupSort(id, sort)
 	}
 
 	const handleNewElement = () => {
-		const selectedGroupId = selected() as GroupID | undefined
-		let newItemId = addItem(
+		const selectedGroupId = selectedModifierGroup() as ModifierGroupID | undefined
+		let newItemId = addModifier(
 			"",
-			(groupsMap().get(selected() as unknown as GroupID)?.id as GroupID) ?? "",
-			[],
+			(entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID)?.id as ModifierGroupID) ?? "",
 			"",
-			0,
-			0,
 			""
 		)
 		const columnEl = document.getElementById(
-			groupsMap()
-				.get(selectedGroupId as unknown as GroupID)
-				?.id.toString() ?? ""
+			entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID)?.id.toString() ?? ""
 		)
 		if (columnEl) {
 			columnEl.scrollTop = columnEl.scrollHeight
 		}
-		setSelectedItem(newItemId as unknown as ElementID)
-		setIsEditingItem({ status: "editing", id: newItemId as unknown as ElementID, label: "all" })
+		setSelectedModifier(newItemId as unknown as ModifierID)
+		setIsEditingModifier({ status: "editing", id: newItemId as unknown as ModifierID, label: "all" })
 	}
 
 	const handleDeleteGroup = () => {
-		deleteGroup(selected()!)
-	}
-
-	const handleDuplicateGroup = () => {
-		duplicateGroup(selected()!)
+		deleteModifierGroup(selectedModifierGroup()!)
 	}
 
 	onMount(() => {
@@ -111,16 +107,20 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 	})
 
 	createEffect(() => {
-		if (selected() !== null && selected() !== undefined && Array.from(groupsMap().values()).length > 0) {
+		if (
+			selectedModifierGroup() !== null &&
+			selectedModifierGroup() !== undefined &&
+			Array.from(entityModifierGroups.values()).length > 0
+		) {
 			setInitializedUserGroup(true)
 		} else {
 			setInitializedUserGroup(false)
 		}
 
 		if (
-			entityItems.get(selected() as unknown as GroupID)?.values() !== null &&
-			entityItems.get(selected() as unknown as GroupID)?.values() !== undefined &&
-			Array.from(entityItems.get(selected() as unknown as GroupID)?.keys() ?? []).length > 0
+			entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() !== null &&
+			entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() !== undefined &&
+			Array.from(entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.keys() ?? []).length > 0
 		) {
 			setInitializedUserElement(true)
 		}
@@ -136,29 +136,29 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 			}
 		>
 			<div class="flex items-center ml-auto ">
-				<Show when={selected()}>
+				<Show when={selectedModifierGroup()}>
 					<div class="flex items-center  ">
 						<Show
-							when={isEditingGroup().status === "editing"}
+							when={isEditingModifierGroup().status === "editing"}
 							fallback={
 								<div
 									aria-hidden="false"
 									tabIndex={0}
-									ondblclick={(e: MouseEvent) => handleEdit(e, selected() as unknown as string)}
-									onClick={(e: MouseEvent) => handleEdit(e, selected() as unknown as string)}
+									ondblclick={(e: MouseEvent) => handleEdit(e, selectedModifierGroup() as unknown as string)}
+									onClick={(e: MouseEvent) => handleEdit(e, selectedModifierGroup() as unknown as string)}
 									class="flex items-center min-w-40 group"
 								>
 									<h1 class="text-sm font-bold mt-1.5 mb-1.5 capitalize truncate max-w-60">
-										{groupsMap().get(selected() as unknown as GroupID)?.name}
+										{entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID)?.name}
 									</h1>
 								</div>
 							}
 						>
-							<EditableGroupTitle
+							<EditableModifierGroupTitle
 								inputValueTitle={inputValueTitle}
 								setInputValueTitle={setInputValueTitle}
-								item={groupsMap().get(selected() as unknown as GroupID) as unknown as PromptItem}
-								name={groupsMap().get(selected() as unknown as GroupID)?.name}
+								item={entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID) as unknown as Modifier}
+								name={entityModifierGroups.get(selectedModifierGroup() as unknown as ModifierGroupID)?.name}
 								handleNameChange={handleNameChange}
 							/>
 						</Show>
@@ -166,7 +166,7 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 				</Show>
 
 				<div class="ml-auto flex items-center gap-2">
-					<Show when={groupFilter() !== "preset"}>
+					<Show when={groupModifierFilter() !== "preset"}>
 						<span
 							class="mr-1 cursor-pointer text-xs font-medium min-w-17 bg-background-secondary rounded-md px-1 py-0.5 justify-center items-center flex select-none border border-border"
 							onClick={() => {
@@ -187,13 +187,13 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 									"website",
 									"other"
 								]
-								const currentIndex = filters.indexOf(groupFilter() || "collection")
+								const currentIndex = filters.indexOf(groupModifierFilter() || "collection")
 								const nextFilter = filters[(currentIndex + 1) % filters.length]
-								setGroupFilter(nextFilter)
-								handleUpdateGroupSort(selected() as unknown as GroupID, nextFilter)
+								setGroupModifierFilter(nextFilter)
+								handleUpdateGroupSort(selectedModifierGroup() as unknown as ModifierGroupID, nextFilter)
 							}}
 						>
-							{groupFilter() || "collection"}
+							{groupModifierFilter() || "collection"}
 						</span>
 					</Show>
 					<Tooltip
@@ -213,7 +213,7 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 								<div class="i-mdi:view-grid-outline w-1.25em h-1.25em"></div>
 							)}
 						</TooltipTrigger>
-						<TooltipContent>{props.isFullModifiers() ? "Toggle List Elements" : "Toggle Grid Elements"}</TooltipContent>
+						<TooltipContent>{props.isFullModifiers() ? "Toggle List Modifiers" : "Toggle Grid Modifiers"}</TooltipContent>
 					</Tooltip>
 					<Tooltip
 						openDelay={1000}
@@ -295,14 +295,14 @@ export default function ModifiersMenu(props: ModifiersMenuProps) {
 						</DropdownMenu>
 
 						<DialogContent class="sm:max-w-[425px]">
-							<DialogTitle>Are you sure you want to delete this group?</DialogTitle>
+							<DialogTitle>Are you sure you want to delete this Modifier Group?</DialogTitle>
 							<DialogDescription>This action cannot be undone.</DialogDescription>
 							<Button
 								onClick={() => {
 									toast(
 										<div class="flex items-center gap-2">
 											<div class="i-material-symbols:check-box w-4 h-4 text-success" />
-											<span class="text-xs font-medium">Group deleted</span>
+											<span class="text-xs font-medium">Modifier Group deleted</span>
 										</div>,
 										{ duration: 2000, position: "bottom-center" }
 									)

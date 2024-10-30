@@ -16,7 +16,7 @@ import {
 	selectedTemplateVersion
 } from "~/global_state"
 import { pinToggleItem } from "~/helpers/actionHelpers"
-import { PromptItem, GroupID, ElementID, VersionID } from "~/types/entityType"
+import { Modifier, ModifierGroupID, ModifierID } from "~/types/entityType"
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -33,22 +33,20 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~
 import { addItemToTemplateSection } from "~/helpers/actionHelpers"
 
 interface ModifiersCompactProps {
-	item: PromptItem
-	handleEditing: (item: PromptItem, label: "title" | "summary" | "body", status: "editing" | "saved", id: string) => void
+	item: Modifier
+	handleEditing: (item: Modifier, label: "title" | "summary" | "body", status: "editing" | "saved", id: string) => void
 	handleUpdateAttributes: (
-		item: PromptItem,
+		item: Modifier,
 		name: string,
 		summary: string,
 		body: string,
-		version: VersionID,
-		versionCounter: VersionID,
-		updatedBody: boolean
+		modifierGroupId: ModifierGroupID
 	) => void
-	handleDeleteItem: (groupId: GroupID, itemId: ElementID) => void
-	handleDuplicateItem: (item: PromptItem) => void
-	handleMoveItem: (item: PromptItem, groupId: GroupID) => void
+	handleDeleteItem: (groupId: ModifierGroupID, itemId: ModifierID) => void
+	handleDuplicateItem: (item: Modifier) => void
+	handleMoveItem: (item: Modifier, groupId: ModifierGroupID) => void
 	labelLimit: () => number
-	items: PromptItem[]
+	items: Modifier[]
 	sizes: number[]
 	setIsFullModifiers: (value: boolean) => void
 }
@@ -64,35 +62,18 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 	})
 
 	const groupOptions = Array.from(entityGroups.values())
-		.filter((group: any) => group.id !== props.item.group)
+		.filter((group: any) => group.id !== props.item.modifierGroupId)
 		.map((group: any) => ({
 			value: group.id,
 			label: group.name
 		}))
-
-	createEffect(() => {
-		if (props.item.pinned) {
-			setIsPinned(true)
-		} else {
-			setIsPinned(false)
-		}
-	})
-
-	const handlePinToggle = () => {
-		pinToggleItem(props.item.group, props.item.id)
-		setIsPinned(props.item.pinned || false)
-	}
-
-	const handleNewGroup = (groupId: any) => {
-		props.handleMoveItem(props.item, groupId.value)
-	}
 
 	const handleAddToTemplate = () => {
 		addItemToTemplateSection(
 			selectedTemplateGroup()!,
 			selectedSection()!,
 			props.item.id,
-			props.item.group,
+			props.item.modifierGroupId,
 			selectedTemplateVersion()!
 		)
 	}
@@ -108,7 +89,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 		}
 	}
 
-	const handleOpenItem = (itemId: ElementID, groupId: GroupID) => {
+	const handleOpenItem = (itemId: ModifierID, groupId: ModifierGroupID) => {
 		setSelected(groupId)
 		setSelectedItem(itemId)
 		props.setIsFullModifiers(true)
@@ -151,28 +132,6 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 				<div class="">
 					<div class="flex gap-1 items-center">
 						<div class="flex items-center gap-2 min-w-23 min-h-10">
-							<Show when={isPinned() && props.sizes[1] > 0.2 && isEditingItem().status === "saved"}>
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={() => {
-										handlePinToggle()
-										toast(
-											<div class="flex items-center gap-2">
-												<div class="i-material-symbols:check-box w-4 h-4 text-success" />
-												<span class="text-xs font-medium">
-													{props.item.name} {isPinned() ? "Unpinned" : "Pinned"}
-												</span>
-											</div>,
-											{ duration: 2000, position: "bottom-center" }
-										)
-									}}
-									class="group"
-								>
-									<div class="i-material-symbols-light:push-pin text-foreground/80 w-4 h-4 group-hover:text-accent-foreground"></div>
-								</Button>
-							</Show>
-
 							<Show when={selectedItem() === props.item.id}>
 								<Tooltip
 									openDelay={1000}
@@ -181,7 +140,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 									<TooltipTrigger
 										as={Button}
 										onClick={() => {
-											handleOpenItem(props.item.id, props.item.group)
+											handleOpenItem(props.item.id, props.item.modifierGroupId)
 										}}
 										variant="ghost"
 										size="icon"
@@ -226,7 +185,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 											<span class="sr-only">More</span>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
-											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.group, props.item.id)}>
+											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.modifierGroupId, props.item.id)}>
 												<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Modifier
 											</DropdownMenuItem>
 										</DropdownMenuContent>
