@@ -54,24 +54,20 @@ export default function Nav() {
 								onClick={() => setIsShowModifiers(!isShowModifiers())}
 							>
 								{isShowModifiers() ? (
-									<div class="i-mdi:view-column w-5 h-5" />
+									<div class="i-fluent:tetris-app-24-filled w-5 h-5" />
 								) : (
 									<div class="i-material-symbols:grid-view w-5 h-5" />
 								)}
 							</button>
 						</li>
-						<li class="min-w-10">
+						{/* 	<li class="min-w-10">
 							<button
 								class="px-2 py-1 rounded-md hover:bg-zinc-700  text-center text-[.65rem]"
 								onClick={() => setIsShowTesting(!isShowTesting())}
 							>
-								{isShowTesting() ? (
-									<div class="i-material-symbols:view-array w-5 h-5" />
-								) : (
-									<div class="i-ri:apps-2-fill w-5 h-5" />
-								)}
+								{isShowTesting() ? <div class="i-mingcute:grid-2-fill w-5 h-5" /> : <div class="i-ri:apps-2-fill w-5 h-5" />}
 							</button>
-						</li>
+						</li> */}
 						<li
 							class="px-2 py-1 rounded-md hover:bg-zinc-700"
 							onClick={() => {

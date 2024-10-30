@@ -194,7 +194,7 @@ export function Navigate(props: NavProps) {
 													"flex justify-between"
 												)}
 											>
-												<span class="truncate max-w-30 select-none">{group.title}</span>
+												<span class="truncate max-w-30 select-none text-[0.8rem]">{group.title}</span>
 												<span class={cn("flex-shrink-0 ml-auto")}>{entityItems.get(group.id)?.size ?? 0}</span>
 											</a>
 										}
@@ -328,7 +328,7 @@ export function Navigate(props: NavProps) {
 													"justify-start"
 												)}
 											>
-												<span class="truncate max-w-30 select-none">{template.title}</span>
+												<span class="truncate max-w-30 select-none text-[0.8rem]">{template.title}</span>
 												<span class={cn("flex-shrink-0 ml-auto", selectedTemplateGroup() === template.id && " dark:text-white")}>
 													{template.sections.get(template.versionCounter as VersionID)?.size ?? 0}
 												</span>
@@ -370,6 +370,7 @@ export function Navigate(props: NavProps) {
 					</div>
 				</nav>
 			</div>
+
 			<hr class="w-full border-foreground/30" />
 			<div class="flex flex-col mt-2">
 				<div
@@ -453,7 +454,7 @@ export function Navigate(props: NavProps) {
 														variant: selectedModifierGroup() === template.id ? "outline_selected" : "outline_only",
 														size: "sm",
 														class:
-															"flex justify-between text-xs capitalize cursor-pointer hover:border-accent group-[[data-collapsed=false]]:max-h-7.5"
+															"flex justify-between text-[0.8rem] capitalize cursor-pointer hover:border-accent group-[[data-collapsed=false]]:max-h-7.5"
 													}),
 													selectedModifierGroup() === template.id && " bg-accent border-background text-accent-foreground",
 													"justify-start"

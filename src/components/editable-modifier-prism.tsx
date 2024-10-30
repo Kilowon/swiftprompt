@@ -44,7 +44,7 @@ export const EditableModifierPrism = (props: {
 	return (
 		<div class="w-full h-full  relative">
 			<span class="text-[0.65rem] absolute top-5 left-0">Prism Editor</span>
-			<div class="w-full h-full mt-11 min-h-40 max-h-60 overflow-y-auto">
+			<div class="w-full h-full mt-11 min-h-40 max-h-60 overflow-y-auto scrollbar-default scrollbar-gutter">
 				<Editor
 					wordWrap={true}
 					readOnly={false}

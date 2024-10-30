@@ -128,7 +128,7 @@ export default function Modifiers(props: ModifiersProps) {
 								handleDebounce()
 							}}
 						>
-							<div class="i-mdi:file-document-arrow-right w-1.25em h-1.25em"></div>
+							<div class="i-material-symbols:arrow-split w-1.25em h-1.25em"></div>
 							<span class="sr-only">Add to Template</span>
 						</TooltipTrigger>
 						<TooltipContent>Add to Template</TooltipContent>
@@ -142,8 +142,10 @@ export default function Modifiers(props: ModifiersProps) {
 								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
 								fallback={
 									<div class="flex items-center gap-1">
-										<div class="i-material-symbols:view-column-outline-sharp w-4 h-4 text-accent"></div>
-										<div class={cn("text-sm font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}>
+										<div class="i-fluent:tetris-app-24-regular w-5 h-5 text-accent"></div>
+										<div
+											class={cn("text-[0.8rem] font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}
+										>
 											{props.item?.name || "Add Title"}
 										</div>
 									</div>
@@ -182,23 +184,7 @@ export default function Modifiers(props: ModifiersProps) {
 					</div>
 
 					{/* Body Prompts */}
-					<Show
-						when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
-						fallback={
-							<div class="text-xs w-full">
-								<div class="flex flex-col w-full gap-1">
-									<div class="flex justify-between min-h-5">
-										<div class="text-foreground/60 text-xs flex items-center gap-4">
-											<div class="flex items-center gap-1 text-[.6rem]">
-												<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
-												<span class="text-[.6rem] mr-2">tokens</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						}
-					>
+					<Show when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}>
 						<Show when={isPrism()}>
 							<EditableModifierPrism
 								item={props.item}
@@ -216,6 +202,10 @@ export default function Modifiers(props: ModifiersProps) {
 				<div class="absolute top-1 right-2">
 					<div class="flex gap-1 items-center">
 						<div class="flex items-center gap-2 min-w-23 min-h-10">
+							<div class="flex items-center gap-1 text-[.6rem] ">
+								<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
+								<span class="text-[.6rem] mr-2">tokens</span>
+							</div>
 							<Show
 								when={
 									isEditingItem().status === "editing" && isEditingItem().id === props.item.id && isEditingItem().label === "all"

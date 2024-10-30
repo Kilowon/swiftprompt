@@ -363,7 +363,7 @@ export default function Elements(props: ElementsProps) {
 								handleDebounce()
 							}}
 						>
-							<div class="i-mdi:file-document-arrow-right w-1.25em h-1.25em"></div>
+							<div class="i-material-symbols:arrow-split w-1.25em h-1.25em"></div>
 							<span class="sr-only">Add to Template</span>
 						</TooltipTrigger>
 						<TooltipContent>Add to Template</TooltipContent>
@@ -421,8 +421,10 @@ export default function Elements(props: ElementsProps) {
 								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
 								fallback={
 									<div class="flex items-center gap-1">
-										<div class="i-material-symbols:grid-view-outline w-4 h-4 text-accent" />
-										<div class={cn("text-sm font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}>
+										<div class="i-material-symbols:grid-view-outline w-5 h-5 text-accent" />
+										<div
+											class={cn("text-[0.8rem] font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}
+										>
 											{props.item?.name || "Add Title"}
 										</div>
 									</div>

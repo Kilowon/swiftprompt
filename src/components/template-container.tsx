@@ -159,7 +159,8 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 															<Show
 																when={props.isEditingTemplateSection().status === "editing" && selectedSection() === section.id}
 																fallback={
-																	<div class="flex items-center gap-2">
+																	<div class="flex items-center">
+																		<div class="i-ri:apps-2-line w-5 h-5 ml-2 text-accent" />
 																		<div class="text-[0.8rem] font-semibold pl-2 min-h-12 flex items-center">{section.name || ""}</div>
 																		<Show
 																			when={

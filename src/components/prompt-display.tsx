@@ -193,7 +193,7 @@ export default function PromptDisplay() {
 						</div>
 					}
 				>
-					<div class="whitespace-pre-wrap p-4 text-xs text-muted-foreground max-w-[calc(50vw-2rem)] max-h-[calc(100vh-22rem)]">
+					<div class="whitespace-pre-wrap p-4 text-xs text-muted-foreground max-w-[calc(50vw-2rem)] max-h-[calc(100vh-22rem)] overflow-y-auto scrollbar-default scrollbar-gutter">
 						<Show
 							when={systemMode()}
 							fallback={
