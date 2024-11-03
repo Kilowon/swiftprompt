@@ -50,9 +50,13 @@ export default function TemplateSectionFields(props: TemplateSectionFieldsProps)
 						<div class="w-full flex flex-col min-h-10 max-h-10 justify-center px-3 py-1">
 							<div class="flex items-center justify-between w-full">
 								<div class="flex ml-2 gap-2">
-									<div class={cn("font-semibold text-[0.6rem] capitalize truncate ")}>{field.name}</div>
+									<div class={cn("text-foreground/40 text-[0.6rem] bg-accent/5 rounded-md px-1 flex items-center gap-1")}>
+										<span class="opacity-50">Field:</span>
+										{field.name}
+									</div>
 									<Show when={field.modifierId !== ""}>
-										<div class="text-foreground/40 text-[0.6rem] bg-accent/5 rounded-md px-1">
+										<div class="text-foreground/40 text-[0.6rem] bg-accent/5 rounded-md px-1 flex items-center gap-1">
+											<span class="opacity-50">Modifier:</span>
 											{entityModifiers.get(field.modifierGroupId as ModifierGroupID)?.get(field.modifierId as ModifierID)?.name}
 										</div>
 									</Show>
@@ -62,7 +66,10 @@ export default function TemplateSectionFields(props: TemplateSectionFieldsProps)
 										<div class="i-mdi:checkbox-blank-circle text-warning w-1em h-1em mr-1"></div>
 									</Show>
 
-									<div class="truncate mr-2">{field.type}</div>
+									<div class="text-foreground/40 text-[0.6rem] bg-accent/5 rounded-md px-1 flex items-center gap-1">
+										<span class="opacity-50">Field Type:</span>
+										{field.type}
+									</div>
 								</div>
 								<Show
 									when={selectedField() === field.templateFieldId}

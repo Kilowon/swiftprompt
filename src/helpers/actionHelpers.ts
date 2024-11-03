@@ -534,37 +534,56 @@ export const addModifierToField = (
 	fieldId: TemplateFieldID,
 	version: VersionID
 ) => {
-	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
-	if (section) {
-		const updatedItems = section.items.map(item => {
-			if (item.id === itemId) {
-				return {
-					...item,
-					fields: item.fields?.map(field =>
-						field.templateFieldId === fieldId
-							? {
-									...field,
-									modifierId: modifierId,
-									modifierGroupId: modifierGroupId
-							  }
-							: field
-					)
-				}
-			}
-			return item
-		})
+	const templateGroup = templates.get(templateGroupId)
+	const sections = templateGroup?.sections.get(version)
 
-		templates
-			.get(templateGroupId)
-			?.sections.get(version)
-			?.set(id, {
+	const field = sections
+		?.get(id)
+		?.items.find(item => item.id === itemId)
+		?.fields?.find(field => field.templateFieldId === fieldId)
+
+	if (field?.type === "global") {
+		sections?.forEach((section, sectionId) => {
+			const updatedItems = section.items.map(item => ({
+				...item,
+				fields: item.fields?.map(f =>
+					f.type === "global" && f.name === field.name ? { ...f, modifierId, modifierGroupId } : f
+				)
+			}))
+
+			templates
+				.get(templateGroupId)
+				?.sections.get(version)
+				?.set(sectionId, {
+					...section,
+					items: updatedItems,
+					date_modified: new Date().toISOString()
+				})
+		})
+	} else {
+		const section = sections?.get(id)
+		if (section) {
+			const updatedItems = section.items.map(item => {
+				if (item.id === itemId) {
+					return {
+						...item,
+						fields: item.fields?.map(field =>
+							field.templateFieldId === fieldId ? { ...field, modifierId, modifierGroupId } : field
+						)
+					}
+				}
+				return item
+			})
+
+			sections?.set(id, {
 				...section,
 				items: updatedItems,
 				date_modified: new Date().toISOString()
 			})
-
-		storeEntityMap()
+		}
 	}
+
+	storeEntityMap()
 }
 
 // Element Functions
