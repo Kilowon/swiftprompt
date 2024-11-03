@@ -30,14 +30,14 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 	const [isLoading, setIsLoading] = createSignal(true)
 
 	const [labelLimit, setLabelLimit] = createSignal<number>(18)
-	const [items, setItems] = createStore(props.items)
+	const [modifiers, setModifiers] = createStore(props.items)
 
 	const handleDeleteItem = (groupId: ModifierGroupID, itemId: ModifierID) => {
-		setItems(
-			produce(items => {
-				const index = items().findIndex(item => item.id === itemId)
+		setModifiers(
+			produce(modifiers => {
+				const index = modifiers().findIndex(modifier => modifier.id === itemId)
 				if (index !== -1) {
-					items().splice(index, 1)
+					modifiers().splice(index, 1)
 				}
 			})
 		)
@@ -156,17 +156,17 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 					when={props.isFullModifiers()}
 					fallback={
 						<For each={props.items()}>
-							{item => {
+							{modifier => {
 								return (
 									<ModifiersCompact
-										item={item}
+										modifier={modifier}
 										handleEditing={handleEditing}
 										handleUpdateAttributes={handleUpdateAttributes}
 										handleDeleteItem={handleDeleteItem}
 										handleDuplicateItem={duplicateItemHandler}
 										labelLimit={labelLimit}
 										handleMoveItem={moveItemToNewGroup}
-										items={items()}
+										modifiers={modifiers()}
 										sizes={props.sizes}
 										setIsFullModifiers={props.setIsFullModifiers}
 									/>
@@ -176,20 +176,20 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 					}
 				>
 					<For each={props.items()}>
-						{item => {
+						{modifier => {
 							createEffect(() => {
-								console.log("item DIS EN", item)
+								console.log("item DIS EN", modifier)
 							})
 							return (
 								<Modifiers
-									modifier={item}
+									modifier={modifier}
 									handleEditing={handleEditing}
 									handleUpdateAttributes={handleUpdateAttributes}
 									handleDeleteItem={handleDeleteItem}
 									handleDuplicateItem={duplicateItemHandler}
 									labelLimit={labelLimit}
 									handleMoveItem={moveItemToNewGroup}
-									modifiers={items()}
+									modifiers={modifiers()}
 									sizes={props.sizes}
 								/>
 							)

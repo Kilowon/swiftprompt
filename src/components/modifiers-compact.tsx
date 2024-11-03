@@ -13,9 +13,10 @@ import {
 	setSelectedSectionItemEl,
 	setSelected,
 	selectedSectionItemEl,
-	selectedTemplateVersion
+	selectedTemplateVersion,
+	selectedTemplateField
 } from "~/global_state"
-import { pinToggleItem } from "~/helpers/actionHelpers"
+import { addModifierToField } from "~/helpers/actionHelpers"
 import { Modifier, ModifierGroupID, ModifierID } from "~/types/entityType"
 import {
 	DropdownMenu,
@@ -33,10 +34,15 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~
 import { addItemToTemplateSection } from "~/helpers/actionHelpers"
 
 interface ModifiersCompactProps {
-	item: Modifier
-	handleEditing: (item: Modifier, label: "title" | "summary" | "body", status: "editing" | "saved", id: string) => void
+	modifier: Modifier
+	handleEditing: (
+		modifier: Modifier,
+		label: "title" | "summary" | "body",
+		status: "editing" | "saved",
+		id: string
+	) => void
 	handleUpdateAttributes: (
-		item: Modifier,
+		modifier: Modifier,
 		name: string,
 		summary: string,
 		body: string,
@@ -46,7 +52,7 @@ interface ModifiersCompactProps {
 	handleDuplicateItem: (item: Modifier) => void
 	handleMoveItem: (item: Modifier, groupId: ModifierGroupID) => void
 	labelLimit: () => number
-	items: Modifier[]
+	modifiers: Modifier[]
 	sizes: number[]
 	setIsFullModifiers: (value: boolean) => void
 }
@@ -56,24 +62,30 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 	let el: HTMLButtonElement | undefined
 
 	createEffect(() => {
-		if (selectedSectionItem() === props.item.id) {
+		if (selectedSectionItem() === props.modifier.id) {
 			setSelectedSectionItemEl(el)
 		}
 	})
 
 	const groupOptions = Array.from(entityGroups.values())
-		.filter((group: any) => group.id !== props.item.modifierGroupId)
+		.filter((group: any) => group.id !== props.modifier.modifierGroupId)
 		.map((group: any) => ({
 			value: group.id,
 			label: group.name
 		}))
 
-	const handleAddToTemplate = () => {
-		addItemToTemplateSection(
+	const handleAddToField = () => {
+		if (selectedSection() === null) {
+			toast("Please select a field to add the modifier to", { duration: 5000, position: "bottom-center" })
+			return
+		}
+		addModifierToField(
 			selectedTemplateGroup()!,
 			selectedSection()!,
-			props.item.id,
-			props.item.modifierGroupId,
+			selectedSectionItem()!,
+			props.modifier.id,
+			props.modifier.modifierGroupId,
+			selectedTemplateField()!,
 			selectedTemplateVersion()!
 		)
 	}
@@ -82,7 +94,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 	const handleDebounce = () => {
 		if (!isDebouncing()) {
 			setIsDebouncing(true)
-			handleAddToTemplate()
+			handleAddToField()
 			setTimeout(() => {
 				setIsDebouncing(false)
 			}, 1000)
@@ -107,9 +119,9 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 				size="no_format"
 				class={cn(
 					"flex relative  gap-2 rounded-md border border-border p-0.5 text-left text-sm transition-all hover:bg-muted/50 cursor-default max-h-10 min-h-10",
-					selectedItem() === props.item.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
+					selectedItem() === props.modifier.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
 				)}
-				onClick={() => setSelectedItem(props.item.id)}
+				onClick={() => setSelectedItem(props.modifier.id)}
 			>
 				<div class="flex w-full flex-col gap-2 p-0.5">
 					<div class="flex flex-col items-start justify-between w-full relative">
@@ -118,11 +130,11 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 							<div class="flex items-center gap-10">
 								<div
 									class={cn(
-										"text-[0.6rem] font-semibold text-foreground/80 pl-3",
-										!props.item?.name ? "text-foreground/80" : ""
+										"text-[0.65rem] font-semibold text-foreground/80 pl-3",
+										!props.modifier?.name ? "text-foreground/80" : ""
 									)}
 								>
-									{props.item?.name || "Add Title"}
+									{props.modifier?.name || "Add Title"}
 								</div>
 							</div>
 						</div>
@@ -132,7 +144,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 				<div class="">
 					<div class="flex gap-1 items-center">
 						<div class="flex items-center gap-2 min-w-23 min-h-10">
-							<Show when={selectedItem() === props.item.id}>
+							<Show when={selectedItem() === props.modifier.id}>
 								<Tooltip
 									openDelay={1000}
 									closeDelay={0}
@@ -140,7 +152,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 									<TooltipTrigger
 										as={Button}
 										onClick={() => {
-											handleOpenItem(props.item.id, props.item.modifierGroupId)
+											handleOpenItem(props.modifier.id, props.modifier.modifierGroupId)
 										}}
 										variant="ghost"
 										size="icon"
@@ -152,7 +164,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 									<TooltipContent>Edit Modifier</TooltipContent>
 								</Tooltip>
 							</Show>
-							<Show when={selectedItem() === props.item.id}>
+							<Show when={selectedItem() === props.modifier.id}>
 								<Tooltip
 									openDelay={1000}
 									closeDelay={0}
@@ -172,7 +184,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 									<TooltipContent>Add to Template</TooltipContent>
 								</Tooltip>
 							</Show>
-							<Show when={selectedItem() === props.item.id}>
+							<Show when={selectedItem() === props.modifier.id}>
 								<div>
 									<DropdownMenu placement="bottom-end">
 										<DropdownMenuTrigger
@@ -185,7 +197,7 @@ export default function ModifiersCompact(props: ModifiersCompactProps) {
 											<span class="sr-only">More</span>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
-											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.modifierGroupId, props.item.id)}>
+											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.modifier.modifierGroupId, props.modifier.id)}>
 												<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Modifier
 											</DropdownMenuItem>
 										</DropdownMenuContent>

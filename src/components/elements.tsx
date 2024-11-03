@@ -446,8 +446,8 @@ export default function Elements(props: ElementsProps) {
 				variant="no_format"
 				size="no_format"
 				class={cn(
-					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/50 cursor-default",
-					selectedItem() === props.item.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
+					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/30 hover:border-accent/60 cursor-default",
+					selectedItem() === props.item.id && "bg-muted/30 ring-1 border-accent ring-accent  transition-none"
 				)}
 				onClick={() => setSelectedItem(props.item.id)}
 				onMouseEnter={() => setMouseOver(true)}
@@ -479,12 +479,12 @@ export default function Elements(props: ElementsProps) {
 						<div class="flex items-center gap-2 pr-10 group flex-grow mb-2">
 							<Show
 								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
-								/* fallback={
-									<div class="text-xs font-medium bg-background rounded-md px-2 py-0.5 justify-center items-center flex select-none ">
-										<div class="text-[.5rem] mr-0.25 mt-0.5">v</div>
+								fallback={
+									<div class="text-[0.65rem] font-medium bg-background rounded-md px-2 py-0.5 justify-center items-center flex select-none ">
+										<div class="text-[0.65rem] mr-0.25 ">v</div>
 										<div>{props.item.selectedVersion}</div>
 									</div>
-								} */
+								}
 							>
 								<div class="flex items-center gap-2 mt-5">
 									<Select
@@ -545,13 +545,20 @@ export default function Elements(props: ElementsProps) {
 						</div>
 					</div>
 					{/* Summary Prompts */}
-					<div class="items-center gap-2 pr-10">
+					<div class="items-center gap-2 w-full">
 						<Show
 							when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
 							fallback={
-								<div class="flex items-center gap-2">
-									<div class={cn("text-xs text-foreground/60", !props.item?.summary ? "text-foreground/60" : "")}>
-										{props.item?.summary || "Add summary"}
+								<div class="flex items-center gap-2 w-full">
+									<div class="flex items-center gap-2 w-full">
+										<div
+											class={cn(
+												"text-[0.65rem] w-full border border-border/50 bg-border/10 rounded-md px-2 py-1",
+												!props.item?.summary ? "text-foreground/30" : "text-foreground/50"
+											)}
+										>
+											{props.item?.summary || "Add summary"}
+										</div>
 									</div>
 								</div>
 							}
@@ -575,58 +582,59 @@ export default function Elements(props: ElementsProps) {
 								class="text-xs w-full"
 							>
 								<Show when={isVisible()}>
-									<div class="flex flex-col w-full gap-1">
-										<Progress
-											value={contentPreview()?.wordCount || 0}
-											minValue={0}
-											maxValue={1000}
-											getValueLabel={({ value, max }) => ``}
-											class="w-[300px] space-y-1"
-										>
-											<div class="flex justify-between min-h-5">
-												<div class="text-foreground/60 text-xs flex items-center gap-4">
-													<div class="flex items-center gap-1 text-[.6rem]">
-														<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
-														<span class="text-[.6rem] mr-2">tokens</span>
-													</div>
-													<div class="flex items-center gap-1 text-[.6rem]">
-														<span>{`${usedInSections({ id: props.item.id, group: props.item.group }).sections.length}`}</span>
-														<span class="text-[.6rem] mr-2">Sections</span>
-													</div>
-													<div class="flex items-center gap-1 text-[.6rem]">
-														<span>{`${
-															Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length
-														}`}</span>
-														<span class="text-[.6rem] mr-2">Templates</span>
-													</div>
-													<Show when={fieldsData().length > 0}>
-														<div class="flex gap-1 text-foreground/60 text-[.6rem] items-center overflow-hidden">
-															Fields:
-															<div class="flex gap-1 items-center overflow-hidden">
-																<For each={fieldsData().slice(0, 3)}>
-																	{field => (
-																		<div
-																			class={cn(
-																				"lowercase text-[.6rem] font-700 rounded-sm px-0.65 py-0.10 whitespace-nowrap text-ellipsis overflow-hidden max-w-[100px]",
-																				field.type === "global" ? "bg-accent/20" : "bg-background-secondary"
-																			)}
-																		>
-																			{field.name}
-																		</div>
-																	)}
-																</For>
-																<Show when={fieldsData().length > 3}>
-																	<div class="text-[.6rem] font-700 rounded-sm px-0.65 py-0.10 bg-background-secondary">
-																		+{fieldsData().length - 3}
-																	</div>
-																</Show>
-															</div>
+									<Show when={fieldsData().length > 0}>
+										<div class="text-foreground/70 text-[0.65rem] border border-border bg-accent/10 rounded-md px-2 flex items-center gap-1.5 h-8 mb-2">
+											<span class="opacity-60">Fields :</span>
+											<div class="flex gap-1 items-center">
+												<For each={fieldsData().slice(0, 3)}>
+													{field => (
+														<div
+															class={cn(
+																"px-1.5 rounded-sm",
+																"bg-background/50 border border-border rounded-sm",
+																field.type === "global" && "text-primary/80"
+															)}
+														>
+															{field.name}
 														</div>
-													</Show>
-												</div>
-												<ProgressValueLabel />
+													)}
+												</For>
 											</div>
-										</Progress>
+											<Show when={fieldsData().length > 3}>
+												<div class="opacity-70">+{fieldsData().length - 3}</div>
+											</Show>
+										</div>
+									</Show>
+									<div class="flex flex-col w-full gap-1">
+										<div class="grid grid-cols-3 gap-2 min-h-5">
+											<div class="flex items-center justify-center border border-border gap-1.5 px-2 py-1 rounded-md bg-muted/30">
+												<div class="i-lucide:hash text-[0.8rem] text-foreground/50" />
+												<div class="flex items-baseline gap-1">
+													<span class="text-[0.7rem] font-medium">{estimateTokens(contentPreview().wordCount)}</span>
+													<span class="text-[0.65rem] text-foreground/50">tokens</span>
+												</div>
+											</div>
+
+											<div class="flex items-center justify-center border border-border gap-1.5 px-2 py-1 rounded-md bg-muted/30">
+												<div class="i-lucide:layout-template text-[0.8rem] text-foreground/50" />
+												<div class="flex items-baseline gap-1">
+													<span class="text-[0.7rem] font-medium">
+														{usedInSections({ id: props.item.id, group: props.item.group }).sections.length}
+													</span>
+													<span class="text-[0.65rem] text-foreground/50">sections</span>
+												</div>
+											</div>
+
+											<div class="flex items-center justify-center border border-border gap-1.5 px-2 py-1 rounded-md bg-muted/30">
+												<div class="i-lucide:folder-template text-[0.8rem] text-foreground/50" />
+												<div class="flex items-baseline gap-1">
+													<span class="text-[0.7rem] font-medium">
+														{Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length}
+													</span>
+													<span class="text-[0.65rem] text-foreground/50">templates</span>
+												</div>
+											</div>
+										</div>
 									</div>
 								</Show>
 							</div>
@@ -676,33 +684,13 @@ export default function Elements(props: ElementsProps) {
 													class={cn("transition-opacity duration-200 opacity-100 py-0.75 px-2.5 ")}
 												>
 													<div class="i-material-symbols:add w-1em h-1em"></div>
-													<span class="sr-only">AI Generate Prompt</span>
 												</TooltipTrigger>
 												<TooltipContent>Add Badge</TooltipContent>
 											</Tooltip>
-
-											{/* <Tooltip
-												openDelay={1000}
-												closeDelay={0}
-											>
-												<TooltipTrigger
-													as={Button}
-													variant="badge"
-													size="badge"
-													class={cn("transition-opacity duration-200 opacity-100 py-0.5 px-2.5")}
-													onClick={() => {
-														console.log("Generate Prompt")
-													}}
-												>
-													<div class="i-ion:sparkles-sharp w-1.15em h-1.15em"></div>
-												</TooltipTrigger>
-												<span class="sr-only">AI Generate Prompt</span>
-												<TooltipContent>AI Generate Badges (Coming Soon)</TooltipContent>
-											</Tooltip> */}
 										</div>
 									</Show>
 									<Show when={selectedIconValues().length > 0}>
-										<div class="flex gap-1 text-sm items-center flex-wrap ">
+										<div class="flex gap-1 text-[0.65rem] items-center flex-wrap ">
 											<Show
 												when={selectedItem() === props.item.id}
 												fallback={
@@ -723,7 +711,7 @@ export default function Elements(props: ElementsProps) {
 																		variant={
 																			searchSelectedBadges().some((badge: BadgeType) => badge.name === option.name) ? "default" : "outline"
 																		}
-																		class="group relative cursor-pointer overflow-hidden py-0"
+																		class="group relative text-[0.65rem] cursor-pointer overflow-hidden py-0"
 																	>
 																		{(option as any).name || ""}
 
@@ -793,24 +781,6 @@ export default function Elements(props: ElementsProps) {
 														</TooltipTrigger>
 														<TooltipContent>Add Badge</TooltipContent>
 													</Tooltip>
-													{/* <Tooltip
-														openDelay={1000}
-														closeDelay={0}
-													>
-														<TooltipTrigger
-															as={Button}
-															variant="badge"
-															size="badge"
-															class={cn("py-0.5 px-2.5")}
-															onClick={() => {
-																console.log("Generate Prompt")
-															}}
-														>
-															<div class="i-ion:sparkles-sharp w-1.15em h-1.15em"></div>
-															<span class="sr-only">AI Generate Prompt</span>
-														</TooltipTrigger>
-														<TooltipContent>AI Generate Badges (Coming Soon)</TooltipContent>
-													</Tooltip> */}
 												</div>
 											</Show>
 										</div>

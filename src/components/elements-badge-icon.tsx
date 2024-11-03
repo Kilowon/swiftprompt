@@ -132,7 +132,7 @@ function ComboboxDemo(props: {
 			optionLabel="label"
 			optionDisabled="disabled"
 			optionGroupChildren="options"
-			placeholder="Search a food…"
+			placeholder="Search Icons"
 			onChange={e => {
 				handleIconChange(e)
 			}}

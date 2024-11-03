@@ -228,10 +228,6 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																				<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Section
 																			</DropdownMenuItem>
 																			<DropdownMenuSub overlap>
-																				<DropdownMenuSubTrigger>
-																					<div class="i-solar:download-linear w-1.25em h-1.25em mr-2" />
-																					Move Section
-																				</DropdownMenuSubTrigger>
 																				<DropdownMenuPortal>
 																					<DropdownMenuSubContent>
 																						<Select
@@ -317,14 +313,14 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																					<div class="flex">
 																						<div
 																							class={cn(
-																								"font-semibold text-[0.6rem] capitalize truncate ",
+																								"font-semibold text-[0.65rem] capitalize truncate ",
 																								elementToElementMatch() && "text-success"
 																							)}
 																						>
 																							{entityItems.get(item.group)?.get(item.id)?.name}
 																						</div>
 																					</div>
-																					<div class={cn("ml-auto text-[0.6rem] text-foreground/40 flex items-center mr-1")}>
+																					<div class={cn("ml-auto text-[0.65rem] text-foreground/40 flex items-center mr-1")}>
 																						<Show when={elementToElementMatch()}>
 																							<div class="i-mdi:checkbox-blank-circle text-success w-1em h-1em mr-1"></div>
 																						</Show>
@@ -408,7 +404,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																									setActiveFieldId(current => (current === item.id ? null : item.id))
 																								}}
 																								class={cn(
-																									"items-center justify-center text-[0.6rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 hover:cursor-pointer",
+																									"items-center justify-center text-[0.65rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 hover:cursor-pointer",
 																									activeFieldId() === item.id && "text-primary-foreground bg-primary",
 																									item.fields?.some(field => field.modifierId === "")
 																										? "text-warning bg-warning/15 hover:bg-warning hover:text-warning-foreground"
@@ -423,7 +419,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																			</div>
 																		</button>
 																		<Show when={activeFieldId() === item.id && selectedSection() === section.id}>
-																			<div class="w-full text-[0.6rem] text-foreground/40 space-y-0.25 flex flex-col items-center">
+																			<div class="w-full text-[0.65rem] text-foreground/40 space-y-0.25 flex flex-col items-center">
 																				<TemplateSectionFields fields={item.fields!} />
 																			</div>
 																		</Show>

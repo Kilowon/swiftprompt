@@ -79,7 +79,7 @@ export default function PromptDisplay() {
 	}
 
 	function replaceDelimiters(inputString: string, values: any) {
-		return inputString.replace(/{{(.*?)}}/g, (match: string, p1: string) => {
+		return inputString.replace(/\$?{{(.*?)}}/g, (match: string, p1: string) => {
 			const key = p1.trim()
 			const lowerKey = key.toLowerCase()
 			return values[lowerKey] || values[key] || match
@@ -192,7 +192,7 @@ export default function PromptDisplay() {
 			</div>
 			<Separator />
 
-			<div class="flex flex-1 flex-col overflow-y-auto max-h-[calc(100vh-22rem)]">
+			<div class="flex flex-1 flex-col h-100% overflow-y-auto">
 				<Show
 					when={screenWriter()}
 					fallback={
@@ -204,7 +204,7 @@ export default function PromptDisplay() {
 						</div>
 					}
 				>
-					<div class="whitespace-pre-wrap p-4 text-xs text-muted-foreground max-w-[calc(50vw-2rem)] max-h-[calc(100vh-22rem)] overflow-y-auto scrollbar-default scrollbar-gutter">
+					<div class="whitespace-pre-wrap p-4 text-[0.8rem] text-muted-foreground h-100% overflow-y-auto scrollbar-default scrollbar-gutter">
 						<Show
 							when={systemMode()}
 							fallback={
@@ -237,66 +237,6 @@ export default function PromptDisplay() {
 						</Show>
 					</div>
 				</Show>
-			</div>
-			<Separator class="mt-auto" />
-			<div class="p-4">
-				<div class="grid gap-4">
-					<TextField>
-						<TextFieldTextArea
-							class="p-4"
-							placeholder={`Reply`}
-						/>
-					</TextField>
-					<div class="flex items-center">
-						<Switch
-							class="flex items-center gap-4 text-xs font-bold"
-							onChange={e => {
-								setSystemMode(e.valueOf())
-							}}
-						>
-							<SwitchControl>
-								<SwitchThumb class="bg-foreground/80" />
-							</SwitchControl>
-
-							<SwitchLabel class="text-xs font-bold text-foreground/80">
-								<Show
-									when={systemMode()}
-									fallback={
-										<div>
-											<div class="flex flex-col items-center">
-												<div>System</div>
-											</div>
-											<div class="flex flex-col items-center">
-												<div>Prompt</div>
-											</div>
-										</div>
-									}
-								>
-									<div class="flex flex-col items-center">
-										<div>User</div>
-									</div>
-									<div class="flex flex-col items-center">
-										<div>Prompt</div>
-									</div>
-								</Show>
-							</SwitchLabel>
-						</Switch>
-						<Button
-							variant="outline"
-							size="sm"
-							class="ml-auto"
-						>
-							Clear
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							class="ml-4"
-						>
-							Send
-						</Button>
-					</div>
-				</div>
 			</div>
 		</div>
 	)

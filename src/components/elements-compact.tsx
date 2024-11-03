@@ -147,7 +147,7 @@ function ElementsCompact(props: ElementsCompactProps) {
 							<div class="flex items-center gap-10">
 								<div
 									class={cn(
-										"text-[0.6rem] font-semibold text-foreground/80 pl-3",
+										"text-[0.65rem] font-semibold text-foreground/80 pl-3",
 										!props.item?.name ? "text-foreground/80" : ""
 									)}
 								>
@@ -183,15 +183,17 @@ function ElementsCompact(props: ElementsCompactProps) {
 								</Button>
 							</Show>
 							<Show when={fieldsData().length > 0 && selectedItem() !== props.item.id}>
-								<div class="flex gap-1 text-foreground/60 text-[.6rem] items-center min-w-50 pr-3">
+								<div class="flex gap-1 text-foreground/60 text-[0.65rem] items-center min-w-50 pr-3">
 									Fields:
 									<For each={fieldsData().slice(0, 3)}>
 										{field => (
-											<div class="lowercase text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">{field}</div>
+											<div class="lowercase text-[0.65rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
+												{field}
+											</div>
 										)}
 									</For>
 									<Show when={fieldsData().length > 3}>
-										<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
+										<div class="text-[0.65rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
 											+{fieldsData().length - 3}
 										</div>
 									</Show>

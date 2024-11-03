@@ -103,7 +103,7 @@ export default function TemplateGlobalFields() {
 											<div class="w-full">
 												<div class="flex items-center">
 													<div class="flex items-center gap-2">
-														<div class="text-[0.6rem] font-semibold pl-2 min-h-8 flex items-center">{section.title}</div>
+														<div class="text-[0.65rem] font-semibold pl-2 min-h-8 flex items-center">{section.title}</div>
 													</div>
 
 													<div class="ml-auto">
@@ -113,7 +113,7 @@ export default function TemplateGlobalFields() {
 																	setIsFieldsSelected(!isFieldsSelected())
 																}}
 																class={cn(
-																	"items-center justify-center text-[0.6rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 bg-accent/15 hover:cursor-pointer hover:text-primary-foreground hover:bg-primary",
+																	"items-center justify-center text-[0.65rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 bg-accent/15 hover:cursor-pointer hover:text-primary-foreground hover:bg-primary",
 																	isFieldsSelected() && "text-primary-foreground bg-primary"
 																	//!isFieldsSelected() && " bg-error text-error-foreground"
 																	//!isFieldsSelected() && " text-warning bg-warning/15"
@@ -180,14 +180,14 @@ export default function TemplateGlobalFields() {
 																			<div class="flex">
 																				<div
 																					class={cn(
-																						"font-semibold text-[0.6rem] ml-2 capitalize truncate",
+																						"font-semibold text-[0.65rem] ml-2 capitalize truncate",
 																						elementToElementMatch() && "text-success"
 																					)}
 																				>
 																					{item.name}
 																				</div>
 																			</div>
-																			<div class={cn("ml-auto text-[0.6rem] text-foreground/40 flex items-center mr-1")}>
+																			<div class={cn("ml-auto text-[0.65rem] text-foreground/40 flex items-center mr-1")}>
 																				<Show when={elementToElementMatch()}>
 																					<div class="i-mdi:checkbox-blank-circle text-success w-1em h-1em mr-1"></div>
 																				</Show>

@@ -214,9 +214,9 @@ export default function Modifiers(props: ModifiersProps) {
 				<div class="absolute top-1 right-2">
 					<div class="flex gap-1 items-center">
 						<div class="flex items-center gap-2 min-w-23 min-h-10">
-							<div class="flex items-center gap-1 text-[.6rem] ">
+							<div class="flex items-center gap-1 text-[0.65rem] ">
 								<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
-								<span class="text-[.6rem] mr-2">tokens</span>
+								<span class="text-[0.65rem] mr-2">tokens</span>
 							</div>
 							<Show
 								when={
