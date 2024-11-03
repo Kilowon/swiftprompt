@@ -116,20 +116,12 @@ export default function PromptDisplay() {
 									[field.name]: modifier || ""
 								}
 							}, {}) ?? {}
-					console.log("fields", fields)
+
 					const replacedContent = replaceDelimiters(body, fields)
 					return replacedContent
 				}) ?? [])
 			])
 			.join("\n\n")
-
-		// Define the values for replacement
-
-		createEffect(() => {
-			console.log("content", content)
-		})
-
-		// Use the replaceDelimiters function
 
 		setScreenWriter(content)
 	})

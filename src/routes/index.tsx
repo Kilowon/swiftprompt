@@ -33,7 +33,7 @@ import { ReactiveMap } from "@solid-primitives/map"
 import TemplateVersions from "~/components/template-versions"
 import TemplateContainer from "~/components/template-container"
 import PromptDisplay from "~/components/prompt-display"
-import TemplateModifiersContainer from "~/components/template-modifiers-container"
+import TemplateGlobalFields from "~/components/template-global-fields"
 import ModifiersContainer from "~/components/modifiers-container"
 import ModifiersMenu from "~/components/modifiers-menu"
 import ModifiersContainerSearch from "~/components/modifiers-container-search"
@@ -364,7 +364,7 @@ export default function Home() {
 										</Show>
 									</div>
 									<div class="bg-background-secondary overflow-auto">
-										<TemplateModifiersContainer />
+										<TemplateGlobalFields />
 									</div>
 									<div class="flex-1 bg-background-secondary overflow-auto pb-20">
 										<TemplateContainer

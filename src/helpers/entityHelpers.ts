@@ -22,7 +22,12 @@ import {
 	TemplateGroup,
 	TemplateSectionID,
 	TemplateSection,
-	VersionID
+	VersionID,
+	GlobalModifiersID,
+	Modifier,
+	ModifierGroupID,
+	ModifierID,
+	ModifierGroup
 } from "~/types/entityType"
 import { ReactiveMap } from "@solid-primitives/map"
 import { Badge } from "~/types/badgeType"
@@ -77,6 +82,10 @@ const serializeEntityMap = (entityMap: EntityMap): string => {
 				)
 			}
 		]),
+		modifierGroups: Array.from<[ModifierGroupID, ModifierGroup]>(entityMap.modifierGroups.entries()),
+		modifiers: Array.from<[ModifierGroupID, ReactiveMap<ModifierID, Modifier>]>(entityMap.modifiers.entries()).map(
+			([groupId, modifierMap]) => [groupId, Array.from<[ModifierID, Modifier]>(modifierMap.entries())]
+		),
 		nextOrder: nextOrder()
 	}
 	return JSON.stringify(serialized)
@@ -103,6 +112,8 @@ const deserializeEntityMap = (serialized: string): EntityMap => {
 	groupBadge.clear()
 	badge.clear()
 	templates.clear()
+	entityModifierGroups.clear()
+	entityModifiers.clear()
 
 	parsed.groups.forEach(([id, group]: [Id, Group]) => entityGroups.set(id as unknown as GroupID, group))
 
@@ -137,6 +148,19 @@ const deserializeEntityMap = (serialized: string): EntityMap => {
 		}
 		templates.set(id, templateGroup)
 	})
+
+	if (parsed.modifierGroups) {
+		parsed.modifierGroups.forEach(([id, group]: [Id, ModifierGroup]) =>
+			entityModifierGroups.set(id as unknown as ModifierGroupID, group)
+		)
+	}
+
+	if (parsed.modifiers) {
+		parsed.modifiers.forEach(([groupId, modifiers]: [Id, [Id, Modifier][]]) => {
+			const groupModifiers = new ReactiveMap(modifiers) as unknown as ReactiveMap<ModifierID, Modifier>
+			entityModifiers.set(groupId as unknown as ModifierGroupID, groupModifiers)
+		})
+	}
 
 	setAvailableBadges(Array.from<Badge>(badge.values()))
 	setNextOrder(parsed.nextOrder)

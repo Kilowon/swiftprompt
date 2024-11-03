@@ -14,7 +14,8 @@ import {
 	selectedSectionItemEl,
 	setIsEditingItem,
 	selectedItem,
-	selectedTemplateVersion
+	selectedTemplateVersion,
+	entityModifiers
 } from "~/global_state"
 import {
 	ElementID,
@@ -26,28 +27,9 @@ import {
 	TemplateSectionID
 } from "~/types/entityType"
 import { Button } from "~/registry/ui/button"
-import { EditableSectionTitle } from "./editable-section-title"
-import {
-	deleteTemplateSection,
-	duplicateTemplateSection,
-	editTemplateSection,
-	moveTemplateSection,
-	removeItemFromTemplateSection
-} from "~/helpers/actionHelpers"
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSub,
-	DropdownMenuSubTrigger,
-	DropdownMenuSubContent,
-	DropdownMenuPortal
-} from "~/registry/ui/dropdown-menu"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "~/registry/ui/select"
 
-export default function TemplateModifiersContainer() {
+export default function TemplateGlobalFields() {
 	const [templateList, setTemplateList] = createSignal<{ value: string; label: string }[]>([])
 
 	createEffect(() => {
