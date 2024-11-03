@@ -74,6 +74,7 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 			"",
 			(groupsMap().get(selected() as unknown as GroupID)?.id as GroupID) ?? "",
 			[],
+			[],
 			"",
 			0,
 			0,

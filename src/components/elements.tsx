@@ -22,9 +22,20 @@ import {
 	setSelectedSection,
 	selectedTemplateVersion
 } from "~/global_state"
-import { pinToggleItem, updateBadge } from "~/helpers/actionHelpers"
+import { pinToggleItem, updateBadge, updateItemFieldsInTemplateSection } from "~/helpers/actionHelpers"
 import { Badge as BadgeType } from "~/types/badgeType"
-import { PromptItem, GroupID, ElementID, BadgeID, VersionID, TemplateGroupID, TemplateGroup } from "~/types/entityType"
+import {
+	PromptItem,
+	GroupID,
+	ElementID,
+	BadgeID,
+	VersionID,
+	TemplateGroupID,
+	TemplateGroup,
+	TemplateField,
+	TemplateFieldID,
+	ModifierID
+} from "~/types/entityType"
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -49,6 +60,7 @@ import { storeEntityMap } from "~/helpers/entityHelpers"
 import { addItemToTemplateSection } from "~/helpers/actionHelpers"
 import { Progress, ProgressValueLabel } from "~/registry/ui/progress"
 import { ReactiveSet } from "@solid-primitives/set"
+import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 
 interface ElementsProps {
 	item: PromptItem
@@ -58,6 +70,7 @@ interface ElementsProps {
 		name: string,
 		summary: string,
 		body: string,
+		fields: TemplateField[],
 		version: VersionID,
 		versionCounter: VersionID,
 		updatedBody: boolean
@@ -87,6 +100,12 @@ export default function Elements(props: ElementsProps) {
 	const [prismValue, setPrismValue] = createSignal("")
 	const [isRevert, setIsRevert] = createSignal(false)
 	let el: HTMLButtonElement | undefined
+	let progressRef: HTMLDivElement | undefined
+	const useVisibilityObserver = createVisibilityObserver({
+		threshold: 0.1,
+		rootMargin: "50px" // Preload a bit before element comes into view
+	})
+	const isVisible = useVisibilityObserver(() => progressRef)
 
 	createEffect(() => {
 		setInputValueBody(props.item.body.get(props.item.selectedVersion) || "")
@@ -179,6 +198,20 @@ export default function Elements(props: ElementsProps) {
 		const isTitleDiff: boolean = inputValueTitle() !== props.item.name
 		const isSummaryDiff: boolean = inputValueSummary() !== props.item.summary
 		const revert: boolean = isRevert()
+		const newFields = fieldsData() as unknown as TemplateField[]
+		const isFieldsDiff: boolean = JSON.stringify(props.item.fields || []) !== JSON.stringify(newFields)
+
+		// Update fields in all templates using this element
+		const sections = usedInSections({ id: props.item.id, group: props.item.group }).sections
+		sections.forEach(section => {
+			updateItemFieldsInTemplateSection(
+				section.templateId,
+				section.sectionId,
+				props.item.id,
+				newFields,
+				selectedTemplateVersion()!
+			)
+		})
 
 		if (revert && props.item.selectedVersion === version) {
 			setIsRevert(false)
@@ -188,10 +221,20 @@ export default function Elements(props: ElementsProps) {
 			})
 			return
 		}
+
 		if (revert && props.item.selectedVersion !== version) {
 			version = props.item.versionCounter + 1
 			const body = props.item.body.get(props.item.selectedVersion) || ""
-			props.handleUpdateAttributes(props.item, inputValueTitle(), inputValueSummary(), body, version, version, true)
+			props.handleUpdateAttributes(
+				props.item,
+				inputValueTitle(),
+				inputValueSummary(),
+				body,
+				newFields,
+				version,
+				version,
+				true
+			)
 			storeEntityMap()
 			setIsRevert(false)
 			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
@@ -200,24 +243,46 @@ export default function Elements(props: ElementsProps) {
 				position: "bottom-center"
 			})
 			return
-		} else if ((isTitleDiff || isSummaryDiff) && !isDiff) {
+		}
+
+		if ((isTitleDiff || isSummaryDiff) && !isDiff && !isFieldsDiff) {
 			version = props.item.versionCounter
-			props.handleUpdateAttributes(props.item, inputValueTitle(), inputValueSummary(), body, version, version, false)
+			props.handleUpdateAttributes(
+				props.item,
+				inputValueTitle(),
+				inputValueSummary(),
+				body,
+				newFields,
+				version,
+				version,
+				false
+			)
 			storeEntityMap()
 			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
 			toast(isTitleDiff ? "Title Saved" : "Summary Saved", { duration: 2000, position: "bottom-center" })
 			return
-		} else if (isDiff) {
+		}
+
+		if (isDiff || isFieldsDiff) {
 			version = props.item.versionCounter + 1
-			props.handleUpdateAttributes(props.item, inputValueTitle(), inputValueSummary(), body, version, version, true)
+			props.handleUpdateAttributes(
+				props.item,
+				inputValueTitle(),
+				inputValueSummary(),
+				body,
+				newFields,
+				version,
+				version,
+				true
+			)
 			storeEntityMap()
 			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
 			toast("Saved to new version: " + version, { duration: 2000, position: "bottom-center" })
 			return
-		} else {
-			toast("No Changes to Save", { duration: 5000, position: "bottom-center" })
-			return
 		}
+
+		toast("No Changes to Save", { duration: 5000, position: "bottom-center" })
+		return
 	}
 
 	const handleAddToTemplate = () => {
@@ -230,7 +295,8 @@ export default function Elements(props: ElementsProps) {
 			selectedSection()!,
 			props.item.id,
 			props.item.group,
-			selectedTemplateVersion()!
+			selectedTemplateVersion()!,
+			fieldsData()
 		)
 	}
 
@@ -271,6 +337,46 @@ export default function Elements(props: ElementsProps) {
 		setSelectedTemplateGroup(templateId.value)
 		setSelectedSection(null)
 	}
+
+	const extractFields = (text: string, existingFields: TemplateField[] = []): TemplateField[] => {
+		if (!text) return []
+		const fieldPattern = /(\$?)\{\{([^{}]+?)(?:\}\}|\}|$)/g
+		const matches = [...text.matchAll(fieldPattern)]
+
+		return Array.from(
+			new Set(
+				matches.map(match => {
+					const name = match[2].trim()
+					// Find existing field with same name to preserve its ID
+					const existingField = existingFields.find(f => f.name === name)
+
+					return {
+						name,
+						// Use existing ID if available, otherwise create new one
+						templateFieldId: existingField?.templateFieldId || (crypto.randomUUID() as unknown as TemplateFieldID),
+						type: match[1] === "$" ? "global" : "local",
+						modifierId: existingField?.modifierId || "",
+						order: existingField?.order || ""
+					}
+				})
+			)
+		)
+	}
+
+	const fieldsData = createMemo(() => {
+		const currentBody =
+			isEditingItem().id === props.item.id && isEditingItem().status === "editing"
+				? isPrism()
+					? prismValue()
+					: inputValueBody()
+				: props.item.body.get(props.item.selectedVersion) || ""
+
+		// Pass existing fields to extractFields
+		const existingFields = props.item.fields || []
+		const fields = extractFields(currentBody, existingFields)
+
+		return fields
+	})
 
 	const getBadgeValuesFromBadgeID = (badgeId: BadgeID) => {
 		const badges = badge.get(badgeId)
@@ -333,8 +439,6 @@ export default function Elements(props: ElementsProps) {
 		return templateNames
 	}
 
-	const placeholdersTest = ["color", "hair", "bread", "couch", "money"]
-
 	return (
 		<div>
 			<Button
@@ -375,12 +479,12 @@ export default function Elements(props: ElementsProps) {
 						<div class="flex items-center gap-2 pr-10 group flex-grow mb-2">
 							<Show
 								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
-								fallback={
+								/* fallback={
 									<div class="text-xs font-medium bg-background rounded-md px-2 py-0.5 justify-center items-center flex select-none ">
 										<div class="text-[.5rem] mr-0.25 mt-0.5">v</div>
 										<div>{props.item.selectedVersion}</div>
 									</div>
-								}
+								} */
 							>
 								<div class="flex items-center gap-2 mt-5">
 									<Select
@@ -466,53 +570,65 @@ export default function Elements(props: ElementsProps) {
 					<Show
 						when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
 						fallback={
-							<div class="text-xs w-full">
-								<div class="flex flex-col w-full gap-1">
-									<Progress
-										value={contentPreview()?.wordCount || 0}
-										minValue={0}
-										maxValue={1000}
-										getValueLabel={({ value, max }) => ``}
-										class="w-[300px] space-y-1"
-									>
-										<div class="flex justify-between min-h-5">
-											<div class="text-foreground/60 text-xs flex items-center gap-4">
-												<div class="flex items-center gap-1 text-[.6rem]">
-													<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
-													<span class="text-[.6rem] mr-2">tokens</span>
-												</div>
-												<div class="flex items-center gap-1 text-[.6rem]">
-													<span>{`${usedInSections({ id: props.item.id, group: props.item.group }).sections.length}`}</span>
-													<span class="text-[.6rem] mr-2">Sections</span>
-												</div>
-												<div class="flex items-center gap-1 text-[.6rem]">
-													<span>{`${
-														Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length
-													}`}</span>
-													<span class="text-[.6rem] mr-2">Templates</span>
-												</div>
-												<Show when={placeholdersTest.length > 0}>
-													<div class="flex gap-1 text-foreground/60 text-[.6rem] items-center ">
-														Fields:
-														<For each={placeholdersTest.slice(0, 3)}>
-															{(placeholder: any) => (
-																<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
-																	{placeholder}
-																</div>
-															)}
-														</For>
-														<Show when={placeholdersTest.length > 3}>
-															<div class="text-[.6rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
-																+{placeholdersTest.length - 3}
-															</div>
-														</Show>
+							<div
+								ref={progressRef}
+								class="text-xs w-full"
+							>
+								<Show when={isVisible()}>
+									<div class="flex flex-col w-full gap-1">
+										<Progress
+											value={contentPreview()?.wordCount || 0}
+											minValue={0}
+											maxValue={1000}
+											getValueLabel={({ value, max }) => ``}
+											class="w-[300px] space-y-1"
+										>
+											<div class="flex justify-between min-h-5">
+												<div class="text-foreground/60 text-xs flex items-center gap-4">
+													<div class="flex items-center gap-1 text-[.6rem]">
+														<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
+														<span class="text-[.6rem] mr-2">tokens</span>
 													</div>
-												</Show>
+													<div class="flex items-center gap-1 text-[.6rem]">
+														<span>{`${usedInSections({ id: props.item.id, group: props.item.group }).sections.length}`}</span>
+														<span class="text-[.6rem] mr-2">Sections</span>
+													</div>
+													<div class="flex items-center gap-1 text-[.6rem]">
+														<span>{`${
+															Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length
+														}`}</span>
+														<span class="text-[.6rem] mr-2">Templates</span>
+													</div>
+													<Show when={fieldsData().length > 0}>
+														<div class="flex gap-1 text-foreground/60 text-[.6rem] items-center overflow-hidden">
+															Fields:
+															<div class="flex gap-1 items-center overflow-hidden">
+																<For each={fieldsData().slice(0, 3)}>
+																	{field => (
+																		<div
+																			class={cn(
+																				"lowercase text-[.6rem] font-700 rounded-sm px-0.65 py-0.10 whitespace-nowrap text-ellipsis overflow-hidden max-w-[100px]",
+																				field.type === "global" ? "bg-accent/20" : "bg-background-secondary"
+																			)}
+																		>
+																			{field.name}
+																		</div>
+																	)}
+																</For>
+																<Show when={fieldsData().length > 3}>
+																	<div class="text-[.6rem] font-700 rounded-sm px-0.65 py-0.10 bg-background-secondary">
+																		+{fieldsData().length - 3}
+																	</div>
+																</Show>
+															</div>
+														</div>
+													</Show>
+												</div>
+												<ProgressValueLabel />
 											</div>
-											<ProgressValueLabel />
-										</div>
-									</Progress>
-								</div>
+										</Progress>
+									</div>
+								</Show>
 							</div>
 						}
 					>
@@ -736,7 +852,7 @@ export default function Elements(props: ElementsProps) {
 							>
 								<div class="i-material-symbols-light:push-pin text-foreground/80 w-4 h-4 group-hover:text-accent-foreground"></div>
 							</Button>
-						</Show>
+						</Show>{" "}
 						<div class="flex items-center gap-2 min-w-23 min-h-10">
 							<Show
 								when={

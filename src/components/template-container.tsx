@@ -1,4 +1,4 @@
-import { For, createSignal, Show, createEffect, Accessor, createUniqueId, onCleanup } from "solid-js"
+import { For, createSignal, Show, createEffect, Accessor, createUniqueId } from "solid-js"
 import { cn } from "~/lib/utils"
 import {
 	selectedTemplateGroup,
@@ -14,9 +14,18 @@ import {
 	selectedSectionItemEl,
 	setIsEditingItem,
 	selectedItem,
-	selectedTemplateVersion
+	selectedTemplateVersion,
+	activeFieldId,
+	setActiveFieldId
 } from "~/global_state"
-import { ElementID, GroupID, TemplateGroupID, TemplateSection, TemplateSectionID } from "~/types/entityType"
+import {
+	ElementID,
+	GroupID,
+	TemplateField,
+	TemplateGroupID,
+	TemplateSection,
+	TemplateSectionID
+} from "~/types/entityType"
 import { Button } from "~/registry/ui/button"
 import { EditableSectionTitle } from "./editable-section-title"
 import {
@@ -38,7 +47,7 @@ import {
 } from "~/registry/ui/dropdown-menu"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "~/registry/ui/select"
-
+import TemplateSectionFields from "./template-section-fields"
 interface TemplateContainerProps {
 	isEditingTemplateSection: Accessor<{ status: string }>
 	setIsEditingTemplateSection: (value: { status: string }) => void
@@ -257,7 +266,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 													</div>
 													<div class="flex flex-col gap-1 w-full overflow-auto min-h-8">
 														<For each={section.items}>
-															{(item: { id: ElementID; group: GroupID }) => {
+															{(item: { id: ElementID; group: GroupID; fields?: TemplateField[] }) => {
 																const uniqueId = createUniqueId()
 																const [el, setEl] = createSignal<HTMLButtonElement | undefined>()
 																const [isSelected, setIsSelected] = createSignal<{ selected: "selected" | "unselected" }>({
@@ -393,17 +402,17 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																						</div>
 																					</Show>
 																					<div class="min-w-13">
-																						<Show when={true}>
+																						<Show when={item.fields && item.fields.length > 0}>
 																							<div
-																								onclick={() => {
-																									setIsFieldsSelected(!isFieldsSelected())
+																								onclick={e => {
+																									setActiveFieldId(current => (current === item.id ? null : item.id))
 																								}}
 																								class={cn(
-																									"items-center justify-center text-[0.6rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 bg-accent/15 hover:cursor-pointer hover:text-primary-foreground hover:bg-primary",
-																									isFieldsSelected() && "text-primary-foreground bg-primary"
-																									//!isFieldsSelected() && " bg-error text-error-foreground"
-																									//!isFieldsSelected() && " text-warning bg-warning/15"
-																									//!isFieldsSelected() && " bg-success text-success-foreground"
+																									"items-center justify-center text-[0.6rem] text-foreground/40 flex items-center mr-2 ml-2 px-1 rounded-0.75 hover:cursor-pointer",
+																									activeFieldId() === item.id && "text-primary-foreground bg-primary",
+																									item.fields?.some(field => field.modifierId === "")
+																										? "text-warning bg-warning/15 hover:bg-warning hover:text-warning-foreground"
+																										: "bg-accent/15 hover:text-primary-foreground hover:bg-primary"
 																								)}
 																							>
 																								Fields
@@ -413,28 +422,10 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																				</div>
 																			</div>
 																		</button>
-																		<Show when={isFieldsSelected() && selectedSectionItem() === item.id}>
-																			{shown => {
-																				createEffect(() => {
-																					onCleanup(() => setIsFieldsSelected(false))
-																				})
-
-																				return (
-																					<div class="w-full text-[0.6rem] text-foreground/40">
-																						<div class="w-full h-8 flex items-center px-2 py-1  ">
-																							Global Field: One
-																							<div class="bg-background text-foreground text-[0.6rem] rounded-sm px-1 ml-2">
-																								Global Modifier One
-																							</div>
-																						</div>
-																						<div class="w-full  h-8 flex items-center px-2 py-1 border-t border-accent/20 ">
-																							Field: Two
-																							<div class="bg-background text-foreground text-[0.6rem] rounded-sm px-1 ml-2">Modifier One</div>
-																						</div>
-																						<div class="w-full  h-8 flex items-center px-2 py-1 border-t border-accent/20 ">Field: Three</div>
-																					</div>
-																				)
-																			}}
+																		<Show when={activeFieldId() === item.id && selectedSection() === section.id}>
+																			<div class="w-full text-[0.6rem] text-foreground/40 space-y-0.25 flex flex-col items-center">
+																				<TemplateSectionFields fields={item.fields!} />
+																			</div>
 																		</Show>
 																	</div>
 																)

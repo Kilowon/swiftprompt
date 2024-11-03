@@ -182,14 +182,14 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 							})
 							return (
 								<Modifiers
-									item={item}
+									modifier={item}
 									handleEditing={handleEditing}
 									handleUpdateAttributes={handleUpdateAttributes}
 									handleDeleteItem={handleDeleteItem}
 									handleDuplicateItem={duplicateItemHandler}
 									labelLimit={labelLimit}
 									handleMoveItem={moveItemToNewGroup}
-									items={items()}
+									modifiers={items()}
 									sizes={props.sizes}
 								/>
 							)

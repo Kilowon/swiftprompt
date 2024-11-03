@@ -24,6 +24,7 @@ export interface Item extends Base {
 	description: string
 	group: GroupID
 	labels: Badge[]
+	fields?: TemplateField[]
 	summary?: string
 	body?: ReactiveMap<VersionID, string>
 	versionCounter: VersionID
@@ -114,6 +115,10 @@ export interface TemplateSectionID {
 	id: Id
 }
 
+export interface TemplateFieldID {
+	id: Id
+}
+
 export interface GlobalModifiersID {
 	id: Id
 }
@@ -157,9 +162,12 @@ export interface TemplateSection {
 }
 
 export interface TemplateField {
-	name: string
-	order: string
-	modifierId?: ModifierID
+	name: string | ""
+	templateFieldId: TemplateFieldID | ""
+	type: "global" | "local"
+	modifierId?: ModifierID | ""
+	modifierGroupId?: ModifierGroupID | ""
+	order?: string | ""
 }
 
 export type Filter =

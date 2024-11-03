@@ -5,7 +5,14 @@ import { Separator } from "~/registry/ui/separator"
 import { Switch, SwitchControl, SwitchLabel, SwitchThumb } from "~/registry/ui/switch"
 import { TextField, TextFieldTextArea } from "~/registry/ui/text-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
-import { templates, selectedTemplateGroup, entityItems, selected, selectedTemplateVersion } from "~/global_state"
+import {
+	templates,
+	selectedTemplateGroup,
+	entityItems,
+	selected,
+	selectedTemplateVersion,
+	entityModifiers
+} from "~/global_state"
 import { writeClipboard } from "@solid-primitives/clipboard"
 import { toast } from "solid-sonner"
 import { Editor } from "solid-prism-editor"
@@ -26,7 +33,7 @@ import { highlightMatchingTags, matchTags } from "solid-prism-editor/match-tags"
 import { copyButton } from "solid-prism-editor/copy-button"
 import { defaultCommands, editHistory } from "solid-prism-editor/commands"
 
-import { GroupID, PromptItem, TemplateSection } from "~/types/entityType"
+import { GroupID, ModifierGroupID, ModifierID, PromptItem, TemplateField, TemplateSection } from "~/types/entityType"
 
 export default function PromptDisplay() {
 	const [tokenCount, setTokenCount] = createSignal(0)
@@ -96,23 +103,35 @@ export default function PromptDisplay() {
 				...(section.items?.map((item: PromptItem) => {
 					const versionCounter = entityItems.get(item.group)?.get(item.id)?.versionCounter ?? 0
 					const body = entityItems.get(item.group)?.get(item.id)?.body?.get(versionCounter) ?? ""
-					return body
+					const fields =
+						section.items
+							.find((i: TemplateSection) => i.id === item.id)
+							?.fields.reduce((acc: Record<string, string>, field: TemplateField) => {
+								const modifier =
+									field.modifierGroupId && field.modifierId
+										? entityModifiers.get(field.modifierGroupId)?.get(field.modifierId)?.modifier
+										: ""
+								return {
+									...acc,
+									[field.name]: modifier || ""
+								}
+							}, {}) ?? {}
+					console.log("fields", fields)
+					const replacedContent = replaceDelimiters(body, fields)
+					return replacedContent
 				}) ?? [])
 			])
 			.join("\n\n")
 
 		// Define the values for replacement
-		const values = {
-			delimiter: "Comma",
-			color: "Blue",
-			pdf: "Document",
-			items: "my island!"
-		}
+
+		createEffect(() => {
+			console.log("content", content)
+		})
 
 		// Use the replaceDelimiters function
-		const replacedContent = replaceDelimiters(content, values)
 
-		setScreenWriter(replacedContent)
+		setScreenWriter(content)
 	})
 	const handleCopyToClipboard = () => {
 		writeClipboard(promptWriter() === "" ? screenWriter() : promptWriter())

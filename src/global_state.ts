@@ -16,7 +16,8 @@ import {
 	ModifierGroupID,
 	ModifierID,
 	ModifierGroup,
-	Modifier
+	Modifier,
+	TemplateFieldID
 } from "~/types/entityType"
 import { Id } from "@thisbeyond/solid-dnd"
 import { Badge } from "~/types/badgeType"
@@ -128,6 +129,10 @@ const [selectedModifier, setSelectedModifier] = createSignal<ModifierID | null>(
 
 export { selectedModifier, setSelectedModifier }
 
+const [selectedTemplateField, setSelectedTemplateField] = createSignal<TemplateFieldID | null>(null)
+
+export { selectedTemplateField, setSelectedTemplateField }
+
 const [searchSelectedBadges, setSearchSelectedBadges] = createSignal<Badge[]>([])
 
 export { searchSelectedBadges, setSearchSelectedBadges }
@@ -157,7 +162,13 @@ const [isCollapsedViewer, setIsCollapsedViewer] = createSignal(false)
 export { isCollapsedViewer, setIsCollapsedViewer }
 
 const [panelRef, setPanelRef] = createSignal<any>(null)
+
 export { panelRef, setPanelRef }
 
 const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
+
 export { isCollapsedMenu, setIsCollapsedMenu }
+
+const [activeFieldId, setActiveFieldId] = createSignal<ElementID | null>(null)
+
+export { activeFieldId, setActiveFieldId }

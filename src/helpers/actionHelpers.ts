@@ -34,7 +34,9 @@ import {
 	ModifierGroupID,
 	ModifierID,
 	Modifier,
-	ModifierGroup
+	ModifierGroup,
+	TemplateField,
+	TemplateFieldID
 } from "~/types/entityType"
 import { Badge } from "~/types/badgeType"
 import { storeEntityMap } from "./entityHelpers"
@@ -121,6 +123,7 @@ export const duplicateGroup = (id: GroupID) => {
 				item.name,
 				newGroupId as unknown as GroupID,
 				item.labels || [],
+				item.fields || [],
 				item.summary || "",
 				0,
 				0,
@@ -393,7 +396,8 @@ export const addItemToTemplateSection = (
 	id: TemplateSectionID,
 	itemId: ElementID,
 	groupId: GroupID,
-	version: VersionID
+	version: VersionID,
+	fields: TemplateField[]
 ) => {
 	const versionCounter = templates.get(selectedTemplateGroup()!)?.versionCounter ?? 0
 	const selectedVersion = selectedTemplateVersion() ?? 0
@@ -435,7 +439,8 @@ export const addItemToTemplateSection = (
 			group: groupId,
 			order: getNextOrder(),
 			date_created: new Date().toISOString(),
-			date_modified: new Date().toISOString()
+			date_modified: new Date().toISOString(),
+			fields: fields
 		})
 		templates
 			.get(templateGroupId)
@@ -469,12 +474,106 @@ export const removeItemFromTemplateSection = (
 	}
 }
 
+export const updateItemFieldsInTemplateSection = (
+	templateGroupId: TemplateGroupID,
+	id: TemplateSectionID,
+	itemId: ElementID,
+	fields: TemplateField[],
+	version: VersionID
+) => {
+	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
+	if (section) {
+		const updatedItems = section.items.map(item => {
+			if (item.id === itemId) {
+				// Log existing fields for debugging
+				console.log("Existing fields:", item.fields)
+				console.log("New fields:", fields)
+
+				const updatedFields = fields.map(newField => {
+					const existingField = item.fields?.find(f => f.templateFieldId === newField.templateFieldId)
+
+					// Log matching for debugging
+					console.log("Matching field:", existingField)
+
+					const result = {
+						...newField,
+						// Explicitly preserve existing modifier IDs if they exist
+						modifierId: existingField?.modifierId ?? newField.modifierId,
+						modifierGroupId: existingField?.modifierGroupId ?? newField.modifierGroupId
+					}
+
+					// Log result for debugging
+					console.log("Result field:", result)
+					return result
+				})
+
+				return { ...item, fields: updatedFields }
+			}
+			return item
+		})
+
+		templates
+			.get(templateGroupId)
+			?.sections.get(version)
+			?.set(id, {
+				...section,
+				items: updatedItems,
+				date_modified: new Date().toISOString()
+			})
+
+		storeEntityMap()
+	}
+}
+
+export const addModifierToField = (
+	templateGroupId: TemplateGroupID,
+	id: TemplateSectionID,
+	itemId: ElementID,
+	modifierId: ModifierID,
+	modifierGroupId: ModifierGroupID,
+	fieldId: TemplateFieldID,
+	version: VersionID
+) => {
+	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
+	if (section) {
+		const updatedItems = section.items.map(item => {
+			if (item.id === itemId) {
+				return {
+					...item,
+					fields: item.fields?.map(field =>
+						field.templateFieldId === fieldId
+							? {
+									...field,
+									modifierId: modifierId,
+									modifierGroupId: modifierGroupId
+							  }
+							: field
+					)
+				}
+			}
+			return item
+		})
+
+		templates
+			.get(templateGroupId)
+			?.sections.get(version)
+			?.set(id, {
+				...section,
+				items: updatedItems,
+				date_modified: new Date().toISOString()
+			})
+
+		storeEntityMap()
+	}
+}
+
 // Element Functions
 
 export const addItem = (
 	name: string,
 	group: GroupID,
 	labels: Badge[],
+	fields: TemplateField[],
 	summary: string,
 	versionCounter: VersionID,
 	selectedVersion: VersionID,
@@ -484,6 +583,7 @@ export const addItem = (
 	const date_created = new Date()
 	const date_modified = new Date()
 	const labelsCopy = labels || []
+	const fieldsCopy = fields || []
 	const summaryCopy = summary || ""
 	const nameCopy = name || ""
 	const order = getNextOrder()
@@ -506,6 +606,7 @@ export const addItem = (
 		date_modified: date_modified.toString(),
 		labels: labelsCopy,
 		description: "",
+		fields: fieldsCopy,
 		name: nameCopy,
 		id: id as unknown as ElementID,
 		pinned
@@ -525,6 +626,7 @@ export const changeItemAttributes = (
 	name: string,
 	summary: string,
 	body: string,
+	fields: TemplateField[],
 	versionCounter: VersionID,
 	selectedVersion: VersionID,
 	updatedBody: boolean
@@ -552,7 +654,8 @@ export const changeItemAttributes = (
 		versionCounter: versionCounters,
 		selectedVersion: selectedVersions,
 		date_modified: date_modified.toString(),
-		type: "item" as const
+		type: "item" as const,
+		fields: fields ?? item.fields
 	}
 
 	entity.set(id, updatedItem as unknown as Omit<Item, "body"> & { body: ReactiveMap<VersionID, string> })
@@ -579,7 +682,6 @@ export const pinToggleItem = (groupId: GroupID, id: ElementID) => {
 export const deleteItem = (groupId: GroupID, id: ElementID) => {
 	// Removes the item from the templates before deleting the item from the entityItems
 	const itemBadges = entityItems.get(groupId)?.get(id)
-	console.log("deleteItem", id, itemBadges?.labels)
 	templates.forEach(template => {
 		const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
 			[...template.sections.entries()].map(([version, sections]) => [
@@ -606,6 +708,7 @@ export const duplicateItem = (groupId: GroupID, itemId: ElementID) => {
 			item.name + " - Copy",
 			groupId,
 			item.labels,
+			item.fields || [],
 			item.summary || "",
 			item.versionCounter,
 			item.selectedVersion,
@@ -725,8 +828,6 @@ export const updateModifierGroupSort = (id: ModifierGroupID, sort: Filter) => {
 // Modifier Functions
 
 export const addModifier = (name: string, modifierGroupId: ModifierGroupID, summary: string, modifier: string) => {
-	console.log("Start Modifier")
-
 	const id = crypto.randomUUID()
 	const date_created = new Date()
 	const date_modified = new Date()
@@ -745,9 +846,9 @@ export const addModifier = (name: string, modifierGroupId: ModifierGroupID, summ
 		date_modified: date_modified.toString(),
 		name: nameCopy
 	})
-	console.log("End Modifier", modifierToGroup.get(id as unknown as ModifierID))
+
 	entityModifiers.set(modifierGroupId, modifierToGroup)
-	console.log("End Modifier Set", Array.from(entityModifiers.get(modifierGroupId)?.values() ?? []))
+
 	storeEntityMap()
 
 	return id

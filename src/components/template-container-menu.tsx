@@ -123,8 +123,10 @@ export default function TemplateContainerMenu() {
 							}}
 							class="flex items-center min-w-40 group"
 						>
-							<h1 class="text-[0.8rem] font-bold mt-1.5 mb-1.5 capitalize truncate max-w-60 flex items-center">
+							<Show when={selectedTemplateGroup()}>
 								<div class="i-ri:apps-2-fill w-5 h-5 mr-2 text-accent" />
+							</Show>
+							<h1 class="text-[0.8rem] font-bold mt-1.5 mb-1.5 capitalize truncate max-w-60 flex items-center">
 								{templates.get(selectedTemplateGroup()!)?.name}
 							</h1>
 						</div>

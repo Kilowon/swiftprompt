@@ -13,23 +13,28 @@ import {
 	selectedSection,
 	selectedSectionItem,
 	setSelectedSectionItemEl,
-	selectedTemplateVersion
+	selectedTemplateVersion,
+	selectedTemplateField
 } from "~/global_state"
-import { ElementID, Modifier, ModifierGroupID, ModifierID, VersionID } from "~/types/entityType"
+import { ElementID, Modifier, ModifierGroupID, ModifierID } from "~/types/entityType"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/registry/ui/dropdown-menu"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
 import { EditableModifierTitle } from "./editable-modifier-title"
 import { EditableModifierSummary } from "./editable-modifier-summary"
 import { EditableModifierPrism } from "./editable-modifier-prism"
-import { storeEntityMap } from "~/helpers/entityHelpers"
-import { addItemToTemplateSection } from "~/helpers/actionHelpers"
+import { addModifierToField } from "~/helpers/actionHelpers"
 
 interface ModifiersProps {
-	item: Modifier
-	handleEditing: (item: Modifier, label: "title" | "summary" | "body", status: "editing" | "saved", id: string) => void
+	modifier: Modifier
+	handleEditing: (
+		modifier: Modifier,
+		label: "title" | "summary" | "body",
+		status: "editing" | "saved",
+		id: string
+	) => void
 	handleUpdateAttributes: (
-		item: Modifier,
+		modifier: Modifier,
 		name: string,
 		summary: string,
 		body: string,
@@ -39,40 +44,48 @@ interface ModifiersProps {
 	handleDuplicateItem: (item: Modifier) => void
 	handleMoveItem: (item: Modifier, groupId: ModifierGroupID) => void
 	labelLimit: () => number
-	items: Modifier[]
+	modifiers: Modifier[]
 	sizes: number[]
 }
 
 export default function Modifiers(props: ModifiersProps) {
-	const [inputValueTitle, setInputValueTitle] = createSignal(props.item.name || "")
-	const [inputValueSummary, setInputValueSummary] = createSignal(props.item.summary || "")
-	const [inputValueBodyPrism, setInputValueBodyPrism] = createSignal(props.item.modifier)
+	const [inputValueTitle, setInputValueTitle] = createSignal(props.modifier.name || "")
+	const [inputValueSummary, setInputValueSummary] = createSignal(props.modifier.summary || "")
+	const [inputValueBodyPrism, setInputValueBodyPrism] = createSignal(props.modifier.modifier)
 	const [isPrism, setIsPrism] = createSignal(true)
 	const [prismValue, setPrismValue] = createSignal("")
 	let el: HTMLButtonElement | undefined
 
 	createEffect(() => {
-		if (selectedSectionItem() === props.item.id) {
+		if (selectedSectionItem() === props.modifier.id) {
 			setSelectedSectionItemEl(el)
 		}
 	})
 
 	const handleSave = () => {
 		const body = prismValue()
-		props.handleUpdateAttributes(props.item, inputValueTitle(), inputValueSummary(), body, props.item.modifierGroupId)
+		props.handleUpdateAttributes(
+			props.modifier,
+			inputValueTitle(),
+			inputValueSummary(),
+			body,
+			props.modifier.modifierGroupId
+		)
 		setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
 	}
 
-	const handleAddToTemplate = () => {
+	const handleAddToField = () => {
 		if (selectedSection() === null) {
-			toast("Please select a section to add the item to", { duration: 5000, position: "bottom-center" })
+			toast("Please select a field to add the modifier to", { duration: 5000, position: "bottom-center" })
 			return
 		}
-		addItemToTemplateSection(
+		addModifierToField(
 			selectedTemplateGroup()!,
 			selectedSection()!,
-			props.item.id,
-			props.item.modifierGroupId,
+			selectedSectionItem()!,
+			props.modifier.id,
+			props.modifier.modifierGroupId,
+			selectedTemplateField()!,
 			selectedTemplateVersion()!
 		)
 	}
@@ -81,7 +94,7 @@ export default function Modifiers(props: ModifiersProps) {
 	const handleDebounce = () => {
 		if (!isDebouncing()) {
 			setIsDebouncing(true)
-			handleAddToTemplate()
+			handleAddToField()
 			setTimeout(() => {
 				setIsDebouncing(false)
 			}, 1000)
@@ -89,7 +102,7 @@ export default function Modifiers(props: ModifiersProps) {
 	}
 
 	const contentPreview = createMemo(() => {
-		const body = props.item.modifier || ""
+		const body = props.modifier.modifier || ""
 		const wordCount = body.trim() ? body.split(/\s+/).length : 0
 		return { wordCount }
 	})
@@ -97,10 +110,6 @@ export default function Modifiers(props: ModifiersProps) {
 	const estimateTokens = (wordCount: number): number => {
 		return Math.ceil(wordCount * 1.33)
 	}
-
-	createEffect(() => {
-		console.log("wordCount", estimateTokens(contentPreview().wordCount))
-	})
 
 	return (
 		<div>
@@ -110,11 +119,11 @@ export default function Modifiers(props: ModifiersProps) {
 				size="no_format"
 				class={cn(
 					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/50 cursor-default",
-					selectedItem() === props.item.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
+					selectedItem() === props.modifier.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
 				)}
-				onClick={() => setSelectedItem(props.item.id)}
+				onClick={() => setSelectedItem(props.modifier.id)}
 			>
-				<Show when={selectedItem() === props.item.id}>
+				<Show when={selectedItem() === props.modifier.id}>
 					<Tooltip
 						openDelay={1000}
 						closeDelay={0}
@@ -139,14 +148,17 @@ export default function Modifiers(props: ModifiersProps) {
 						{/* Title Prompts */}
 						<div class="flex items-center gap-2 pr-10 group flex-grow mb-2">
 							<Show
-								when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
+								when={isEditingItem().id === props.modifier.id && isEditingItem().status === "editing"}
 								fallback={
 									<div class="flex items-center gap-1">
 										<div class="i-fluent:tetris-app-24-regular w-5 h-5 text-accent"></div>
 										<div
-											class={cn("text-[0.8rem] font-semibold text-foreground/80", !props.item?.name ? "text-foreground/80" : "")}
+											class={cn(
+												"text-[0.8rem] font-semibold text-foreground/80",
+												!props.modifier?.name ? "text-foreground/80" : ""
+											)}
 										>
-											{props.item?.name || "Add Title"}
+											{props.modifier?.name || "Add Title"}
 										</div>
 									</div>
 								}
@@ -154,8 +166,8 @@ export default function Modifiers(props: ModifiersProps) {
 								<EditableModifierTitle
 									inputValueTitle={inputValueTitle}
 									setInputValueTitle={setInputValueTitle}
-									item={props.item}
-									name={props.item.name}
+									item={props.modifier}
+									name={props.modifier.name}
 									handleSave={handleSave}
 								/>
 							</Show>
@@ -164,18 +176,18 @@ export default function Modifiers(props: ModifiersProps) {
 					{/* Summary Prompts */}
 					<div class="items-center gap-2 pr-10">
 						<Show
-							when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}
+							when={isEditingItem().id === props.modifier.id && isEditingItem().status === "editing"}
 							fallback={
 								<div class="flex items-center gap-2">
-									<div class={cn("text-xs text-foreground/60", !props.item?.summary ? "text-foreground/60" : "")}>
-										{props.item?.summary || "Add summary"}
+									<div class={cn("text-xs text-foreground/60", !props.modifier?.summary ? "text-foreground/60" : "")}>
+										{props.modifier?.summary || "Add summary"}
 									</div>
 								</div>
 							}
 						>
 							<EditableModifierSummary
-								item={props.item}
-								summary={props.item.summary}
+								item={props.modifier}
+								summary={props.modifier.summary}
 								inputValueSummary={inputValueSummary()}
 								setInputValueSummary={setInputValueSummary}
 								handleSave={handleSave}
@@ -184,14 +196,14 @@ export default function Modifiers(props: ModifiersProps) {
 					</div>
 
 					{/* Body Prompts */}
-					<Show when={isEditingItem().id === props.item.id && isEditingItem().status === "editing"}>
+					<Show when={isEditingItem().id === props.modifier.id && isEditingItem().status === "editing"}>
 						<Show when={isPrism()}>
 							<EditableModifierPrism
-								item={props.item}
+								item={props.modifier}
 								inputValueBody={inputValueBodyPrism}
 								setInputValueBody={setInputValueBodyPrism}
 								setPrismValue={setPrismValue}
-								body={props.item.modifier}
+								body={props.modifier.modifier}
 								handleSave={handleSave}
 								setIsPrism={setIsPrism}
 							/>
@@ -208,10 +220,12 @@ export default function Modifiers(props: ModifiersProps) {
 							</div>
 							<Show
 								when={
-									isEditingItem().status === "editing" && isEditingItem().id === props.item.id && isEditingItem().label === "all"
+									isEditingItem().status === "editing" &&
+									isEditingItem().id === props.modifier.id &&
+									isEditingItem().label === "all"
 								}
 								fallback={
-									<Show when={selectedItem() === props.item.id}>
+									<Show when={selectedItem() === props.modifier.id}>
 										<Tooltip
 											openDelay={1000}
 											closeDelay={0}
@@ -219,7 +233,7 @@ export default function Modifiers(props: ModifiersProps) {
 											<TooltipTrigger
 												as={Button}
 												onClick={() => {
-													setIsEditingItem({ status: "editing", id: props.item.id, label: "all" })
+													setIsEditingItem({ status: "editing", id: props.modifier.id, label: "all" })
 													setIsEditingGroup({ status: "saved", id: "" as unknown as ModifierGroupID, label: "" })
 												}}
 												variant="ghost"
@@ -270,7 +284,7 @@ export default function Modifiers(props: ModifiersProps) {
 									<TooltipContent>Exit Edit (Ctrl + E)</TooltipContent>
 								</Tooltip>
 							</Show>
-							<Show when={selectedItem() === props.item.id}>
+							<Show when={selectedItem() === props.modifier.id}>
 								<div>
 									<DropdownMenu placement="bottom-end">
 										<DropdownMenuTrigger
@@ -283,7 +297,7 @@ export default function Modifiers(props: ModifiersProps) {
 											<span class="sr-only">More</span>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
-											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.modifierGroupId, props.item.id)}>
+											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.modifier.modifierGroupId, props.modifier.id)}>
 												<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Modifier
 											</DropdownMenuItem>
 										</DropdownMenuContent>
