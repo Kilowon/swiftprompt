@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, onCleanup, Show } from "solid-js"
 import { toast } from "solid-sonner"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
@@ -20,12 +20,14 @@ import {
 	setSelectedTemplateGroup,
 	setSelectedSection,
 	selectedTemplateVersion,
-	setSelectedTemplateVersion
+	setSelectedTemplateVersion,
+	hotKeyMappings
 } from "../global_state"
 
 import { ElementID, TemplateGroupID, TemplateSectionID, VersionID, TemplateFilter } from "../types/entityType"
 
 import { EditableTemplateTitle } from "~/components/editable-template-title"
+import { createShortcut } from "@solid-primitives/keyboard"
 //import TemplateVersions from "~/components/TemplateVersions"
 
 const [isCollapsedTemplate, setIsCollapsedTemplate] = createSignal(false)
@@ -80,6 +82,21 @@ const handleTemplateNameChange = (newName: string) => {
 const handleDuplicateTemplateGroup = () => {
 	duplicateTemplateGroup(selectedTemplateGroup() as unknown as TemplateGroupID)
 }
+
+const handleDeleteTemplateGroup = () => {
+	deleteTemplateGroup(selectedTemplateGroup()!)
+	setSelectedTemplateGroup(null)
+}
+
+// Add Template Section
+
+createShortcut(hotKeyMappings().AddTemplateSection, handleNewTemplateSection, { preventDefault: true })
+// Add Template Group
+createShortcut(hotKeyMappings().AddTemplateGroup, handleNewTemplateGroup, { preventDefault: true })
+// Delete Template Group
+createShortcut(hotKeyMappings().DeleteTemplateGroup, handleDeleteTemplateGroup, {
+	preventDefault: true
+})
 
 export default function TemplateContainerMenu() {
 	return (

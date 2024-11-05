@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
 import { getCookie } from "vinxi/http"
 import { ColorExampleFooter } from "./components/color-footer"
 import { Toaster } from "~/registry/ui/sonner"
-
+import { HotKeyFooter } from "./components/HotKeyFooter"
 function getServerCookies() {
 	"use server"
 	const colorMode = getCookie("kb-color-mode")
@@ -40,6 +40,7 @@ export default function App() {
 							<div class="flex-1 overflow-hidden">
 								<Suspense>{props.children}</Suspense>
 							</div>
+							<HotKeyFooter />
 							<ColorExampleFooter />
 						</div>
 					)}

@@ -1,12 +1,24 @@
-import { For, Show, createEffect, createMemo, Accessor } from "solid-js"
+import { For, Show, createEffect, createMemo, Accessor, onCleanup } from "solid-js"
 import { createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { ReactiveSet } from "@solid-primitives/set"
-import { setIsEditingItem, searchSelectedBadges, groupBadge, selected } from "~/global_state"
+import {
+	setIsEditingItem,
+	searchSelectedBadges,
+	groupBadge,
+	selected,
+	selectedItem,
+	setSelectedItem,
+	hotKeyMappings,
+	selectedSectionItemEl,
+	setSelectedSectionItem,
+	entityItems
+} from "~/global_state"
 import { deleteItem, duplicateItem, changeItemAttributes, moveItemToGroup } from "~/helpers/actionHelpers"
 import { PromptItem, ElementID, GroupID, VersionID, TemplateField } from "~/types/entityType"
 import Elements from "./elements"
 import ElementsCompact from "./elements-compact"
+import { createShortcut } from "@solid-primitives/keyboard"
 
 interface ElementsContainerProps {
 	type: "all" | "unread"
@@ -74,6 +86,29 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 		}
 	}
 
+	const handleFocusElement = () => {
+		if (selectedItem()) {
+			setSelectedSectionItem(selectedItem() as unknown as ElementID)
+			if (selectedSectionItemEl()) {
+				selectedSectionItemEl()?.focus()
+				setIsEditingItem({ status: "saved", id: selectedItem() as unknown as ElementID, label: "" })
+			}
+		}
+		if (!selectedItem()) {
+			setSelectedItem(
+				entityItems
+					.get(selected() as unknown as GroupID)
+					?.keys()
+					.next().value as unknown as ElementID
+			)
+			setSelectedSectionItem(selectedItem() as unknown as ElementID)
+			if (selectedSectionItemEl()) {
+				selectedSectionItemEl()?.focus()
+				setIsEditingItem({ status: "saved", id: selectedItem() as unknown as ElementID, label: "" })
+			}
+		}
+	}
+
 	createEffect(() => {
 		if (props.items().length > 0) {
 			setIsLoading(false)
@@ -117,6 +152,33 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 			setVisibleCount(prev => Math.min(prev + incrementalRender, filteredItems().length))
 		}
 	}
+
+	const handleDeleteElement = () => {
+		deleteItem(selected()!, selectedItem()!)
+		setSelectedItem(null)
+	}
+	// Delete Element
+	createShortcut(
+		hotKeyMappings().DeleteElement,
+		() => {
+			handleDeleteElement()
+		},
+		{
+			preventDefault: true
+		}
+	)
+
+	// Focus Element
+	createShortcut(
+		hotKeyMappings().FocusElement,
+		() => {
+			//console.log("Focus Element")
+			handleFocusElement()
+		},
+		{
+			preventDefault: true
+		}
+	)
 
 	return (
 		<div

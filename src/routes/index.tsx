@@ -1,5 +1,5 @@
 import { createShortcut } from "@solid-primitives/keyboard"
-import { createEffect, createSignal, Show } from "solid-js"
+import { createEffect, createSignal, onCleanup, Show } from "solid-js"
 import { isServer } from "solid-js/web"
 import { cookieStorage, makePersisted } from "@solid-primitives/storage"
 import {
@@ -16,7 +16,9 @@ import {
 	setIsCollapsedViewer,
 	entityModifiers,
 	entityModifierGroups,
-	selectedModifierGroup
+	selectedModifierGroup,
+	setHotKeyFooter,
+	hotKeyMappings
 } from "~/global_state"
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
@@ -105,13 +107,20 @@ export default function Home() {
 
 	// Toggle Color Footer
 	createShortcut(
-		["Control", "Shift", "C"],
+		hotKeyMappings().ToggleColorFooter,
 		() => {
 			setColorFooter(prev => !prev)
 		},
-		{
-			preventDefault: true
-		}
+		{ preventDefault: true }
+	)
+
+	// Toggle HotKey Footer
+	createShortcut(
+		hotKeyMappings().ToggleHotKeyFooter,
+		() => {
+			setHotKeyFooter(prev => !prev)
+		},
+		{ preventDefault: true }
 	)
 
 	createEffect(() => {

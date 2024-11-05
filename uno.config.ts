@@ -206,9 +206,9 @@ export default defineConfig({
 			@layer base {
 		:root {
   --background: 220 20% 97%;
-  --background-secondary: 220 9% 92%;
+  --background-secondary: 220.08 18% 93%;
   --foreground: 221.17 24% 19%;
-  --muted: 220.01 5% 70%;
+  --muted: 220.07 27% 82%;
   --muted-foreground: 220 20% 40%;
   --popover: 220 20% 98%;
   --popover-foreground: 220 25% 10%;

@@ -1,4 +1,4 @@
-import { For, createSignal, Show, createEffect, Accessor, createUniqueId } from "solid-js"
+import { For, createSignal, Show, createEffect, Accessor, createUniqueId, onCleanup } from "solid-js"
 import { cn } from "~/lib/utils"
 import {
 	selectedTemplateGroup,
@@ -17,7 +17,8 @@ import {
 	selectedTemplateVersion,
 	activeFieldId,
 	setActiveFieldId,
-	setIsShowModifiers
+	setIsShowModifiers,
+	hotKeyMappings
 } from "~/global_state"
 import {
 	ElementID,
@@ -50,6 +51,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "~/registry/ui/select"
 import TemplateSectionFields from "./template-section-fields"
 import { useColorMode } from "@kobalte/core"
+import { createShortcut } from "@solid-primitives/keyboard"
 
 type ColorMode = "light" | "dark" | "warm-dark" | "system"
 
@@ -110,12 +112,16 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 		moveTemplateSection(selectedTemplateGroup()!, selectedSection()!, e.value as unknown as TemplateGroupID)
 	}
 
-	createEffect(() => {
-		//console.log("selectedSection:", selectedSection())
-		//console.log("selectedSectionItem:", selectedSectionItem())
-		console.log("activeFieldId:", activeFieldId())
-		//console.log("selectedModifier:", selectedModifier())
-	})
+	// Delete Template Section
+	createShortcut(
+		hotKeyMappings().DeleteTemplateSection,
+		() => {
+			handleDeleteSection(selectedSection()!)
+		},
+		{
+			preventDefault: true
+		}
+	)
 
 	return (
 		<div class="flex flex-col gap-2 h-full px-4 overflow-auto scrollbar-gutter">

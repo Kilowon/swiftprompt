@@ -172,3 +172,24 @@ export { isCollapsedMenu, setIsCollapsedMenu }
 const [activeFieldId, setActiveFieldId] = createSignal<ElementID | null>(null)
 
 export { activeFieldId, setActiveFieldId }
+
+const [hotKeyFooter, setHotKeyFooter] = createSignal(false)
+
+export { hotKeyFooter, setHotKeyFooter }
+
+const [hotKeyMappings, setHotKeyMappings] = createSignal<Record<string, string[]>>({
+	AddElement: ["Control", "Shift", "E"],
+	AddGroup: ["Control", "Shift", "G"],
+	ToggleColorFooter: ["Control", "Shift", "C"],
+	AddTemplateSection: ["Control", "Shift", "S"],
+	AddTemplateGroup: ["Control", "Shift", "A"],
+	DeleteGroup: ["Control", "Shift", "G", "D"],
+	DeleteElement: ["Control", "Shift", "E", "D"],
+	DeleteTemplateGroup: ["Control", "Shift", "T", "D"],
+	DeleteTemplateSection: ["Control", "Shift", "S", "D"],
+	FocusElement: ["Control", "E"],
+	ToggleHotKeyFooter: ["Control", "Shift", "V"],
+	ToggleQueryFooter: ["Control", "Shift", "M"]
+})
+
+export { hotKeyMappings, setHotKeyMappings }

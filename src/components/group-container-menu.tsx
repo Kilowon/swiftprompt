@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show, onMount } from "solid-js"
+import { createEffect, createSignal, Show, onMount, onCleanup } from "solid-js"
 import { toast } from "solid-sonner"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
@@ -16,12 +16,14 @@ import {
 	setIsEditingGroup,
 	isEditingGroup,
 	entityItems,
-	entityGroups
+	entityGroups,
+	hotKeyMappings
 } from "../global_state"
 
 import { PromptItem, GroupID, ElementID, Filter } from "../types/entityType"
 
 import { EditableGroupTitle } from "~/components/editable-group-title"
+import { createShortcut } from "@solid-primitives/keyboard"
 
 interface GroupContainerMenuProps {}
 
@@ -123,6 +125,39 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 			setInitializedUserElement(true)
 		}
 	})
+
+	// Add Element
+	createShortcut(
+		hotKeyMappings().AddElement,
+		() => {
+			handleNewElement()
+		},
+		{
+			preventDefault: true
+		}
+	)
+
+	// Add Group
+	createShortcut(
+		hotKeyMappings().AddGroup,
+		() => {
+			handleNewGroup()
+		},
+		{
+			preventDefault: true
+		}
+	)
+
+	// Delete Group
+	createShortcut(
+		hotKeyMappings().DeleteGroup,
+		() => {
+			handleDeleteGroup()
+		},
+		{
+			preventDefault: true
+		}
+	)
 
 	return (
 		<Show
