@@ -220,7 +220,10 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 						</DialogTrigger>
 
 						<DialogContent class="sm:max-w-[425px]">
-							<div>AI Element Generation</div>
+							<div class="flex flex-col items-center gap-2">
+								<div>AI Element Generation</div>
+								<div class="i-hugeicons:coming-soon-01 w-15 h-15"></div>
+							</div>
 						</DialogContent>
 					</Dialog>
 					<Tooltip

@@ -4,7 +4,7 @@ import { createStore, produce } from "solid-js/store"
 import { ReactiveSet } from "@solid-primitives/set"
 import { setIsEditingItem, searchSelectedBadges, groupBadge, selected } from "~/global_state"
 import { deleteItem, duplicateItem, changeItemAttributes, moveItemToGroup } from "~/helpers/actionHelpers"
-import { PromptItem, ElementID, GroupID, VersionID } from "~/types/entityType"
+import { PromptItem, ElementID, GroupID, VersionID, TemplateField } from "~/types/entityType"
 import Elements from "./elements"
 import ElementsCompact from "./elements-compact"
 
@@ -64,12 +64,13 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 		name: string,
 		summary: string,
 		body: string,
+		fields: TemplateField[],
 		version: VersionID,
 		versionCounter: VersionID,
 		updatedBody: boolean
 	) => {
 		if (item.id) {
-			changeItemAttributes(item.group, item.id, name, summary, body, version, versionCounter, updatedBody)
+			changeItemAttributes(item.group, item.id, name, summary, body, fields, version, versionCounter, updatedBody)
 		}
 	}
 

@@ -17,7 +17,7 @@ import {
 	selectedTemplateVersion,
 	activeFieldId,
 	setActiveFieldId,
-	selectedModifier
+	setIsShowModifiers
 } from "~/global_state"
 import {
 	ElementID,
@@ -49,6 +49,10 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "~/registry/ui/select"
 import TemplateSectionFields from "./template-section-fields"
+import { useColorMode } from "@kobalte/core"
+
+type ColorMode = "light" | "dark" | "warm-dark" | "system"
+
 interface TemplateContainerProps {
 	isEditingTemplateSection: Accessor<{ status: string }>
 	setIsEditingTemplateSection: (value: { status: string }) => void
@@ -57,6 +61,7 @@ interface TemplateContainerProps {
 
 export default function TemplateContainer(props: TemplateContainerProps) {
 	const [templateList, setTemplateList] = createSignal<{ value: string; label: string }[]>([])
+	const { setColorMode, colorMode } = useColorMode()
 
 	createEffect(() => {
 		setTemplateList(
@@ -73,6 +78,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 	}))
 
 	const handleOpenItem = (itemId: ElementID, groupId: GroupID) => {
+		setIsShowModifiers(false)
 		setSelected(groupId)
 		setSelectedItem(itemId)
 		props.setIsFullElements(true)
@@ -81,6 +87,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 	}
 
 	const handleViewItem = (itemId: ElementID, groupId: GroupID) => {
+		setIsShowModifiers(false)
 		setSelected(groupId)
 		setSelectedItem(itemId)
 		selectedSectionItemEl()?.focus()
@@ -298,9 +305,17 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																			class={cn(
 																				"w-98% flex flex-col items-start gap-2 rounded-lg border border-muted/60 ml-2 text-left text-sm transition-all cursor-default",
 																				mouseOverItem() === item.id && "bg-background/50 border-accent/25  transition-none",
+																				mouseOverItem() === item.id &&
+																					colorMode() === "light" &&
+																					"bg-background border-accent/25  transition-none",
+
 																				selectedSectionItem() === item.id &&
 																					selectedSection() === section.id &&
-																					"bg-background/50 border-accent/25   transition-none rounded-md"
+																					"bg-background/50 border-accent/25   transition-none rounded-md",
+																				selectedSectionItem() === item.id &&
+																					selectedSection() === section.id &&
+																					colorMode() === "light" &&
+																					"bg-background border-accent/25   transition-none rounded-md"
 																			)}
 																			ref={setEl}
 																			onClick={() => {

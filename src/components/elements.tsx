@@ -82,9 +82,6 @@ interface ElementsProps {
 }
 
 export default function Elements(props: ElementsProps) {
-	const [mouseOver, setMouseOver] = createSignal(false)
-	const [isNew, setIsNew] = createSignal(false)
-	const [isModified, setIsModified] = createSignal(false)
 	const [isPinned, setIsPinned] = createSignal(false)
 	const [isBadgeSelectEdit, setIsBadgeSelectEdit] = createSignal(false)
 	const [selectedIconValues, setSelectedIconValues] = createSignal<any[]>([])
@@ -100,8 +97,8 @@ export default function Elements(props: ElementsProps) {
 	let el: HTMLButtonElement | undefined
 	let progressRef: HTMLDivElement | undefined
 	const useVisibilityObserver = createVisibilityObserver({
-		threshold: 0.1,
-		rootMargin: "50px" // Preload a bit before element comes into view
+		threshold: 0,
+		rootMargin: "100%"
 	})
 	const isVisible = useVisibilityObserver(() => progressRef)
 
@@ -130,42 +127,6 @@ export default function Elements(props: ElementsProps) {
 			value: group.id,
 			label: group.name
 		}))
-
-	createEffect(() => {
-		if (selectedItem() === props.item.id) {
-			setMouseOver(true)
-		} else {
-			setMouseOver(false)
-		}
-	})
-
-	const [timeAgoCreated, { difference: createdDifference }] = createTimeAgo(() => props.item.date_created, {
-		interval: 600000 // Update every 10 minutes
-	})
-
-	createEffect(() => {
-		if (-createdDifference() <= 3600000) {
-			// 1 hour in milliseconds
-			// 2 days in milliseconds
-			setIsNew(true)
-		} else {
-			setIsNew(false)
-		}
-	})
-
-	const [timeAgoModified, { difference: modifiedDifference }] = createTimeAgo(() => props.item.date_modified, {
-		interval: 30000 // Update every 30 seconds
-	})
-
-	createEffect(() => {
-		if (props.item.date_modified === props.item.date_created) return
-		if (-modifiedDifference() <= 120000) {
-			// 1 minute in milliseconds
-			setIsModified(true)
-		} else {
-			setIsModified(false)
-		}
-	})
 
 	createEffect(() => {
 		if (props.item.pinned) {
@@ -448,8 +409,6 @@ export default function Elements(props: ElementsProps) {
 					selectedItem() === props.item.id && "bg-muted/30 ring-1 border-accent ring-accent  transition-none"
 				)}
 				onClick={() => setSelectedItem(props.item.id)}
-				onMouseEnter={() => setMouseOver(true)}
-				onMouseLeave={() => setMouseOver(false)}
 			>
 				<Show when={selectedItem() === props.item.id && isBadgeSelectEdit() === false}>
 					<Tooltip
@@ -922,9 +881,7 @@ export default function Elements(props: ElementsProps) {
 												<div class="i-octicon:duplicate-16 w-1.25em h-1.25em mr-2"></div>
 												Duplicate Element
 											</DropdownMenuItem>
-											<DropdownMenuItem onSelect={() => console.log("Clear Prompt")}>
-												<div class="i-icon-park-outline:clear-format w-1.25em h-1.25em mr-2"></div> Clear Prompt
-											</DropdownMenuItem>
+
 											<DropdownMenuItem onSelect={() => props.handleDeleteItem(props.item.group, props.item.id)}>
 												<div class="i-octicon:repo-deleted-16 w-1.25em h-1.25em mr-2"></div> Delete Element
 											</DropdownMenuItem>

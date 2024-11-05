@@ -32,6 +32,7 @@ const [isCollapsedTemplate, setIsCollapsedTemplate] = createSignal(false)
 const [inputValueTemplateTitle, setInputValueTemplateTitle] = createSignal("")
 const [isEditingTemplateGroup, setIsEditingTemplateGroup] = createSignal({ status: "saved" })
 const [isEditingTemplateSection, setIsEditingTemplateSection] = createSignal({ status: "saved" })
+const [isDialogOpenAIGroup, setIsDialogOpenAIGroup] = createSignal(false)
 const [isDialogOpenTemplate, setIsDialogOpenTemplate] = createSignal(false)
 const [templateFilter, setTemplateFilter] = createSignal<TemplateFilter>("collection")
 const [versionFilter, setVersionFilter] = createSignal<VersionID>(0)
@@ -165,29 +166,38 @@ export default function TemplateContainerMenu() {
 							{templateFilter() || "collection"}
 						</span>
 					</Show>
-					<Tooltip
-						openDelay={1000}
-						closeDelay={0}
+					<Dialog
+						open={isDialogOpenAIGroup()}
+						//open={true}
+						onOpenChange={setIsDialogOpenAIGroup}
 					>
-						<TooltipTrigger
-							as={Button}
-							variant="ghost"
-							size="icon"
-							onClick={() => {
-								handleNewTemplateGroup()
-								toast(
-									<div class="flex items-center gap-2">
-										<div class="i-material-symbols:check-box w-4 h-4 text-success" />
-										<span class="text-xs font-medium">Template Generating</span>
-									</div>,
-									{ duration: 6000, position: "bottom-center" }
-								)
-							}}
-						>
-							<div class="i-fluent:glance-horizontal-sparkle-32-filled w-1.25em h-1.25em"></div>
-						</TooltipTrigger>
-						<TooltipContent>AI Generate Template</TooltipContent>
-					</Tooltip>
+						<DialogTrigger>
+							<Tooltip
+								openDelay={1000}
+								closeDelay={0}
+							>
+								<TooltipTrigger
+									as={Button}
+									variant="ghost"
+									size="icon"
+									onClick={() => {
+										console.log("AI Element Generation")
+									}}
+								>
+									<div class="i-fluent:glance-horizontal-sparkle-32-filled w-1.25em h-1.25em"></div>
+								</TooltipTrigger>
+								<TooltipContent>AI Group Generation</TooltipContent>
+							</Tooltip>
+						</DialogTrigger>
+
+						<DialogContent class="sm:max-w-[425px]">
+							<div class="flex flex-col items-center gap-2">
+								<div>AI Group Generation</div>
+								<div class="i-hugeicons:coming-soon-01 w-15 h-15"></div>
+							</div>
+						</DialogContent>
+					</Dialog>
+
 					<Tooltip
 						openDelay={1000}
 						closeDelay={0}

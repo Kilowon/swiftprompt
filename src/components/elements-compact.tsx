@@ -16,7 +16,7 @@ import {
 	selectedTemplateVersion
 } from "~/global_state"
 import { pinToggleItem } from "~/helpers/actionHelpers"
-import { PromptItem, GroupID, ElementID, VersionID } from "~/types/entityType"
+import { PromptItem, GroupID, ElementID, VersionID, TemplateField } from "~/types/entityType"
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -40,6 +40,7 @@ interface ElementsCompactProps {
 		name: string,
 		summary: string,
 		body: string,
+		fields: TemplateField[],
 		version: VersionID,
 		versionCounter: VersionID,
 		updatedBody: boolean
