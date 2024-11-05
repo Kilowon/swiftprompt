@@ -15,22 +15,15 @@ import {
 } from "../helpers/actionHelpers"
 
 import {
-	selected,
-	setSelectedItem,
-	setIsEditingItem,
-	entityItems,
 	templates,
 	selectedTemplateGroup,
 	setSelectedTemplateGroup,
 	setSelectedSection,
-	selectedItem,
-	selectedSectionItemEl,
-	setSelectedSectionItem,
 	selectedTemplateVersion,
 	setSelectedTemplateVersion
 } from "../global_state"
 
-import { GroupID, ElementID, TemplateGroupID, TemplateSectionID, VersionID, TemplateFilter } from "../types/entityType"
+import { ElementID, TemplateGroupID, TemplateSectionID, VersionID, TemplateFilter } from "../types/entityType"
 
 import { EditableTemplateTitle } from "~/components/editable-template-title"
 //import TemplateVersions from "~/components/TemplateVersions"
