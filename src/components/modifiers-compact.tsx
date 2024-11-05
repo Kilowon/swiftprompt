@@ -1,4 +1,4 @@
-import { createEffect, Show, createSignal, For } from "solid-js"
+import { createEffect, Show, createSignal } from "solid-js"
 import { toast } from "solid-sonner"
 import { cn } from "~/lib/utils"
 import {
@@ -18,20 +18,9 @@ import {
 } from "~/global_state"
 import { addModifierToField } from "~/helpers/actionHelpers"
 import { Modifier, ModifierGroupID, ModifierID } from "~/types/entityType"
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSub,
-	DropdownMenuSubTrigger,
-	DropdownMenuSubContent,
-	DropdownMenuPortal
-} from "~/registry/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/registry/ui/dropdown-menu"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "~/registry/ui/select"
-import { addItemToTemplateSection } from "~/helpers/actionHelpers"
 
 interface ModifiersCompactProps {
 	modifier: Modifier

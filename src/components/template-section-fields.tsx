@@ -2,8 +2,7 @@ import { createUniqueId, createSignal, For, Show } from "solid-js"
 import { cn } from "~/lib/utils"
 import { ModifierGroupID, ModifierID, TemplateField, TemplateFieldID } from "~/types/entityType"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
-import { Button } from "~/registry/ui/button"
-import { selectedTemplateField, setSelectedTemplateField, entityModifiers } from "~/global_state"
+import { setSelectedTemplateField, entityModifiers } from "~/global_state"
 
 interface TemplateSectionFieldsProps {
 	fields: TemplateField[] | undefined
@@ -48,74 +47,41 @@ export default function TemplateSectionFields(props: TemplateSectionFieldsProps)
 						onMouseLeave={() => setMouseOverField(null)}
 					>
 						<div class="w-full flex flex-col min-h-10 max-h-10 justify-center px-3 py-1">
-							<div class="flex items-center justify-between w-full">
-								<div class="flex ml-2 gap-2">
-									<div class={cn("text-foreground/40 text-[0.65rem] bg-accent/5 rounded-md px-1 flex items-center gap-1")}>
-										<span class="opacity-50">Field:</span>
-										{field.name}
-									</div>
-									<Show when={field.modifierId !== ""}>
-										<div class="text-foreground/40 text-[0.65rem] bg-accent/5 rounded-md px-1 flex items-center gap-1">
-											<span class="opacity-50">Modifier:</span>
-											{entityModifiers.get(field.modifierGroupId as ModifierGroupID)?.get(field.modifierId as ModifierID)?.name}
-										</div>
-									</Show>
-								</div>
-								<div class={cn("ml-auto text-[0.65rem] text-foreground/40 flex items-center mr-1")}>
-									<Show when={field.modifierId === ""}>
-										<div class="i-mdi:checkbox-blank-circle text-warning w-1em h-1em mr-1"></div>
-									</Show>
-
-									<div class="text-foreground/40 text-[0.65rem] bg-accent/5 rounded-md px-1 flex items-center gap-1">
-										<span class="opacity-50">Field Type:</span>
-										{field.type}
+							<div class="flex items-center justify-between w-full gap-2 truncate">
+								{/* Field Name - 1/3 width */}
+								<div class="flex-1 bg-accent/5 rounded-md px-2 py-1">
+									<div class="text-[0.65rem] flex items-center gap-1">
+										<span class="font-mono">Field:</span>
+										<span class="font-medium text-foreground/70">{field.name}</span>
 									</div>
 								</div>
-								<Show
-									when={selectedField() === field.templateFieldId}
-									fallback={<div></div>}
-								>
-									<div class="w-px h-4 bg-foreground/20 mx-1" />
-									<div class="flex items-center text-accent gap-2">
-										<Tooltip
-											openDelay={1000}
-											closeDelay={0}
-										>
-											<TooltipTrigger
-												as={Button}
-												onClick={() => {}}
-												variant="ghost"
-												size="icon"
-												class=" text-accent hover:text-accent-foreground max-h-8"
-											>
-												<div class="i-mdi:file-eye w-1.25em h-1.25em"></div>
 
-												<span class="sr-only">View Element</span>
-											</TooltipTrigger>
-											<TooltipContent>View Modifier</TooltipContent>
-										</Tooltip>
+								{/* Modifier - 1/3 width */}
 
-										<Show when={true}>
-											<Tooltip
-												openDelay={1000}
-												closeDelay={0}
-											>
-												<TooltipTrigger
-													as={Button}
-													onClick={() => {}}
-													variant="ghost"
-													size="icon"
-													class=" text-accent hover:text-accent-foreground max-h-8"
-												>
-													<div class="i-mdi:file-document-remove w-1.25em h-1.25em" />
-
-													<span class="sr-only">Remove from Template</span>
+								<div class="flex-1 bg-accent/5 rounded-md px-2 py-1">
+									<div class="text-[0.65rem] flex items-center gap-1">
+										<span class="font-mono">Modifier:</span>
+										<Show when={field.modifierId === ""}>
+											<Tooltip>
+												<TooltipTrigger>
+													<div class="i-mdi:alert-decagram-outline text-warning/80 w-4 h-4 animate-pulse" />
 												</TooltipTrigger>
-												<TooltipContent>Remove Modifier</TooltipContent>
+												<TooltipContent>No modifier selected</TooltipContent>
 											</Tooltip>
 										</Show>
+										<span class="font-medium text-foreground/70">
+											{entityModifiers.get(field.modifierGroupId as ModifierGroupID)?.get(field.modifierId as ModifierID)?.name}
+										</span>
 									</div>
-								</Show>
+								</div>
+
+								{/* Field Type - 1/3 width */}
+								<div class="flex-1 bg-accent/5 rounded-md px-2 py-1">
+									<div class="text-[0.65rem] flex items-center gap-1">
+										<span class="font-mono">Field Type:</span>
+										<span class="font-medium text-foreground/70">{field.type}</span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</button>

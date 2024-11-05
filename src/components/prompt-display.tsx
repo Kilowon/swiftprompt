@@ -2,17 +2,8 @@ import { Show, createSignal, createEffect, createMemo } from "solid-js"
 import { Button } from "~/registry/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/registry/ui/dropdown-menu"
 import { Separator } from "~/registry/ui/separator"
-import { Switch, SwitchControl, SwitchLabel, SwitchThumb } from "~/registry/ui/switch"
-import { TextField, TextFieldTextArea } from "~/registry/ui/text-field"
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
-import {
-	templates,
-	selectedTemplateGroup,
-	entityItems,
-	selected,
-	selectedTemplateVersion,
-	entityModifiers
-} from "~/global_state"
+import { templates, selectedTemplateGroup, entityItems, selectedTemplateVersion, entityModifiers } from "~/global_state"
 import { writeClipboard } from "@solid-primitives/clipboard"
 import { toast } from "solid-sonner"
 import { Editor } from "solid-prism-editor"
@@ -33,7 +24,7 @@ import { highlightMatchingTags, matchTags } from "solid-prism-editor/match-tags"
 import { copyButton } from "solid-prism-editor/copy-button"
 import { defaultCommands, editHistory } from "solid-prism-editor/commands"
 
-import { GroupID, ModifierGroupID, ModifierID, PromptItem, TemplateField, TemplateSection } from "~/types/entityType"
+import { PromptItem, TemplateField, TemplateSection } from "~/types/entityType"
 
 export default function PromptDisplay() {
 	const [tokenCount, setTokenCount] = createSignal(0)

@@ -2,19 +2,17 @@ import { createEffect, Show, createSignal, createMemo } from "solid-js"
 import { toast } from "solid-sonner"
 import { cn } from "~/lib/utils"
 import {
-	selectedItem,
-	setSelectedItem,
 	isEditingItem,
 	setIsEditingItem,
 	setIsEditingGroup,
-	entityGroups,
-	entityItems,
 	selectedTemplateGroup,
 	selectedSection,
 	selectedSectionItem,
 	setSelectedSectionItemEl,
 	selectedTemplateVersion,
-	selectedTemplateField
+	selectedTemplateField,
+	selectedModifier,
+	setSelectedModifier
 } from "~/global_state"
 import { ElementID, Modifier, ModifierGroupID, ModifierID } from "~/types/entityType"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "~/registry/ui/dropdown-menu"
@@ -118,12 +116,12 @@ export default function Modifiers(props: ModifiersProps) {
 				variant="no_format"
 				size="no_format"
 				class={cn(
-					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/50 cursor-default",
-					selectedItem() === props.modifier.id && "bg-muted/50 ring-1 border-accent ring-accent  transition-none"
+					"flex relative  gap-2 rounded-md border border-border p-3 text-left text-sm transition-all hover:bg-muted/30 hover:border-accent/60 cursor-default",
+					selectedModifier() === props.modifier.id && "bg-muted/30 ring-1 border-accent ring-accent  transition-none"
 				)}
-				onClick={() => setSelectedItem(props.modifier.id)}
+				onClick={() => setSelectedModifier(props.modifier.id)}
 			>
-				<Show when={selectedItem() === props.modifier.id}>
+				<Show when={selectedModifier() === props.modifier.id}>
 					<Tooltip
 						openDelay={1000}
 						closeDelay={0}
@@ -214,10 +212,15 @@ export default function Modifiers(props: ModifiersProps) {
 				<div class="absolute top-1 right-2">
 					<div class="flex gap-1 items-center">
 						<div class="flex items-center gap-2 min-w-23 min-h-10">
-							<div class="flex items-center gap-1 text-[0.65rem] ">
-								<span>{`${estimateTokens(contentPreview().wordCount)}`}</span>
-								<span class="text-[0.65rem] mr-2">tokens</span>
-							</div>
+							<Show when={selectedModifier() !== props.modifier.id}>
+								<div class="flex items-center justify-center border border-border gap-1.5 px-2 py-1 rounded-md bg-muted/30">
+									<div class="i-lucide:hash text-[0.8rem] text-foreground/50" />
+									<div class="flex items-baseline gap-1">
+										<span class="text-[0.7rem] font-medium">{estimateTokens(contentPreview().wordCount)}</span>
+										<span class="text-[0.65rem] text-foreground/50">tokens</span>
+									</div>
+								</div>
+							</Show>
 							<Show
 								when={
 									isEditingItem().status === "editing" &&
@@ -225,7 +228,7 @@ export default function Modifiers(props: ModifiersProps) {
 									isEditingItem().label === "all"
 								}
 								fallback={
-									<Show when={selectedItem() === props.modifier.id}>
+									<Show when={selectedModifier() === props.modifier.id}>
 										<Tooltip
 											openDelay={1000}
 											closeDelay={0}
@@ -284,7 +287,7 @@ export default function Modifiers(props: ModifiersProps) {
 									<TooltipContent>Exit Edit (Ctrl + E)</TooltipContent>
 								</Tooltip>
 							</Show>
-							<Show when={selectedItem() === props.modifier.id}>
+							<Show when={selectedModifier() === props.modifier.id}>
 								<div>
 									<DropdownMenu placement="bottom-end">
 										<DropdownMenuTrigger

@@ -1,33 +1,16 @@
-import { For, createSignal, Show, createEffect, Accessor, createUniqueId } from "solid-js"
+import { For, createSignal, Show, createEffect, createUniqueId } from "solid-js"
 import { cn } from "~/lib/utils"
 import {
 	selectedTemplateGroup,
 	templates,
-	entityItems,
-	setSelected,
-	setSelectedItem,
 	selectedSection,
 	setSelectedSection,
-	entityGroups,
 	selectedSectionItem,
 	setSelectedSectionItem,
-	selectedSectionItemEl,
-	setIsEditingItem,
 	selectedItem,
-	selectedTemplateVersion,
-	entityModifiers
+	selectedTemplateVersion
 } from "~/global_state"
-import {
-	ElementID,
-	GlobalModifiersID,
-	GroupID,
-	ModifierID,
-	TemplateGroupID,
-	TemplateSection,
-	TemplateSectionID,
-	TemplateField,
-	Item
-} from "~/types/entityType"
+import { ElementID, GlobalModifiersID, GroupID, ModifierID, TemplateField, Item } from "~/types/entityType"
 import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
 import { ReactiveSet } from "@solid-primitives/set"
@@ -69,10 +52,6 @@ export default function TemplateGlobalFields() {
 			return acc
 		}, new ReactiveSet())
 	}
-
-	createEffect(() => {
-		console.log("uniqueGlobalFields", uniqueGlobalFields())
-	})
 
 	return (
 		<div class="flex flex-col gap-2 h-full px-4 pb-4 overflow-auto scrollbar-gutter">

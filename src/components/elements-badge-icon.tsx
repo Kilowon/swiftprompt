@@ -21,7 +21,7 @@ import {
 	DropdownMenuPortal,
 	DropdownMenuSubContent
 } from "~/registry/ui/dropdown-menu"
-import { badge, selectedItem } from "~/global_state"
+import { selectedItem } from "~/global_state"
 import { BadgeID, ElementID } from "~/types/entityType"
 import { ALL_OPTIONS } from "./icon-list"
 import { Button } from "~/registry/ui/button"

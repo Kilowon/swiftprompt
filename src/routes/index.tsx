@@ -9,7 +9,6 @@ import {
 	setColorFooter,
 	templates,
 	isShowModifiers,
-	isShowTesting,
 	isShowMenu,
 	isShowDisplay,
 	setIsShowDisplay,
@@ -27,9 +26,8 @@ import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
 import GroupContainerSearch from "~/components/group-container-search"
-import { PromptItem, GroupID, VersionID, BadgeID, ModifierGroupID, Modifier } from "~/types/entityType"
+import { PromptItem, GroupID, ModifierGroupID, Modifier } from "~/types/entityType"
 import { groupsMap } from "~/helpers/actionHelpers"
-import { ReactiveMap } from "@solid-primitives/map"
 import TemplateVersions from "~/components/template-versions"
 import TemplateContainer from "~/components/template-container"
 import PromptDisplay from "~/components/prompt-display"
@@ -53,25 +51,9 @@ export default function Home() {
 		...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])
 	] as PromptItem[])
 
-	createEffect(() => {
-		console.log("selectedModifierGroup", selectedModifierGroup())
-	})
-
 	const [modifiersList, setModifiersList] = createSignal<Modifier[]>([
 		...(entityModifiers.get(selectedModifierGroup() as unknown as ModifierGroupID)?.values() ?? [])
 	] as Modifier[])
-
-	createEffect(() => {
-		console.log("modifiersList", modifiersList())
-	})
-
-	createEffect(() => {
-		console.log("entityModifiers", Array.from(entityModifiers.keys()))
-	})
-
-	createEffect(() => {
-		console.log("entityModifierGroups", Array.from(entityModifierGroups.keys()))
-	})
 
 	const [isClientSide, setIsClientSide] = createSignal(false)
 	const [initialized, setInitialized] = createSignal(false)
@@ -212,7 +194,7 @@ export default function Home() {
 									{isCollapsedMenu() ? <div class="i-material-symbols:wind-power-sharp w-1.25em h-1.25em"></div> : "SwiftPrompt"}
 								</div>
 								<div class="text-[0.5rem] font-semibold mb-0.5 text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:ml-2">
-									Beta
+									Alpha
 								</div>
 							</div>
 							<Separator />
@@ -382,7 +364,6 @@ export default function Home() {
 							ref={setPanelRef}
 							initialSize={sizes()[3] ?? 0.3}
 							minSize={0.3}
-							maxSize={0.4}
 							collapsible
 							collapseThreshold={0.01}
 							onCollapse={e => {

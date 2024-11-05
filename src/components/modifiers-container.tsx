@@ -123,10 +123,6 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 		}
 	}
 
-	createEffect(() => {
-		console.log("items", props.items())
-	})
-
 	return (
 		<div
 			onScroll={handleScroll}
@@ -177,9 +173,6 @@ export default function ModifiersContainer(props: ModifiersContainerProps) {
 				>
 					<For each={props.items()}>
 						{modifier => {
-							createEffect(() => {
-								console.log("item DIS EN", modifier)
-							})
 							return (
 								<Modifiers
 									modifier={modifier}

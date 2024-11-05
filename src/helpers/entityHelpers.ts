@@ -23,7 +23,6 @@ import {
 	TemplateSectionID,
 	TemplateSection,
 	VersionID,
-	GlobalModifiersID,
 	Modifier,
 	ModifierGroupID,
 	ModifierID,

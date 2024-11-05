@@ -33,8 +33,7 @@ import {
 	TemplateGroupID,
 	TemplateGroup,
 	TemplateField,
-	TemplateFieldID,
-	ModifierID
+	TemplateFieldID
 } from "~/types/entityType"
 import {
 	DropdownMenu,
@@ -58,7 +57,6 @@ import ElementsBadge from "./elements-badge"
 import ElementsBadgeIcon from "./elements-badge-icon"
 import { storeEntityMap } from "~/helpers/entityHelpers"
 import { addItemToTemplateSection } from "~/helpers/actionHelpers"
-import { Progress, ProgressValueLabel } from "~/registry/ui/progress"
 import { ReactiveSet } from "@solid-primitives/set"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 
@@ -410,7 +408,7 @@ export default function Elements(props: ElementsProps) {
 	const usedInSections = ({ id, group }: { id: ElementID; group: GroupID }) => {
 		const sections = createMemo(() =>
 			[...templates.values()].flatMap((template: TemplateGroup) => {
-				const version = template.sections.get(selectedTemplateVersion()!)
+				const version = template.sections.get(template.versionCounter)
 				return version
 					? [...version.values()]
 							.filter(section => section.items?.some((item: PromptItem) => item.id === id && item.group === group))
@@ -462,7 +460,7 @@ export default function Elements(props: ElementsProps) {
 							as={Button}
 							variant="ghost"
 							size="icon"
-							class="absolute bottom-1 right-2 text-accent hover:text-accent-foreground"
+							class="absolute bottom-1 right-2 text-accent hover:text-accent-foreground animate-pulse"
 							onClick={() => {
 								handleDebounce()
 							}}
@@ -583,16 +581,16 @@ export default function Elements(props: ElementsProps) {
 							>
 								<Show when={isVisible()}>
 									<Show when={fieldsData().length > 0}>
-										<div class="text-foreground/70 text-[0.65rem] border border-border bg-accent/10 rounded-md px-2 flex items-center gap-1.5 h-8 mb-2">
-											<span class="opacity-60">Fields :</span>
+										<div class="text-foreground/70 text-[0.65rem] border border-border bg-accent/5 rounded-md px-2 flex items-center gap-1.5 h-8 mb-2">
+											<span class="opacity-60 font-mono">Fields :</span>
 											<div class="flex gap-1 items-center">
 												<For each={fieldsData().slice(0, 3)}>
 													{field => (
 														<div
 															class={cn(
-																"px-1.5 rounded-sm",
+																"px-2 py-0.5 rounded",
 																"bg-background/50 border border-border rounded-sm",
-																field.type === "global" && "text-primary/80"
+																field.type === "global" && "border-primary/50 rounded"
 															)}
 														>
 															{field.name}
@@ -611,27 +609,27 @@ export default function Elements(props: ElementsProps) {
 												<div class="i-lucide:hash text-[0.8rem] text-foreground/50" />
 												<div class="flex items-baseline gap-1">
 													<span class="text-[0.7rem] font-medium">{estimateTokens(contentPreview().wordCount)}</span>
-													<span class="text-[0.65rem] text-foreground/50">tokens</span>
+													<span class="text-[0.65rem] text-foreground/50 font-mono">tokens</span>
 												</div>
 											</div>
 
 											<div class="flex items-center justify-center border border-border gap-1.5 px-2 py-1 rounded-md bg-muted/30">
-												<div class="i-lucide:layout-template text-[0.8rem] text-foreground/50" />
+												<div class="i-ri:apps-2-fill text-[0.8rem] text-foreground/50" />
 												<div class="flex items-baseline gap-1">
 													<span class="text-[0.7rem] font-medium">
 														{usedInSections({ id: props.item.id, group: props.item.group }).sections.length}
 													</span>
-													<span class="text-[0.65rem] text-foreground/50">sections</span>
+													<span class="text-[0.65rem] text-foreground/50 font-mono">sections</span>
 												</div>
 											</div>
 
 											<div class="flex items-center justify-center border border-border gap-1.5 px-2 py-1 rounded-md bg-muted/30">
-												<div class="i-lucide:folder-template text-[0.8rem] text-foreground/50" />
+												<div class="i-ri:apps-2-line text-[0.8rem] text-foreground/50" />
 												<div class="flex items-baseline gap-1">
 													<span class="text-[0.7rem] font-medium">
 														{Array.from(usedInSections({ id: props.item.id, group: props.item.group }).templates.values()).length}
 													</span>
-													<span class="text-[0.65rem] text-foreground/50">templates</span>
+													<span class="text-[0.65rem] text-foreground/50 font-mono">templates</span>
 												</div>
 											</div>
 										</div>
@@ -690,7 +688,7 @@ export default function Elements(props: ElementsProps) {
 										</div>
 									</Show>
 									<Show when={selectedIconValues().length > 0}>
-										<div class="flex gap-1 text-[0.65rem] items-center flex-wrap ">
+										<div class="flex gap-1 text-[0.65rem] items-center flex-wrap font-mono ">
 											<Show
 												when={selectedItem() === props.item.id}
 												fallback={

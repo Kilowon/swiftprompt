@@ -16,7 +16,8 @@ import {
 	selectedItem,
 	selectedTemplateVersion,
 	activeFieldId,
-	setActiveFieldId
+	setActiveFieldId,
+	selectedModifier
 } from "~/global_state"
 import {
 	ElementID,
@@ -101,6 +102,13 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 	const handleMoveSection = (e: { value: string; label: string }) => {
 		moveTemplateSection(selectedTemplateGroup()!, selectedSection()!, e.value as unknown as TemplateGroupID)
 	}
+
+	createEffect(() => {
+		//console.log("selectedSection:", selectedSection())
+		//console.log("selectedSectionItem:", selectedSectionItem())
+		console.log("activeFieldId:", activeFieldId())
+		//console.log("selectedModifier:", selectedModifier())
+	})
 
 	return (
 		<div class="flex flex-col gap-2 h-full px-4 overflow-auto scrollbar-gutter">

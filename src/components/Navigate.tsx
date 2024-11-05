@@ -83,7 +83,6 @@ export function Navigate(props: NavProps) {
 	}
 
 	const handleSelectModifierGroup = (id: ModifierGroupID) => {
-		setSelectedSection(null)
 		setSelectedModifierGroup(id)
 		if (selectedModifierGroup() === id && isShowModifiers() === false) {
 			setIsShowModifiers(true)
@@ -120,7 +119,7 @@ export function Navigate(props: NavProps) {
 					class="flex items-center justify-between mb-2 cursor-pointer"
 					onClick={() => toggleSection("groups")}
 				>
-					<div class="text-[10px] font-semibold text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:text-[8px] group-[[data-collapsed=true]]:ml-1.2">
+					<div class="text-[0.65rem] font-semibold text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:text-[8px] group-[[data-collapsed=true]]:ml-1.2">
 						Groups {expandedSections().has("groups") ? "▼" : "▶"}
 					</div>
 					<div
@@ -245,7 +244,7 @@ export function Navigate(props: NavProps) {
 					class="flex items-center justify-between mb-2 cursor-pointer"
 					onClick={() => toggleSection("templates")}
 				>
-					<div class="text-[10px] font-semibold text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:text-[8px] group-[[data-collapsed=true]]:ml-1">
+					<div class="text-[0.65rem]  font-semibold text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:text-[8px] group-[[data-collapsed=true]]:ml-1">
 						Templates {expandedSections().has("templates") ? "▼" : "▶"}
 					</div>
 					<div
@@ -377,7 +376,7 @@ export function Navigate(props: NavProps) {
 					class="flex items-center justify-between mb-2 cursor-pointer"
 					onClick={() => toggleSection("modifiers")}
 				>
-					<div class="text-[10px] font-semibold text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:text-[8px] group-[[data-collapsed=true]]:ml-1">
+					<div class="text-[0.65rem]  font-semibold text-accent group-[[data-collapsed=false]]:ml-2 group-[[data-collapsed=true]]:text-[8px] group-[[data-collapsed=true]]:ml-1">
 						Modifiers {expandedSections().has("modifiers") ? "▼" : "▶"}
 					</div>
 					<div

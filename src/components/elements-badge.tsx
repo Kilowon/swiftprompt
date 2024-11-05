@@ -1,4 +1,4 @@
-import { createSignal, Show, Accessor, onMount, createEffect } from "solid-js"
+import { createSignal, Show, Accessor, onMount } from "solid-js"
 import { ErrorBoundary } from "solid-js"
 import { Select, createOptions, fuzzyHighlight, fuzzySort } from "@thisbeyond/solid-select"
 import "@thisbeyond/solid-select/style.css"
@@ -15,7 +15,7 @@ import {
 	availableBadges,
 	setAvailableBadges
 } from "~/global_state"
-import { BadgeID, Item } from "~/types/entityType"
+import { Item } from "~/types/entityType"
 import { storeEntityMap } from "~/helpers/entityHelpers"
 import { ReactiveMap } from "@solid-primitives/map"
 

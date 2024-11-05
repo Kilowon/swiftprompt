@@ -99,19 +99,22 @@ export const SelectSearch = () => {
 					<TooltipContent>Clear Search</TooltipContent>
 				</Tooltip>
 			</div>
-			<div class="flex gap-3 text-sm items-center flex-wrap ">
+			<div class="flex gap-3 text-[0.65rem] font-mono items-center flex-wrap ">
 				<For
-					each={[groupBadge.get(selected() as unknown as GroupID)?.entries() ?? []]
-						.filter(([id, _]) => !searchSelectedBadges().some(badge => badge.id === id))
+					each={Array.from(groupBadge.get(selected() as unknown as GroupID)?.entries() ?? [])
+						.filter((entry: unknown): entry is [BadgeID, string[]] => {
+							const [badgeId] = entry as [BadgeID, string[]]
+							return !searchSelectedBadges().some(badge => badge.id === badgeId)
+						})
 						.sort(([_, a], [__, b]) => b.length - a.length)
 						.slice(0, 5)
-						.map(([id, _]) => badge.get(id))
-						.filter((badge): badge is Badge => badge !== undefined)}
+						.map(([id]) => badge.get(id as BadgeID))
+						.filter((badge): badge is BadgeType => badge !== undefined)}
 				>
 					{option => (
 						<div>
 							<button onClick={() => setSearchSelectedBadges([...searchSelectedBadges(), option])}>
-								<Badge variant={"outline"}>{option.name || ""}</Badge>
+								<Badge variant="outline">{option.name || ""}</Badge>
 							</button>
 						</div>
 					)}
