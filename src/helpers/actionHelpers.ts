@@ -933,42 +933,22 @@ export const isSortableGroup = (sortable: Draggable | Droppable) => sortable.dat
 export const closestEntity: CollisionDetector = (draggable, droppables, context) => {
 	if (!draggable || !droppables || droppables.length === 0) return null
 
-	const closestGroup = closestCenter(
-		draggable,
-		droppables.filter(droppable => droppable && isSortableGroup(droppable)),
-		context
-	)
+	const draggableIsSection = draggable.data.type === "section"
 
-	if (isSortableGroup(draggable)) {
-		return closestGroup
-	} else if (closestGroup) {
-		const closestItem = closestCenter(
-			draggable,
-			droppables.filter(droppable => droppable && !isSortableGroup(droppable) && droppable.data.group === closestGroup.id),
-			context
-		)
-
-		if (!closestItem) {
-			return closestGroup
+	// Filter droppables based on type
+	const validDroppables = droppables.filter(droppable => {
+		if (draggableIsSection) {
+			return droppable.data.type === "section"
 		}
+		return true // Items can be dropped on both sections and items
+	})
 
-		const changingGroup = draggable.data.group !== closestGroup.id
-		if (changingGroup) {
-			const lastItemId = groupItems(closestGroup.id as unknown as GroupID).at(-1)?.id as ElementID | undefined
-			const closestItemId = closestItem.id as unknown as ElementID
-			const belowLastItem = lastItemId === closestItemId
-
-			if (belowLastItem) return closestGroup
-		}
-
-		return closestItem
-	}
-
-	return null
+	return closestCenter(draggable, validDroppables, context)
 }
 
-export const groups = () =>
+/* export const groups = () =>
 	sortByOrder(Object.values(entities).filter(item => item.type === "group" && item.status !== "deleted")) as Group[] // Deprecated
+ */
 
 export const groupsMap = () => entityGroups
 
@@ -992,68 +972,137 @@ export const groupItemOrders = (groupId: GroupID) =>
 export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangingGroup = true) => {
 	if (!draggable || !droppable) return
 
-	const draggableIsGroup = isSortableGroup(draggable)
-	const droppableIsGroup = isSortableGroup(droppable)
+	const draggableIsSection = draggable.data.type === "section"
+	const droppableIsSection = droppable.data.type === "section"
 
-	const draggableGroupId = draggableIsGroup ? draggable.id : draggable.data.group
+	const templateId = selectedTemplateGroup() as TemplateGroupID
+	const version = selectedTemplateVersion()
 
-	const droppableGroupId = droppableIsGroup ? droppable.id : droppable.data.group
+	if (!templateId || version === undefined) return
 
-	if (onlyWhenChangingGroup && (draggableIsGroup || draggableGroupId === droppableGroupId)) {
-		return
-	}
+	const templateSections = templates.get(templateId)?.sections.get(version)
+	if (!templateSections) return
 
-	let ids, orders, order: number | undefined
+	// Handle section reordering
+	if (draggableIsSection && droppableIsSection) {
+		const sections = [...templateSections.values()].sort((a, b) => Number(a.order) - Number(b.order))
 
-	if (draggableIsGroup) {
-		ids = groupIds()
-		orders = groupOrders()
-	} else {
-		ids = groupItemIds(droppableGroupId)
-		orders = groupItemOrders(droppableGroupId)
-	}
+		const draggableIndex = sections.findIndex(s => s.id === draggable.id)
+		const droppableIndex = sections.findIndex(s => s.id === droppable.id)
 
-	if (droppableIsGroup && !draggableIsGroup) {
-		order = new Big(orders.at(-1) ?? -ORDER_DELTA).plus(ORDER_DELTA).round().toNumber()
-	} else {
-		const draggableIndex = ids.indexOf(draggable.id as unknown as GroupID)
-		const droppableIndex = ids.indexOf(droppable.id as unknown as GroupID)
-		if (draggableIndex !== droppableIndex) {
-			let orderAfter, orderBefore
-			if (draggableIndex === -1 || draggableIndex > droppableIndex) {
-				orderBefore = new Big(orders[droppableIndex])
-				orderAfter = new Big(orders[droppableIndex - 1] ?? orderBefore.minus(ORDER_DELTA * 2))
-			} else {
-				orderAfter = new Big(orders[droppableIndex])
-				orderBefore = new Big(orders[droppableIndex + 1] ?? orderAfter.plus(ORDER_DELTA * 2))
-			}
+		if (draggableIndex === droppableIndex) return
 
-			if (orderAfter !== undefined && orderBefore !== undefined) {
-				const orderBig = orderAfter.plus(orderBefore).div(2)
-				if (orderBig !== undefined) {
-					const rounded = orderBig.round()
-					if (rounded.gt(orderAfter) && rounded.lt(orderBefore)) {
-						order = rounded.toNumber()
-					} else {
-						order = orderBig.toNumber()
+		try {
+			const orders = sections.map(s => s.order)
+			const newOrder = calculateNewOrder(draggableIndex, droppableIndex, orders)
+
+			if (newOrder) {
+				const section = templateSections.get(draggable.id as unknown as TemplateSectionID)
+				if (section) {
+					const newSections = new Map(templateSections)
+					newSections.set(draggable.id as unknown as TemplateSectionID, {
+						...section,
+						order: newOrder.toString()
+					})
+
+					const template = templates.get(templateId)
+					if (template) {
+						templates.set(templateId, {
+							...template,
+							sections: new Map(template.sections).set(version, newSections)
+						})
+						storeEntityMap()
 					}
 				}
 			}
+		} catch (error) {
+			console.error("Error calculating section order:", error)
 		}
+		return
 	}
 
-	if (order !== undefined) {
-		setEntities(draggable.id, entity => ({
-			...entity,
-			order: order.toString(),
-			group: droppableGroupId
-		}))
+	// Handle item reordering
+	const sectionId = droppableIsSection
+		? (droppable.id as unknown as TemplateSectionID)
+		: (droppable.data.sectionId as unknown as TemplateSectionID)
+
+	const section = templateSections.get(sectionId)
+	if (!section) return
+
+	const items = [...section.items].sort((a, b) => Number(a.order) - Number(b.order))
+	const draggableIndex = items.findIndex(item => item.id === draggable.id)
+	const droppableIndex = droppableIsSection ? items.length : items.findIndex(item => item.id === droppable.id)
+
+	if (draggableIndex === droppableIndex) return
+
+	try {
+		const orders = items.map(item => item.order)
+		const newOrder = calculateNewOrder(draggableIndex, droppableIndex, orders)
+
+		if (newOrder) {
+			const updatedItems = items
+				.map(item => (item.id === draggable.id ? { ...item, order: newOrder.toString() } : item))
+				.sort((a, b) => Number(a.order) - Number(b.order))
+
+			const newSections = new Map(templateSections)
+			newSections.set(sectionId, {
+				...section,
+				items: updatedItems
+			})
+
+			const template = templates.get(templateId)
+			if (template) {
+				templates.set(templateId, {
+					...template,
+					sections: new Map(template.sections).set(version, newSections)
+				})
+				storeEntityMap()
+			}
+		}
+	} catch (error) {
+		console.error("Error calculating item order:", error)
 	}
-	storeEntityMap()
 }
 
-export const onDragOver: DragEventHandler = ({ draggable, droppable }) =>
-	draggable && droppable && move(draggable, droppable)
+const calculateNewOrder = (dragIndex: number, dropIndex: number, orders: string[]) => {
+	if (dragIndex === dropIndex) return null
 
-export const onDragEnd: DragEventHandler = ({ draggable, droppable }) =>
-	draggable && droppable && move(draggable, droppable, false)
+	const numericOrders = orders.map(Number)
+	let before: number, after: number
+
+	if (dragIndex === -1 || dragIndex > dropIndex) {
+		// Moving up
+		before = numericOrders[dropIndex]
+		after = dropIndex > 0 ? numericOrders[dropIndex - 1] : before - ORDER_DELTA * 2
+	} else {
+		// Moving down
+		after = numericOrders[dropIndex]
+		before = dropIndex < numericOrders.length - 1 ? numericOrders[dropIndex + 1] : after + ORDER_DELTA * 2
+	}
+
+	return (before + after) / 2
+}
+
+export const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
+	if (!draggable || !droppable) return
+
+	const draggableIsSection = draggable.data.type === "section"
+	const droppableIsSection = droppable.data.type === "section"
+
+	// Only allow dropping sections on sections, and items on sections/items
+	if (draggableIsSection !== droppableIsSection && !droppableIsSection) return
+
+	move(draggable, droppable)
+}
+
+export const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+	if (!draggable || !droppable) return
+
+	const draggableIsSection = draggable.data.type === "section"
+	const droppableIsSection = droppable.data.type === "section"
+
+	// Only allow dropping sections on sections, and items on sections/items
+	if (draggableIsSection !== droppableIsSection && !droppableIsSection) return
+
+	move(draggable, droppable, false)
+}

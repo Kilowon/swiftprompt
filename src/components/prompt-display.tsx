@@ -88,7 +88,11 @@ export default function PromptDisplay() {
 			setScreenWriter("")
 			return
 		}
-		const content = Array.from(templateGroup.sections.get(selectedTemplateVersion()!)?.values() ?? [])
+		const sections = templateGroup.sections.get(selectedTemplateVersion()!)
+		if (!sections) return
+
+		const content = Array.from(sections.values())
+			.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 			.flatMap((section: any) => [
 				`${section.name}`,
 				...(section.items?.map((item: PromptItem) => {
@@ -187,10 +191,11 @@ export default function PromptDisplay() {
 				<Show
 					when={screenWriter()}
 					fallback={
-						<div class="flex-1 flex items-center justify-center mt-60">
+						<div class="flex-1 flex items-center justify-center">
 							<div class="text-center">
 								<div class="i-mdi:file-document-outline w-12 h-12 mx-auto mb-4 text-muted-foreground"></div>
 								<p class="text-sm text-muted-foreground">Select a template to view content</p>
+								<span class="text-xs text-muted-foreground">Ctrl + Shift + V to view hotkeys .</span>
 							</div>
 						</div>
 					}
