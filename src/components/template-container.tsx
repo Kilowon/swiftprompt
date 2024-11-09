@@ -358,7 +358,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 
 																			const [elementToElementMatch, setElementToElementMatch] = createSignal<boolean>(false)
 																			const [isFieldsSelected, setIsFieldsSelected] = createSignal<boolean>(false)
-																			const sortable = createSortable(item.id as unknown as Id, {
+																			const sortable = createSortable(`${section.id}-${item.id}` as unknown as Id, {
 																				type: "item",
 																				sectionId: section.id,
 																				group: item.group
@@ -547,21 +547,15 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 				</Show>
 				<DragOverlay>
 					{draggable => {
-						console.log("DragOverlay render:", {
-							draggable,
-							draggableId: draggable?.id,
-							sections: sections(),
-							currentSection: draggable?.id ? sections().find(s => s.id === draggable.id) : null,
-							currentSectionItem: draggable?.id
-								? sections()
-										.flatMap(s => s.items)
-										.find(item => item.id === draggable.id)
-								: null
-						})
+						if (!draggable?.id) return null
 
-						if (!draggable?.id) {
-							console.log("No draggable id found")
-							return null
+						// Extract section ID and item ID from the composite ID
+						const extractIds = (id: string) => {
+							const parts = id.match(/.{8}-.{4}-.{4}-.{4}-.{12}/g) || []
+							return {
+								sectionId: parts[0] as unknown as TemplateSectionID,
+								itemId: parts[1] as unknown as ElementID
+							}
 						}
 
 						if (draggable.data.type === "section") {
@@ -576,12 +570,9 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 							}
 						} else {
 							// For section items
-							const sectionId = draggable.data.sectionId
-							const section = templates
-								.get(selectedTemplateGroup()!)
-								?.sections.get(selectedTemplateVersion()!)
-								?.get(sectionId as unknown as TemplateSectionID)
-							const item = section?.items.find(item => (item.id as unknown as Id) === draggable.id)
+							const { sectionId, itemId } = extractIds(draggable.id as string)
+							const section = templates.get(selectedTemplateGroup()!)?.sections.get(selectedTemplateVersion()!)?.get(sectionId)
+							const item = section?.items.find(item => item.id === itemId)
 
 							if (item) {
 								return (

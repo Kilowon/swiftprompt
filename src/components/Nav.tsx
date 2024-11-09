@@ -33,7 +33,7 @@ export default function Nav() {
 	return (
 		<nav class={cn("bg-zinc-800", colorMode() === "dark" ? "bg-slate-800" : "")}>
 			<div class="flex items-center justify-between font-inter w-full">
-				<ul class="flex items-center justify-between text-gray-200 text-xs w-full mr-8">
+				<ul class="flex items-center justify-between text-gray-200 text-xs w-full mr-6">
 					<li class={` mx-1.5 sm:mx-6`}>
 						<a href="/">Main</a>
 					</li>
@@ -82,6 +82,14 @@ export default function Nav() {
 							) : (
 								<div class="i-carbon:open-panel-right w-5 h-5" />
 							)}
+						</li>
+						<li
+							class="px-2 py-1 rounded-md hover:bg-zinc-700 ml-6"
+							onClick={() => {
+								console.log("clicked")
+							}}
+						>
+							<div class="i-fluent-mdl2:education w-6 h-6 " />
 						</li>
 					</div>
 				</ul>

@@ -1006,6 +1006,7 @@ export const groupItemOrders = (groupId: GroupID) =>
 
 export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangingGroup = true) => {
 	if (!draggable || !droppable) return
+	console.log("Moving:", { draggable, droppable })
 
 	const draggableIsSection = draggable.data.type === "section"
 	const droppableIsSection = droppable.data.type === "section"
@@ -1022,56 +1023,71 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 	if (draggableIsSection && droppableIsSection) {
 		const sections = [...templateSections.values()].sort((a, b) => Number(a.order) - Number(b.order))
 
-		const draggableIndex = sections.findIndex(s => s.id === draggable.id)
-		const droppableIndex = sections.findIndex(s => s.id === droppable.id)
+		const draggableIndex = sections.findIndex(section => section.id === draggable.id)
+		const droppableIndex = sections.findIndex(section => section.id === droppable.id)
 
 		if (draggableIndex === droppableIndex) return
 
-		try {
-			const orders = sections.map(s => s.order)
-			const newOrder = calculateNewOrder(draggableIndex, droppableIndex, orders)
+		const orders = sections.map(section => section.order)
+		const newOrder = calculateNewOrder(draggableIndex, droppableIndex, orders)
 
-			if (newOrder) {
-				const section = templateSections.get(draggable.id as unknown as TemplateSectionID)
-				if (section) {
-					const newSections = new ReactiveMap<TemplateSectionID, TemplateSection>(templateSections)
-					newSections.set(draggable.id as unknown as TemplateSectionID, {
-						...section,
-						order: newOrder.toString()
+		if (newOrder) {
+			const draggedSection = templateSections.get(draggable.id as unknown as TemplateSectionID)
+			if (draggedSection) {
+				const updatedSection = {
+					...draggedSection,
+					order: newOrder.toString()
+				}
+				templateSections.set(draggable.id as unknown as TemplateSectionID, updatedSection)
+
+				const template = templates.get(templateId)
+				if (template) {
+					templates.set(templateId, {
+						...template,
+						sections: new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(template.sections).set(
+							version,
+							templateSections
+						)
 					})
-
-					const template = templates.get(templateId)
-					if (template) {
-						templates.set(templateId, {
-							...template,
-							sections: new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(template.sections).set(
-								version,
-								newSections
-							)
-						})
-						storeEntityMap()
-					}
+					storeEntityMap()
 				}
 			}
-		} catch (error) {
-			console.error("Error calculating section order:", error)
 		}
 		return
 	}
 
-	// Handle item reordering
-	const sectionId = droppableIsSection
-		? (droppable.id as unknown as TemplateSectionID)
-		: (droppable.data.sectionId as unknown as TemplateSectionID)
+	// Extract section ID and item ID from the composite ID
+	const extractIds = (id: string) => {
+		const parts = id.match(/.{8}-.{4}-.{4}-.{4}-.{12}/g) || []
+		return {
+			sectionId: parts[0] as unknown as TemplateSectionID,
+			itemId: parts[1] as unknown as ElementID
+		}
+	}
+
+	// Get section ID from droppable
+	const { sectionId } = extractIds(droppableIsSection ? droppable.id : droppable.data.sectionId)
 
 	const section = templateSections.get(sectionId)
 	if (!section) return
 
 	const items = [...section.items].sort((a, b) => Number(a.order) - Number(b.order))
-	const draggableIndex = items.findIndex(item => (item.id as unknown as Id) === draggable.id)
-	const droppableIndex = droppableIsSection
-		? items.length
-		: items.findIndex(item => (item.id as unknown as Id) === droppable.id)
+
+	// Extract item IDs
+	const { itemId: draggableItemId } = extractIds(draggable.id as string)
+	const { itemId: droppableItemId } = droppableIsSection ? { itemId: null } : extractIds(droppable.id as string)
+
+	console.log("Processing IDs:", {
+		sectionId,
+		draggableItemId,
+		droppableItemId,
+		items: items.map(i => i.id)
+	})
+
+	const draggableIndex = items.findIndex(item => item.id === draggableItemId)
+	const droppableIndex = droppableIsSection ? items.length : items.findIndex(item => item.id === droppableItemId)
+
+	console.log("Found indices:", { draggableIndex, droppableIndex })
 
 	if (draggableIndex === droppableIndex) return
 
@@ -1081,7 +1097,7 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 
 		if (newOrder) {
 			const updatedItems = items
-				.map(item => ((item.id as unknown as Id) === draggable.id ? { ...item, order: newOrder.toString() } : item))
+				.map(item => (item.id === draggableItemId ? { ...item, order: newOrder.toString() } : item))
 				.sort((a, b) => Number(a.order) - Number(b.order))
 
 			const newSections = new ReactiveMap<TemplateSectionID, TemplateSection>(templateSections)
@@ -1128,11 +1144,11 @@ const calculateNewOrder = (dragIndex: number, dropIndex: number, orders: string[
 
 export const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
 	if (!draggable || !droppable) return
+	console.log("DragOver:", { draggable, droppable }) // Debug log
 
 	const draggableIsSection = draggable.data.type === "section"
 	const droppableIsSection = droppable.data.type === "section"
 
-	// Only allow dropping sections on sections, and items on sections/items
 	if (draggableIsSection !== droppableIsSection && !droppableIsSection) return
 
 	move(draggable, droppable)
@@ -1140,11 +1156,11 @@ export const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
 
 export const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
 	if (!draggable || !droppable) return
+	console.log("DragEnd:", { draggable, droppable }) // Debug log
 
 	const draggableIsSection = draggable.data.type === "section"
 	const droppableIsSection = droppable.data.type === "section"
 
-	// Only allow dropping sections on sections, and items on sections/items
 	if (draggableIsSection !== droppableIsSection && !droppableIsSection) return
 
 	move(draggable, droppable, false)
