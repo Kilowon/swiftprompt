@@ -1,4 +1,4 @@
-import { closestCenter, DragEventHandler, Draggable, Droppable, CollisionDetector } from "@thisbeyond/solid-dnd"
+import { closestCenter, DragEventHandler, Draggable, Droppable, CollisionDetector, Id } from "@thisbeyond/solid-dnd"
 import Big from "big.js"
 import {
 	entities,
@@ -287,9 +287,17 @@ export const updateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilte
 export const addTemplateSection = (templateGroupId: TemplateGroupID, name: string, version: VersionID) => {
 	const order = getNextOrder()
 	const id = crypto.randomUUID()
-	const versionMap: ReactiveMap<TemplateSectionID, TemplateSection> =
-		templates.get(templateGroupId)?.sections.get(version) || new ReactiveMap<TemplateSectionID, TemplateSection>()
-	versionMap?.set(id as unknown as TemplateSectionID, {
+
+	const templateGroup = templates.get(templateGroupId)
+	if (!templateGroup) return id
+
+	// Create new version map
+	const versionMap = new ReactiveMap<TemplateSectionID, TemplateSection>(
+		templateGroup.sections.get(version) || new ReactiveMap<TemplateSectionID, TemplateSection>()
+	)
+
+	// Add new section
+	versionMap.set(id as unknown as TemplateSectionID, {
 		name: name,
 		order: order,
 		id: id as unknown as TemplateSectionID,
@@ -298,9 +306,21 @@ export const addTemplateSection = (templateGroupId: TemplateGroupID, name: strin
 		date_created: new Date().toISOString(),
 		date_modified: new Date().toISOString()
 	})
-	templates.get(templateGroupId)?.sections.set(version, versionMap)
-	storeEntityMap()
 
+	// Create new sections map
+	const newSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
+		templateGroup.sections as ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>
+	)
+	newSections.set(version, versionMap)
+
+	// Update template with new sections
+	templates.set(templateGroupId, {
+		...templateGroup,
+		sections: newSections,
+		date_modified: new Date().toISOString()
+	})
+
+	storeEntityMap()
 	return id
 }
 
@@ -412,49 +432,64 @@ export const addItemToTemplateSection = (
 		return
 	}
 
-	if (selectedTemplateGroup() === null) {
-		toast.error("No template selected", {
-			description: "Cannot add elements to template section. No template selected",
+	if (selectedTemplateGroup() === null || selectedSection() === null) {
+		toast.error("Invalid selection", {
+			description: "Cannot add elements to template section. No template or section selected",
 			duration: 5000,
 			position: "bottom-center"
 		})
 		return
 	}
 
-	if (selectedSection() === null) {
-		toast.error("No section selected", {
-			description: "Cannot add elements to template section. No section selected",
-			duration: 5000,
-			position: "bottom-center"
-		})
-		return
-	}
+	const templateGroup = templates.get(templateGroupId)
+	if (!templateGroup) return
 
-	const section = templates.get(templateGroupId)?.sections.get(version)?.get(id)
-	const hasItem = section?.items.some(item => item.id === itemId)
+	// Create new version map
+	const versionMap = new ReactiveMap<TemplateSectionID, TemplateSection>(templateGroup.sections.get(version))
+	if (!versionMap) return
 
-	if (section && !hasItem) {
-		section.items.push({
-			id: itemId,
-			group: groupId,
-			order: getNextOrder(),
-			date_created: new Date().toISOString(),
-			date_modified: new Date().toISOString(),
-			fields: fields
-		})
-		templates
-			.get(templateGroupId)
-			?.sections.get(version)
-			?.set(id, { ...section, items: section.items })
-		storeEntityMap()
-	}
+	// Get section and check for existing item
+	const section: TemplateSection | undefined = versionMap.get(id) as unknown as TemplateSection | undefined
+	if (!section) return
+
+	const hasItem = section.items.some(item => item.id === itemId)
 	if (hasItem) {
 		toast.error("Element already exists in section", {
 			description: "Can only have one instance of an Element in a section",
 			duration: 5000,
 			position: "bottom-center"
 		})
+		return
 	}
+
+	// Create new items array with new item
+	const newItems = [
+		...section.items,
+		{
+			id: itemId,
+			group: groupId,
+			order: getNextOrder(),
+			date_created: new Date().toISOString(),
+			date_modified: new Date().toISOString(),
+			fields: fields
+		}
+	]
+
+	// Create new section with updated items
+	const updatedSection = { ...section, items: newItems }
+	versionMap.set(id, updatedSection)
+
+	// Create new sections map and update template
+	const newSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(templateGroup.sections)
+	newSections.set(version, versionMap)
+
+	templates.set(templateGroupId, {
+		...templateGroup,
+		sections: newSections,
+		date_modified: new Date().toISOString()
+	})
+
+	storeEntityMap()
 }
 
 export const removeItemFromTemplateSection = (
@@ -976,7 +1011,7 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 	const droppableIsSection = droppable.data.type === "section"
 
 	const templateId = selectedTemplateGroup() as TemplateGroupID
-	const version = selectedTemplateVersion()
+	const version = selectedTemplateVersion() || 0
 
 	if (!templateId || version === undefined) return
 
@@ -999,7 +1034,7 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 			if (newOrder) {
 				const section = templateSections.get(draggable.id as unknown as TemplateSectionID)
 				if (section) {
-					const newSections = new Map(templateSections)
+					const newSections = new ReactiveMap<TemplateSectionID, TemplateSection>(templateSections)
 					newSections.set(draggable.id as unknown as TemplateSectionID, {
 						...section,
 						order: newOrder.toString()
@@ -1009,7 +1044,10 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 					if (template) {
 						templates.set(templateId, {
 							...template,
-							sections: new Map(template.sections).set(version, newSections)
+							sections: new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(template.sections).set(
+								version,
+								newSections
+							)
 						})
 						storeEntityMap()
 					}
@@ -1030,8 +1068,10 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 	if (!section) return
 
 	const items = [...section.items].sort((a, b) => Number(a.order) - Number(b.order))
-	const draggableIndex = items.findIndex(item => item.id === draggable.id)
-	const droppableIndex = droppableIsSection ? items.length : items.findIndex(item => item.id === droppable.id)
+	const draggableIndex = items.findIndex(item => (item.id as unknown as Id) === draggable.id)
+	const droppableIndex = droppableIsSection
+		? items.length
+		: items.findIndex(item => (item.id as unknown as Id) === droppable.id)
 
 	if (draggableIndex === droppableIndex) return
 
@@ -1041,10 +1081,10 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 
 		if (newOrder) {
 			const updatedItems = items
-				.map(item => (item.id === draggable.id ? { ...item, order: newOrder.toString() } : item))
+				.map(item => ((item.id as unknown as Id) === draggable.id ? { ...item, order: newOrder.toString() } : item))
 				.sort((a, b) => Number(a.order) - Number(b.order))
 
-			const newSections = new Map(templateSections)
+			const newSections = new ReactiveMap<TemplateSectionID, TemplateSection>(templateSections)
 			newSections.set(sectionId, {
 				...section,
 				items: updatedItems
@@ -1054,7 +1094,10 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 			if (template) {
 				templates.set(templateId, {
 					...template,
-					sections: new Map(template.sections).set(version, newSections)
+					sections: new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(template.sections).set(
+						version,
+						newSections
+					)
 				})
 				storeEntityMap()
 			}

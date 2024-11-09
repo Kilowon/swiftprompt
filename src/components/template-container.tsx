@@ -195,7 +195,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 					<Show
 						when={sections().length === 0}
 						fallback={
-							<div>
+							<div class="mb-40">
 								<SortableProvider ids={sectionIds()}>
 									<For
 										each={sections()}
