@@ -432,11 +432,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 																									<div class="truncate mr-2">{entityGroups.get(item.group)?.name}</div>
 																								</div>
 																								<Show
-																									when={
-																										isSelected().selected === "selected" &&
-																										selectedSectionItem() === item.id &&
-																										selectedSection() === section.id
-																									}
+																									when={selectedSectionItem() === item.id && selectedSection() === section.id}
 																									fallback={<div></div>}
 																								>
 																									<div class="w-px h-4 bg-foreground/20 mx-1" />
