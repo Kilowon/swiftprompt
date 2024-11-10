@@ -33,6 +33,7 @@ export const EditableTemplateTitle = (props: {
 						if (el) focusElement(el)
 					}}
 					type="text"
+					autocomplete="off"
 					value={props.name}
 					placeholder={` Template Title...`}
 					onChange={(e: any) => props.setInputValueTemplateTitle(e.target.value)}

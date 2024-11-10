@@ -16,6 +16,10 @@ import {
 	setIsCollapsedViewer,
 	panelRef
 } from "~/global_state"
+import { Dialog, DialogContent, DialogTrigger } from "~/registry/ui/dialog"
+import { Button } from "~/registry/ui/button"
+import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
+import Tutorial from "~/components/tutorial"
 
 export default function Nav() {
 	const [initialized, setInitialized] = createSignal(false)
@@ -23,6 +27,7 @@ export default function Nav() {
 	const location = useLocation()
 	const active = (path: string) =>
 		path == location.pathname ? "border-sky-600" : "border-transparent hover:border-sky-600"
+	const [isDialogOpen, setIsDialogOpen] = createSignal(false)
 
 	createEffect(() => {
 		if (!isServer && !initialized()) {
@@ -31,7 +36,7 @@ export default function Nav() {
 	})
 
 	return (
-		<nav class={cn("bg-zinc-800", colorMode() === "dark" ? "bg-slate-800" : "")}>
+		<nav class={cn("bg-zinc-800 text-foreground", colorMode() === "dark" ? "bg-slate-800" : "")}>
 			<div class="flex items-center justify-between font-inter w-full">
 				<ul class="flex items-center justify-between text-gray-200 text-xs w-full mr-6">
 					<li class={` mx-1.5 sm:mx-6`}>
@@ -73,7 +78,7 @@ export default function Nav() {
 							onClick={() => {
 								setIsShowDisplay(!isShowDisplay())
 								if (panelRef()) {
-									panelRef().collapse() // or .expand()
+									panelRef().collapse()
 								}
 							}}
 						>
@@ -83,14 +88,31 @@ export default function Nav() {
 								<div class="i-carbon:open-panel-right w-5 h-5" />
 							)}
 						</li>
-						<li
-							class="px-2 py-1 rounded-md hover:bg-zinc-700 ml-6"
-							onClick={() => {
-								console.log("clicked")
-							}}
+						<Dialog
+							open={isDialogOpen()}
+							onOpenChange={setIsDialogOpen}
 						>
-							<div class="i-fluent-mdl2:education w-6 h-6 " />
-						</li>
+							<DialogTrigger>
+								<Tooltip
+									openDelay={1000}
+									closeDelay={0}
+								>
+									<TooltipTrigger
+										as={Button}
+										variant="ghost"
+										size="icon"
+										class="px-2 py-1 rounded-md hover:bg-zinc-700 ml-6"
+									>
+										<div class="i-fluent-mdl2:education w-6 h-6" />
+									</TooltipTrigger>
+									<TooltipContent>Education Resources</TooltipContent>
+								</Tooltip>
+							</DialogTrigger>
+
+							<DialogContent class="w-full max-w-3xl text-foreground">
+								<Tutorial />
+							</DialogContent>
+						</Dialog>
 					</div>
 				</ul>
 

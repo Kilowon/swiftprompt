@@ -563,6 +563,9 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 							if (section) {
 								return (
 									<div class="flex items-center gap-2 bg-background/95 border border-accent/60 rounded-md p-2 shadow-lg">
+										<div class="flex items-center bg-background/50 rounded-md p-1 mx-2 cursor-pointer">
+											<div class="i-material-symbols-light:drag-indicator w-1.25em h-1.25em"></div>
+										</div>
 										<div class="i-ri:apps-2-line w-5 h-5 text-accent" />
 										<span class="text-sm font-medium">{section.name}</span>
 									</div>
@@ -577,6 +580,9 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 							if (item) {
 								return (
 									<div class="flex items-center gap-2 bg-background/95 border border-accent/60 rounded-md p-2 shadow-lg">
+										<div class="flex items-center bg-background/50 rounded-md p-1 mx-2 cursor-pointer">
+											<div class="i-material-symbols-light:drag-indicator w-1.25em h-1.25em"></div>
+										</div>
 										<span class="text-sm font-medium">{entityItems.get(item.group)?.get(item.id)?.name}</span>
 									</div>
 								)

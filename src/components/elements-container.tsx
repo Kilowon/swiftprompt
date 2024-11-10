@@ -138,9 +138,9 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 	const incrementalRender = 25
 
 	const filteredItems = createMemo(() => {
-		const items = props.items()
-		const filters = Array.from(filterElements.values()).flat()
-		return items.filter(item => !item.pinned && (filters.length === 0 || filters.includes(item.id))).reverse()
+		const currentItems = items()
+		const filters = Array.from(filterElements.values())
+		return currentItems.filter(item => !item.pinned && (filters.length === 0 || filters.includes(item.id))).reverse()
 	})
 
 	createEffect(() => {

@@ -41,6 +41,7 @@ export const EditableGroupTitle = (props: {
 						if (el) focusElement(el)
 					}}
 					type="text"
+					autocomplete="off"
 					value={props.inputValueTitle()}
 					placeholder={` Group Title...`}
 					onChange={(e: any) => props.setInputValueTitle(e.target.value)}

@@ -188,7 +188,7 @@ function ElementsCompact(props: ElementsCompactProps) {
 									Fields:
 									<For each={fieldsData().slice(0, 3)}>
 										{field => (
-											<div class="lowercase text-[0.65rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10">
+											<div class="lowercase text-[0.65rem] bg-background-secondary font-700 rounded-sm px-0.65 py-0.10 whitespace-nowrap">
 												{field}
 											</div>
 										)}

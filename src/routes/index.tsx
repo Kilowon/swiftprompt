@@ -167,7 +167,7 @@ export default function Home() {
 
 	return (
 		<main
-			class="font-inter overflow-hidden bg-background shadow h-[100vh] flex flex-col debug-screens"
+			class="font-inter overflow-hidden bg-background text-foreground shadow h-[100vh] flex flex-col debug-screens"
 			tabIndex={0}
 		>
 			<div class="flex flex-col flex-grow-2 h-full">

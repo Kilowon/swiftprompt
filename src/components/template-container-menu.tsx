@@ -203,13 +203,13 @@ export default function TemplateContainerMenu() {
 								>
 									<div class="i-fluent:glance-horizontal-sparkle-32-filled w-1.25em h-1.25em"></div>
 								</TooltipTrigger>
-								<TooltipContent>AI Group Generation</TooltipContent>
+								<TooltipContent>AI Template Generation</TooltipContent>
 							</Tooltip>
 						</DialogTrigger>
 
-						<DialogContent class="sm:max-w-[425px]">
+						<DialogContent class="sm:max-w-[425px] text-foreground">
 							<div class="flex flex-col items-center gap-2">
-								<div>AI Group Generation</div>
+								<div>AI Template Generation</div>
 								<div class="i-hugeicons:coming-soon-01 w-15 h-15"></div>
 							</div>
 						</DialogContent>
@@ -292,7 +292,7 @@ export default function TemplateContainerMenu() {
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
-						<DialogContent class="sm:max-w-[425px]">
+						<DialogContent class="sm:max-w-[425px] text-foreground">
 							<DialogTitle>Are you sure you want to delete this Template?</DialogTitle>
 							<DialogDescription>This action cannot be undone.</DialogDescription>
 							<Button

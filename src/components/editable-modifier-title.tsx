@@ -34,6 +34,7 @@ export const EditableModifierTitle = (props: {
 						if (el) focusElement(el)
 					}}
 					type="text"
+					autocomplete="off"
 					value={props.inputValueTitle()}
 					onChange={(e: any) => props.setInputValueTitle(e.target.value)}
 					onKeyDown={(e: any) => handleKeyDown(e)}

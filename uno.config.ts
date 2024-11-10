@@ -266,7 +266,9 @@ export default defineConfig({
   --error-foreground: 0 20% 98%;
   --ring: 220 70% 60%;
 }
-  [data-kb-theme="warm-dark"] {
+
+html[data-kb-theme="warm-dark"],
+[data-kb-theme="warm-dark"] {
   --background: 220.01 15% 8%;
   --background-secondary: 240.02 7.0% 11%;
   --foreground: 220 20% 97%;

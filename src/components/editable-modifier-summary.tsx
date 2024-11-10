@@ -23,6 +23,7 @@ export const EditableModifierSummary = (props: {
 				<TextFieldLabel class="text-[0.65rem]">Summary</TextFieldLabel>
 				<TextFieldInput
 					type="text"
+					autocomplete="off"
 					value={props.inputValueSummary}
 					placeholder={` Summary...`}
 					onChange={(e: any) => props.setInputValueSummary(e.target.value)}

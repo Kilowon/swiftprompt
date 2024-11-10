@@ -254,7 +254,7 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 							</Tooltip>
 						</DialogTrigger>
 
-						<DialogContent class="sm:max-w-[425px]">
+						<DialogContent class="sm:max-w-[425px] text-foreground">
 							<div class="flex flex-col items-center gap-2">
 								<div>AI Element Generation</div>
 								<div class="i-hugeicons:coming-soon-01 w-15 h-15"></div>
@@ -356,7 +356,7 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 							</DropdownMenuContent>
 						</DropdownMenu>
 
-						<DialogContent class="sm:max-w-[425px]">
+						<DialogContent class="sm:max-w-[425px] text-foreground">
 							<DialogTitle>Are you sure you want to delete this group?</DialogTitle>
 							<DialogDescription>This action cannot be undone.</DialogDescription>
 							<Button

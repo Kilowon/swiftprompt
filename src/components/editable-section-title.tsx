@@ -35,6 +35,7 @@ export const EditableSectionTitle = (props: {
 						if (el) focusElement(el)
 					}}
 					type="text"
+					autocomplete="off"
 					value={props.name}
 					placeholder={` Section Title...`}
 					onChange={(e: any) => props.setInputValueSectionTitle(e.target.value)}
