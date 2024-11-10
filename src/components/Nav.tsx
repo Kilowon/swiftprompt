@@ -105,7 +105,7 @@ export default function Nav() {
 									>
 										<div class="i-fluent-mdl2:education w-6 h-6" />
 									</TooltipTrigger>
-									<TooltipContent>Education Resources</TooltipContent>
+									<TooltipContent>Tutorial</TooltipContent>
 								</Tooltip>
 							</DialogTrigger>
 

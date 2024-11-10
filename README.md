@@ -89,4 +89,4 @@ SwiftPrompt is released under the MIT License
 
 This is just the beginning - SwiftPrompt is designed to grow and adapt with your needs. We're excited to see how you'll use it to create more effective and predictable prompts.
 
-Remember to star the repo on GitHub if you find SwiftPrompt helpful!
+Remember to ⭐ the repo on GitHub if you find SwiftPrompt helpful!
