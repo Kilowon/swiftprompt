@@ -7,13 +7,10 @@ import { isServer } from "solid-js/web"
 import {
 	isShowModifiers,
 	setIsShowModifiers,
-	isShowTesting,
-	setIsShowTesting,
 	isShowMenu,
 	setIsShowMenu,
 	isShowDisplay,
 	setIsShowDisplay,
-	setIsCollapsedViewer,
 	panelRef
 } from "~/global_state"
 import { Dialog, DialogContent, DialogTrigger } from "~/registry/ui/dialog"
@@ -21,12 +18,9 @@ import { Button } from "~/registry/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "~/registry/ui/tooltip"
 import Tutorial from "~/components/tutorial"
 
-export default function Nav() {
+export default function Topbar() {
 	const [initialized, setInitialized] = createSignal(false)
 	const { colorMode } = useColorMode()
-	const location = useLocation()
-	const active = (path: string) =>
-		path == location.pathname ? "border-sky-600" : "border-transparent hover:border-sky-600"
 	const [isDialogOpen, setIsDialogOpen] = createSignal(false)
 
 	createEffect(() => {

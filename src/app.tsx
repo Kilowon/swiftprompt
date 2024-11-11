@@ -6,7 +6,7 @@ import { ColorModeProvider, ColorModeScript, cookieStorageManagerSSR } from "@ko
 import { Router } from "@solidjs/router"
 import { FileRoutes } from "@solidjs/start/router"
 import { Suspense } from "solid-js"
-import Nav from "~/components/nav"
+import Topbar from "~/components/topbar"
 import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
 import { getCookie } from "vinxi/http"
@@ -36,7 +36,7 @@ export default function App() {
 				<Router
 					root={props => (
 						<div class="flex flex-col h-full">
-							<Nav />
+							<Topbar />
 							<div class="flex-1 overflow-hidden">
 								<Suspense>{props.children}</Suspense>
 							</div>
