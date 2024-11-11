@@ -163,10 +163,6 @@ export default function App() {
 					/>
 					<Link
 						rel="preconnect"
-						href={`${import.meta.env.VITE_DIRECTUS_URL}/items/Primary`}
-					/>
-					<Link
-						rel="preconnect"
 						href="https://fonts.googleapis.com"
 					/>
 					<Link
