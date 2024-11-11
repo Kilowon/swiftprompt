@@ -1,4 +1,4 @@
-This was made as an entry for the [SolidHack2024](https://https://hack.solidjs.com//challenges/1)
+This was made as an entry for the [SolidHack2024](https://hack.solidjs.com/)
 
 ```
  ███████╗██╗    ██╗██╗███████╗████████╗██████╗ ██████╗  ██████╗ ███╗   ███╗██████╗ ████████╗
