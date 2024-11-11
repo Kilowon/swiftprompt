@@ -853,7 +853,7 @@ export default function Elements(props: ElementsProps) {
 										<div class="i-material-symbols:file-save w-1.25em h-1.25em"></div>
 										<span class="sr-only">Save Prompt</span>
 									</TooltipTrigger>
-									<TooltipContent>Save Prompt (Ctrl + S)</TooltipContent>
+									<TooltipContent>Save Prompt</TooltipContent>
 								</Tooltip>
 								<Tooltip
 									openDelay={1000}
@@ -872,7 +872,7 @@ export default function Elements(props: ElementsProps) {
 										<div class="i-mdi:file-revert w-1.25em h-1.25em"></div>
 										<span class="sr-only">Revert Version</span>
 									</TooltipTrigger>
-									<TooltipContent>Revert Version (Ctrl + R)</TooltipContent>
+									<TooltipContent>Revert Version</TooltipContent>
 								</Tooltip>
 								<Tooltip
 									openDelay={1000}
@@ -891,7 +891,7 @@ export default function Elements(props: ElementsProps) {
 										<div class="i-ph:file-x-fill w-1.25em h-1.25em"></div>
 										<span class="sr-only">Exit Edit</span>
 									</TooltipTrigger>
-									<TooltipContent>Exit Edit (Ctrl + E)</TooltipContent>
+									<TooltipContent>Exit Edit</TooltipContent>
 								</Tooltip>
 							</Show>
 							<Show when={selectedItem() === props.item.id}>

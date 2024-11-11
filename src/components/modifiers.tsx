@@ -265,7 +265,7 @@ export default function Modifiers(props: ModifiersProps) {
 										<div class="i-material-symbols:file-save w-1.25em h-1.25em"></div>
 										<span class="sr-only">Save Modifier</span>
 									</TooltipTrigger>
-									<TooltipContent>Save Modifier (Ctrl + S)</TooltipContent>
+									<TooltipContent>Save Modifier</TooltipContent>
 								</Tooltip>
 
 								<Tooltip
@@ -284,7 +284,7 @@ export default function Modifiers(props: ModifiersProps) {
 										<div class="i-ph:file-x-fill w-1.25em h-1.25em"></div>
 										<span class="sr-only">Exit Edit</span>
 									</TooltipTrigger>
-									<TooltipContent>Exit Edit (Ctrl + E)</TooltipContent>
+									<TooltipContent>Exit Edit</TooltipContent>
 								</Tooltip>
 							</Show>
 							<Show when={selectedModifier() === props.modifier.id}>
