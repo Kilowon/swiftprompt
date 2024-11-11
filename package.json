@@ -1,10 +1,18 @@
 {
 	"name": "example-with-unocss",
 	"type": "module",
+	"description": "SwiftPrompt - A structured and flexible approach to prompt engineering, allowing users to build complex, explicit prompts from reusable components. Built with SolidJS and UnoCSS.",
+	"contributors": [
+		{
+			"name": "Shaun Cameron",
+			"email": "theusefulnetwork@gmail.com"
+		}
+	],
 	"scripts": {
 		"dev": "vinxi dev --port 3008 --host localhost",
 		"build": "vinxi build",
-		"start": "vinxi start --port 3010 --host localhost"
+		"start": "vinxi start",
+		"start-preview": "vinxi start --port 3010 --host localhost"
 	},
 	"dependencies": {
 		"@corvu/resizable": "^0.2.3",
@@ -44,5 +52,23 @@
 	},
 	"devDependencies": {
 		"@types/big.js": "^6.2.2"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Kilowon/swiftprompt"
+	},
+	"homepage": "https://swiftprompt.app",
+	"license": "MIT",
+	"keywords": [
+		"prompt-engineering",
+		"ai-prompts",
+		"solidjs",
+		"prompt-generator",
+		"prompt-management",
+		"local-first",
+		"prompt-templates",
+		"ai-tools",
+		"unocss",
+		"solid-hack-2024"
+	]
 }

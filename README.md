@@ -61,7 +61,6 @@ Duplication creates fresh copies of elements or templates, starting at version 1
 - Use clear, descriptive names for everything
 - Test combinations of elements to find effective patterns
 - Keep your organization system simple but meaningful
-- Document your approach to help others understand your prompts
 
 ## Getting Started
 

@@ -1,4 +1,4 @@
-import { createSignal, Show, createEffect, Accessor } from "solid-js"
+import { createSignal, Show, Accessor } from "solid-js"
 import { cn } from "~/lib/utils"
 import {
 	Combobox,
@@ -21,7 +21,7 @@ import {
 	DropdownMenuPortal,
 	DropdownMenuSubContent
 } from "~/registry/ui/dropdown-menu"
-import { selectedItem } from "~/global_state"
+import { selectedItem, badge } from "~/global_state"
 import { BadgeID, ElementID } from "~/types/entityType"
 import { ALL_OPTIONS } from "./icon-list"
 import { Button } from "~/registry/ui/button"
@@ -45,11 +45,8 @@ interface ElementsBadgeIconProps {
 }
 export default function ElementsBadgeIcon(props: ElementsBadgeIconProps) {
 	const [isBadgeHover, setIsBadgeHover] = createSignal<boolean>(false)
-	const [iconSelection, setIconSelection] = createSignal<{ icon: string; name: string }>(props.iconSelection())
 
-	createEffect(() => {
-		setIconSelection(props.iconSelection())
-	})
+	const currentBadge = () => badge.get(props.badgeId)
 
 	return (
 		<Show
@@ -58,7 +55,7 @@ export default function ElementsBadgeIcon(props: ElementsBadgeIconProps) {
 				<div
 					class={cn(
 						"[var(--icon)] w-4 h-4 hover:cursor-pointer hover:bg-accent-foreground min-h-5 ml-1",
-						`--icon: ${iconSelection().icon}`
+						`--icon: ${currentBadge()?.icon || props.iconSelection().icon}`
 					)}
 				/>
 			}
@@ -82,7 +79,7 @@ export default function ElementsBadgeIcon(props: ElementsBadgeIconProps) {
 							<div
 								class={cn(
 									"[var(--icon)] w-4 h-4 hover:cursor-pointer hover:bg-accent-foreground flex items-center justify-center min-h-5",
-									`--icon: ${iconSelection().icon}`
+									`--icon: ${currentBadge()?.icon || props.iconSelection().icon}`
 								)}
 							/>
 						</div>
@@ -97,7 +94,6 @@ export default function ElementsBadgeIcon(props: ElementsBadgeIconProps) {
 										badgeId={props.badgeId}
 										handleUpdateBadge={props.handleUpdateBadge}
 										iconSelection={props.iconSelection}
-										setIconSelection={setIconSelection}
 									/>
 								</DropdownMenuSubContent>
 							</DropdownMenuPortal>
@@ -114,12 +110,10 @@ function ComboboxDemo(props: {
 	badgeId: BadgeID
 	handleUpdateBadge: (badgeId: BadgeID, icon: string, name: string) => void
 	iconSelection: Accessor<{ icon: string; name: string }>
-	setIconSelection: (value: { icon: string; name: string }) => void
 }) {
 	const handleIconChange = (e: any) => {
 		props.setIsBadgeHover(false)
 		if (e) {
-			props.setIconSelection({ icon: e.label, name: props.iconSelection().name })
 			props.handleUpdateBadge(props.badgeId, e.label, props.iconSelection().name)
 		}
 	}

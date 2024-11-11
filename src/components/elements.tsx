@@ -196,7 +196,9 @@ export default function Elements(props: ElementsProps) {
 			)
 			storeEntityMap()
 			setIsRevert(false)
-			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
+			setTimeout(() => {
+				setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
+			}, 50)
 			toast("Reverted to Previous Version: " + props.item.selectedVersion + " to new version: " + version, {
 				duration: 5000,
 				position: "bottom-center"
@@ -217,7 +219,9 @@ export default function Elements(props: ElementsProps) {
 				false
 			)
 			storeEntityMap()
-			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
+			setTimeout(() => {
+				setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
+			}, 50)
 			toast(isTitleDiff ? "Title Saved" : "Summary Saved", { duration: 2000, position: "bottom-center" })
 			return
 		}
@@ -235,7 +239,9 @@ export default function Elements(props: ElementsProps) {
 				true
 			)
 			storeEntityMap()
-			setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
+			setTimeout(() => {
+				setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
+			}, 50)
 			toast("Saved to new version: " + version, { duration: 2000, position: "bottom-center" })
 			return
 		}
@@ -398,6 +404,30 @@ export default function Elements(props: ElementsProps) {
 		return templateNames
 	}
 
+	// Add this effect to force re-evaluation of visibility when editing state changes
+	createEffect(() => {
+		// Force visibility check whenever editing state or selection changes
+		const checkVisibility = () => {
+			if (progressRef) {
+				// Immediate check
+				isVisible()
+				// Additional delayed checks to catch DOM updates
+				requestAnimationFrame(() => isVisible())
+				setTimeout(() => isVisible(), 100)
+			}
+		}
+
+		// Run check when editing state changes
+		if (isEditingItem().status === "saved") {
+			checkVisibility()
+		}
+
+		// Run check when item is selected/deselected
+		if (selectedItem() === props.item.id) {
+			checkVisibility()
+		}
+	})
+
 	return (
 		<div>
 			<Button
@@ -538,7 +568,7 @@ export default function Elements(props: ElementsProps) {
 								ref={progressRef}
 								class="text-xs w-full"
 							>
-								<Show when={isVisible()}>
+								<Show when={isVisible() || isEditingItem().status === "saved"}>
 									<Show when={fieldsData().length > 0}>
 										<div class="text-foreground/70 text-[0.65rem] border border-border bg-accent/5 rounded-md px-2 flex items-center gap-1.5 h-8 mb-2">
 											<span class="opacity-60 font-mono">Fields :</span>
