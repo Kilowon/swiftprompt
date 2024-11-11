@@ -23,7 +23,7 @@ import {
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
-import Navigate from "~/components/navigate"
+import Sidebar from "~/components/sidebar"
 import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
@@ -208,7 +208,7 @@ export default function Home() {
 							</div>
 							<Separator />
 							<div class="h-full bg-background-secondary">
-								<Navigate
+								<Sidebar
 									isCollapsed={isCollapsedMenu()}
 									groups={Array.from(groupsMap().values()).map((group: any) => {
 										return {

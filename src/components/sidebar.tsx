@@ -63,7 +63,7 @@ interface Selected {
 	id: GroupID
 }
 
-export default function Navigate(props: NavProps) {
+export default function Sidebar(props: NavProps) {
 	const [templateFilter, setTemplateFilter] = createSignal<TemplateFilter>("all")
 	const [groupFilter, setGroupFilter] = createSignal<Filter>("all")
 	const [modifierFilter, setModifierFilter] = createSignal<Filter>("all")
