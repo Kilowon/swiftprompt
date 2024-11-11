@@ -176,7 +176,13 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 	})
 
 	return (
-		<div class="flex flex-col gap-2 h-full px-4 overflow-auto scrollbar-gutter">
+		<div
+			class="flex flex-col gap-2 h-full px-4 overflow-auto scrollbar-default scrollbar-gutter"
+			style={{
+				"scrollbar-width": "auto",
+				"-ms-overflow-style": "auto"
+			}}
+		>
 			<DragDropProvider
 				onDragOver={onDragOverHandler}
 				onDragEnd={onDragEndHandler}
@@ -195,7 +201,7 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 					<Show
 						when={sections().length === 0}
 						fallback={
-							<div class="mb-40">
+							<div class="mb-40 min-h-[200px]">
 								<SortableProvider ids={sectionIds()}>
 									<For
 										each={sections()}
