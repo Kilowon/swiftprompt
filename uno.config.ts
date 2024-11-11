@@ -12,9 +12,7 @@ import { presetScrollbar } from "unocss-preset-scrollbar"
 
 export default defineConfig({
 	presets: [
-		presetScrollbar({
-			// config
-		}),
+		presetScrollbar({}),
 		presetIcons({
 			scale: 1.2,
 			warn: true,
@@ -103,9 +101,22 @@ export default defineConfig({
 		],
 		[
 			/^scrollbar-default$/,
-			([r]) => `.scrollbar-default{scrollbar-width:auto}
-.scrollbar-default::-webkit-scrollbar{display:block}
-.scrollbar-default::-webkit-scrollbar-thumb{min-height:40px}`
+			([r]) => `
+.scrollbar-default {
+  scrollbar-width: auto !important;
+  -ms-overflow-style: auto !important;
+}
+.scrollbar-default::-webkit-scrollbar {
+  display: block !important;
+  width: 16px !important;
+}
+.scrollbar-default::-webkit-scrollbar-thumb {
+  min-height: 40px !important;
+  border-radius: 9999px !important;
+  border: 4px solid transparent !important;
+  background-clip: content-box !important;
+  background-color: hsl(var(--accent)) !important;
+}`
 		]
 	],
 	theme: {
