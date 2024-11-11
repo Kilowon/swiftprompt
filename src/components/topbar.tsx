@@ -29,6 +29,11 @@ export default function Topbar() {
 		}
 	})
 
+	const handleTutorialClick = () => {
+		setIsDialogOpen(true)
+		localStorage.setItem("has-seen-tutorial", "true")
+	}
+
 	return (
 		<nav class={cn("bg-zinc-800 text-foreground", colorMode() === "dark" ? "bg-slate-800" : "")}>
 			<div class="flex items-center justify-between font-inter w-full">
@@ -86,7 +91,7 @@ export default function Topbar() {
 							open={isDialogOpen()}
 							onOpenChange={setIsDialogOpen}
 						>
-							<DialogTrigger>
+							<DialogTrigger onClick={handleTutorialClick}>
 								<Tooltip
 									openDelay={1000}
 									closeDelay={0}

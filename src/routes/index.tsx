@@ -37,6 +37,8 @@ import TemplateGlobalFields from "~/components/template-global-fields"
 import ModifiersContainer from "~/components/modifiers-container"
 import ModifiersMenu from "~/components/modifiers-menu"
 import ModifiersContainerSearch from "~/components/modifiers-container-search"
+import { Dialog, DialogContent } from "~/registry/ui/dialog"
+import Tutorial from "~/components/tutorial"
 
 export default function Home() {
 	const [isCollapsedMenu, setIsCollapsedMenu] = createSignal(false)
@@ -69,6 +71,8 @@ export default function Home() {
 
 	const [panelRef, setPanelRef] = createSignal<any>(null)
 
+	const [showTutorial, setShowTutorial] = createSignal(false)
+
 	createEffect(() => {
 		setItemsList([...(entityItems.get(selected() as unknown as GroupID)?.values() ?? [])] as PromptItem[])
 	})
@@ -97,9 +101,17 @@ export default function Home() {
 
 	createEffect(() => {
 		if (!isServer && !initialized()) {
+			const hasSeenTutorial = localStorage.getItem("has-seen-tutorial")
+			setShowTutorial(!hasSeenTutorial)
 			setIsClientSide(true)
+
+			// Save tutorial state after 2 seconds
+			setTimeout(() => {
+				localStorage.setItem("has-seen-tutorial", "true")
+			}, 2000)
+
 			if (sizes().length === 0) {
-				setSizes([0.1, 0.3, 0.3, 0.3]) // Default sizes
+				setSizes([0.1, 0.3, 0.3, 0.3])
 			}
 			setInitialized(true)
 		}
@@ -170,6 +182,16 @@ export default function Home() {
 			class="font-inter overflow-hidden bg-background text-foreground shadow h-[100vh] flex flex-col debug-screens"
 			tabIndex={0}
 		>
+			<Show when={showTutorial()}>
+				<Dialog
+					open={showTutorial()}
+					onOpenChange={setShowTutorial}
+				>
+					<DialogContent class="w-full max-w-3xl text-foreground">
+						<Tutorial onComplete={() => setShowTutorial(false)} />
+					</DialogContent>
+				</Dialog>
+			</Show>
 			<div class="flex flex-col flex-grow-2 h-full">
 				<Show when={isClientSide()}>
 					<Resizable

@@ -14,7 +14,12 @@ type TutorialStep = {
 	images?: TutorialImage[]
 }
 
-export default function Tutorial() {
+// Add props interface
+interface TutorialProps {
+	onComplete?: () => void
+}
+
+export default function Tutorial(props: TutorialProps) {
 	const [currentStep, setCurrentStep] = createSignal<number>(0)
 	const [currentImage, setCurrentImage] = createSignal<number>(0)
 
@@ -141,6 +146,11 @@ Field: {{pdf}}, \${{color}}`,
 		setCurrentImage(0)
 	}
 
+	const handleComplete = () => {
+		localStorage.setItem("has-seen-tutorial", "true")
+		props.onComplete?.()
+	}
+
 	return (
 		<div class="flex flex-col gap-6 p-6 max-w-2xl mx-auto">
 			<div class="flex items-start gap-6">
@@ -241,10 +251,15 @@ Field: {{pdf}}, \${{color}}`,
 
 				<Button
 					variant="outline"
-					disabled={currentStep() === steps.length - 1}
-					onClick={() => handleStepChange(currentStep() + 1)}
+					onClick={() => {
+						if (currentStep() === steps.length - 1) {
+							handleComplete()
+						} else {
+							handleStepChange(currentStep() + 1)
+						}
+					}}
 				>
-					Next
+					{currentStep() === steps.length - 1 ? "Finish" : "Next"}
 					<div class="i-carbon:arrow-right ml-2" />
 				</Button>
 			</div>

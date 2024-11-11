@@ -15,22 +15,79 @@ import { Toaster } from "~/registry/ui/sonner"
 import { HotKeyFooter } from "./components/HotKeyFooter"
 import { Title, MetaProvider, Meta, Link } from "@solidjs/meta"
 
-function getServerCookies() {
+const getServerCookies = (): string => {
 	"use server"
 	const colorMode = getCookie("kb-color-mode")
 	return colorMode ? `kb-color-mode=${colorMode}` : ""
 }
 
-function PlausibleScript() {
+const PlausibleScript = (): null => {
 	onMount(() => {
-		if (import.meta.env.VITE_DRAFT_SITE === "true") return
-		const script = document.createElement("script")
-		script.async = true
-		script.dataset.domain = import.meta.env.VITE_PLAUSIBLE_DOMAIN
-		script.src = import.meta.env.VITE_PLAUSIBLE_SCRIPT_SRC
-		document.head.appendChild(script)
+		try {
+			if (import.meta.env.VITE_DRAFT_SITE === "true") return
+
+			// Check if required env vars are present
+			if (!import.meta.env.VITE_PLAUSIBLE_DOMAIN || !import.meta.env.VITE_PLAUSIBLE_SCRIPT_SRC) {
+				console.warn("Plausible configuration missing")
+				return
+			}
+
+			// Check if script already exists
+			const existingScript = document.querySelector(`script[src="${import.meta.env.VITE_PLAUSIBLE_SCRIPT_SRC}"]`)
+			if (existingScript) return
+
+			const script = document.createElement("script")
+			script.defer = true // Use defer instead of async
+			script.dataset.domain = import.meta.env.VITE_PLAUSIBLE_DOMAIN
+			script.src = import.meta.env.VITE_PLAUSIBLE_SCRIPT_SRC
+			script.onerror = e => console.error("Failed to load Plausible script:", e)
+			document.head.appendChild(script)
+		} catch (err) {
+			console.error("Error initializing Plausible:", err)
+		}
 	})
 	return null
+}
+
+export function MetaTags() {
+	let shouldRender = false
+
+	onMount(() => {
+		shouldRender = import.meta.env.VITE_DRAFT_SITE === "false"
+	})
+
+	if (!shouldRender) {
+		return null
+	}
+
+	return (
+		<>
+			<Meta
+				http-equiv="Strict-Transport-Security"
+				content="max-age=63072000 includeSubDomains preload"
+			/>
+			<Meta
+				http-equiv="X-Content-Type-Options"
+				content="nosniff"
+			/>
+			<Meta
+				http-equiv="X-Frame-Options"
+				content="DENY"
+			/>
+			<Meta
+				http-equiv="X-XSS-Protection"
+				content="1; mode=block"
+			/>
+			<Meta
+				http-equiv="Content-Security-Policy"
+				content="default-src 'self' modernedge.app *.modernedge.app direct.shauns.cool services.shauns.cool endpoint.shauns.cool ; img-src https://*; child-src 'none'; "
+			/>
+			<Meta
+				http-equiv="Referrer-Policy"
+				content="strict-origin-when-cross-origin"
+			/>
+		</>
+	)
 }
 
 export default function App() {
@@ -48,30 +105,7 @@ export default function App() {
 			<ColorModeScript storageType={storageManager.type} />
 			<ColorModeProvider storageManager={storageManager}>
 				<MetaProvider>
-					<Meta
-						http-equiv="Strict-Transport-Security"
-						content="max-age=63072000 includeSubDomains preload"
-					/>
-					<Meta
-						http-equiv="X-Content-Type-Options"
-						content="nosniff"
-					/>
-					<Meta
-						http-equiv="X-Frame-Options"
-						content="DENY"
-					/>
-					<Meta
-						http-equiv="X-XSS-Protection"
-						content="1; mode=block"
-					/>
-					<Meta
-						http-equiv="Content-Security-Policy"
-						content={import.meta.env.VITE_SECURITY}
-					/>
-					<Meta
-						http-equiv="Referrer-Policy"
-						content="strict-origin-when-cross-origin"
-					/>
+					<MetaTags />
 					<Title>{import.meta.env.VITE_STORE_NAME}</Title>
 					<Meta charset="utf-8" />
 					<Meta
