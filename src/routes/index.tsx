@@ -23,7 +23,7 @@ import {
 import { Resizable, ResizableHandle, ResizablePanel } from "~/registry/ui/resizable"
 import { Separator } from "~/registry/ui/separator"
 import { cn } from "~/lib/utils"
-import { Navigate } from "~/components/navigate"
+import Navigate from "~/components/navigate"
 import ElementsContainer from "~/components/elements-container"
 import { GroupContainerMenu } from "~/components/group-container-menu"
 import TemplateContainerMenu from "~/components/template-container-menu"
