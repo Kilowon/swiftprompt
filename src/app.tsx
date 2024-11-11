@@ -13,6 +13,8 @@ import { getCookie } from "vinxi/http"
 import { ColorExampleFooter } from "./components/color-footer"
 import { Toaster } from "~/registry/ui/sonner"
 import { HotKeyFooter } from "./components/HotKeyFooter"
+import { Title, MetaProvider } from "@solidjs/meta"
+
 function getServerCookies() {
 	"use server"
 	const colorMode = getCookie("kb-color-mode")
@@ -33,20 +35,23 @@ export default function App() {
 		<QueryClientProvider client={queryClient}>
 			<ColorModeScript storageType={storageManager.type} />
 			<ColorModeProvider storageManager={storageManager}>
-				<Router
-					root={props => (
-						<div class="flex flex-col h-full">
-							<Topbar />
-							<div class="flex-1 overflow-hidden">
-								<Suspense>{props.children}</Suspense>
+				<MetaProvider>
+					<Title>SwiftPrompt</Title>
+					<Router
+						root={props => (
+							<div class="flex flex-col h-full">
+								<Topbar />
+								<div class="flex-1 overflow-hidden">
+									<Suspense>{props.children}</Suspense>
+								</div>
+								<HotKeyFooter />
+								<ColorExampleFooter />
 							</div>
-							<HotKeyFooter />
-							<ColorExampleFooter />
-						</div>
-					)}
-				>
-					<FileRoutes />
-				</Router>
+						)}
+					>
+						<FileRoutes />
+					</Router>
+				</MetaProvider>
 			</ColorModeProvider>
 			<Toaster />
 			<SolidQueryDevtools initialIsOpen={false} />
