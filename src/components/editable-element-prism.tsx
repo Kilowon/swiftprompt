@@ -18,7 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "~/registry/ui/tooltip"
 import { Button } from "~/registry/ui/button"
 import { cn } from "~/lib/utils"
 import { createShortcut } from "@solid-primitives/keyboard"
-
+let isProcessing = false
 export const EditableElementPrism = (props: {
 	item: PromptItem
 	inputValueBody: Accessor<string>
@@ -31,7 +31,15 @@ export const EditableElementPrism = (props: {
 	createShortcut(
 		["Control", "S"],
 		() => {
+			if (isProcessing) return
+			isProcessing = true
+
+			console.log("Key Pressed - Save")
 			props.handleSave()
+
+			setTimeout(() => {
+				isProcessing = false
+			}, 100)
 		},
 		{
 			preventDefault: true

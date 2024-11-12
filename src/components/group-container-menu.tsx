@@ -299,13 +299,6 @@ export function GroupContainerMenu(props: GroupContainerMenuProps) {
 							size="icon"
 							onClick={() => {
 								handleNewElement()
-								toast(
-									<div class="flex items-center gap-2">
-										<div class="i-material-symbols:check-box w-4 h-4 text-success" />
-										<span class="text-xs font-medium">Element added</span>
-									</div>,
-									{ duration: 2000, position: "bottom-center" }
-								)
 							}}
 						>
 							<div class="i-ri:function-add-line w-1.25em h-1.25em"></div>

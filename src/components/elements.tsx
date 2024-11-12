@@ -172,6 +172,8 @@ export default function Elements(props: ElementsProps) {
 			)
 		})
 
+		console.log("Save Function - Start", "SelectedVersion:", props.item.selectedVersion, "Version:", version)
+
 		if (revert && props.item.selectedVersion === version) {
 			setIsRevert(false)
 			toast("Selected Version is the same as the current version", {
@@ -239,9 +241,13 @@ export default function Elements(props: ElementsProps) {
 				true
 			)
 			storeEntityMap()
+			console.log("Save Function - End", "SelectedVersion:", props.item.selectedVersion, "Version:", version)
+
 			setTimeout(() => {
 				setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
-			}, 50)
+			}, 150)
+			console.log("Save Function - Released", "SelectedVersion:", props.item.selectedVersion, "Version:", version)
+
 			toast("Saved to new version: " + version, { duration: 2000, position: "bottom-center" })
 			return
 		}
@@ -249,6 +255,10 @@ export default function Elements(props: ElementsProps) {
 		toast("No Changes to Save", { duration: 5000, position: "bottom-center" })
 		return
 	}
+
+	createEffect(() => {
+		console.log("selectedVersion", props.item.selectedVersion)
+	})
 
 	const handleAddToTemplate = () => {
 		if (selectedSection() === null) {
@@ -476,8 +486,9 @@ export default function Elements(props: ElementsProps) {
 								<div class="flex items-center gap-2 mt-5">
 									<Select
 										onChange={e => {
-											const value = e?.value ?? ""
-											handleSetVersion(Number(value), false)
+											if (e?.value && Number(e.value) !== props.item.selectedVersion) {
+												handleSetVersion(Number(e.value), false)
+											}
 										}}
 										options={Array.from(props.item.body.keys()).map(key => ({
 											value: key,
@@ -853,7 +864,7 @@ export default function Elements(props: ElementsProps) {
 										<div class="i-material-symbols:file-save w-1.25em h-1.25em"></div>
 										<span class="sr-only">Save Prompt</span>
 									</TooltipTrigger>
-									<TooltipContent>Save Prompt</TooltipContent>
+									<TooltipContent>Save Prompt (Ctrl + S)</TooltipContent>
 								</Tooltip>
 								<Tooltip
 									openDelay={1000}
