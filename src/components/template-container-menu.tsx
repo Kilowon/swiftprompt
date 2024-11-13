@@ -60,14 +60,13 @@ const handleUpdateTemplateGroupSort = (id: TemplateGroupID, sort: TemplateFilter
 
 const handleNewTemplateSection = () => {
 	if (selectedTemplateVersion() === 0) {
-		//console.log("Increment Version", selectedTemplateVersion())
 		setSelectedTemplateVersion(1)
 		const temp = templates.get(selectedTemplateGroup()!)
 		if (temp) {
 			templates.set(selectedTemplateGroup()!, { ...temp, versionCounter: 1 })
 		}
 	}
-	//console.log("Add Template Section", selectedTemplateVersion())
+
 	const newTemplateSectionId = addTemplateSection(selectedTemplateGroup()!, "", selectedTemplateVersion()!)
 	setSelectedSection(newTemplateSectionId as unknown as TemplateSectionID)
 	setIsEditingTemplateSection({ status: "editing" })

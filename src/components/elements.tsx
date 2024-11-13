@@ -172,8 +172,6 @@ export default function Elements(props: ElementsProps) {
 			)
 		})
 
-		console.log("Save Function - Start", "SelectedVersion:", props.item.selectedVersion, "Version:", version)
-
 		if (revert && props.item.selectedVersion === version) {
 			setIsRevert(false)
 			toast("Selected Version is the same as the current version", {
@@ -241,12 +239,10 @@ export default function Elements(props: ElementsProps) {
 				true
 			)
 			storeEntityMap()
-			console.log("Save Function - End", "SelectedVersion:", props.item.selectedVersion, "Version:", version)
 
 			setTimeout(() => {
 				setIsEditingItem({ status: "saved", id: "" as unknown as ElementID, label: "" })
 			}, 150)
-			console.log("Save Function - Released", "SelectedVersion:", props.item.selectedVersion, "Version:", version)
 
 			toast("Saved to new version: " + version, { duration: 2000, position: "bottom-center" })
 			return
@@ -255,10 +251,6 @@ export default function Elements(props: ElementsProps) {
 		toast("No Changes to Save", { duration: 5000, position: "bottom-center" })
 		return
 	}
-
-	createEffect(() => {
-		console.log("selectedVersion", props.item.selectedVersion)
-	})
 
 	const handleAddToTemplate = () => {
 		if (selectedSection() === null) {

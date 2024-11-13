@@ -172,7 +172,6 @@ export default function ElementsContainer(props: ElementsContainerProps) {
 	createShortcut(
 		hotKeyMappings().FocusElement,
 		() => {
-			//console.log("Focus Element")
 			handleFocusElement()
 		},
 		{

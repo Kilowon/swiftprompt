@@ -520,15 +520,8 @@ export const updateItemFieldsInTemplateSection = (
 	if (section) {
 		const updatedItems = section.items.map(item => {
 			if (item.id === itemId) {
-				// Log existing fields for debugging
-				console.log("Existing fields:", item.fields)
-				console.log("New fields:", fields)
-
 				const updatedFields = fields.map(newField => {
 					const existingField = item.fields?.find(f => f.templateFieldId === newField.templateFieldId)
-
-					// Log matching for debugging
-					console.log("Matching field:", existingField)
 
 					const result = {
 						...newField,
@@ -537,8 +530,6 @@ export const updateItemFieldsInTemplateSection = (
 						modifierGroupId: existingField?.modifierGroupId ?? newField.modifierGroupId
 					}
 
-					// Log result for debugging
-					console.log("Result field:", result)
 					return result
 				})
 
@@ -789,7 +780,7 @@ export const duplicateItem = (groupId: GroupID, itemId: ElementID) => {
 					console.log(`Item ID ${newItem} is already associated with badge ID ${bdg.id}`)
 				}
 				// Sets groupBadgeMap to groupBadge
-				console.log(`Item added to badge ElementID:${newItem}`)
+
 				groupBadge.set(item.group, groupBadgeMap)
 			}
 		})
@@ -939,24 +930,6 @@ export const changeModifierAttributes = (
 }
 
 export const deleteModifier = (modifierGroupId: ModifierGroupID, id: ModifierID) => {
-	// Removes the item from the templates before deleting the item from the entityItems
-	/* 	const modifierToGroup = entityModifiers.get(modifierGroupId)
-	console.log("deleteModifier", id, modifierToGroup?.get(id))
-	templates.forEach(template => {
-		const updatedSections = new ReactiveMap<VersionID, ReactiveMap<TemplateSectionID, TemplateSection>>(
-			[...template.sections.entries()].map(([version, sections]) => [
-				version,
-				new ReactiveMap<TemplateSectionID, TemplateSection>(
-					[...sections.entries()].map(([sectionId, section]) => [
-						sectionId,
-						{ ...section, items: section.items.filter((item: Item) => item.id !== id) }
-					])
-				)
-			])
-		)
-		templates.set(template.id, { ...template, sections: updatedSections })
-	})
- */
 	entityModifiers.get(modifierGroupId)?.delete(id)
 	storeEntityMap()
 }
@@ -1006,7 +979,6 @@ export const groupItemOrders = (groupId: GroupID) =>
 
 export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangingGroup = true) => {
 	if (!draggable || !droppable) return
-	console.log("Moving:", { draggable, droppable })
 
 	const draggableIsSection = draggable.data.type === "section"
 	const droppableIsSection = droppable.data.type === "section"
@@ -1077,17 +1049,8 @@ export const move = (draggable: Draggable, droppable: Droppable, onlyWhenChangin
 	const { itemId: draggableItemId } = extractIds(draggable.id as string)
 	const { itemId: droppableItemId } = droppableIsSection ? { itemId: null } : extractIds(droppable.id as string)
 
-	console.log("Processing IDs:", {
-		sectionId,
-		draggableItemId,
-		droppableItemId,
-		items: items.map(i => i.id)
-	})
-
 	const draggableIndex = items.findIndex(item => item.id === draggableItemId)
 	const droppableIndex = droppableIsSection ? items.length : items.findIndex(item => item.id === droppableItemId)
-
-	console.log("Found indices:", { draggableIndex, droppableIndex })
 
 	if (draggableIndex === droppableIndex) return
 
@@ -1144,7 +1107,6 @@ const calculateNewOrder = (dragIndex: number, dropIndex: number, orders: string[
 
 export const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
 	if (!draggable || !droppable) return
-	console.log("DragOver:", { draggable, droppable }) // Debug log
 
 	const draggableIsSection = draggable.data.type === "section"
 	const droppableIsSection = droppable.data.type === "section"
@@ -1156,7 +1118,6 @@ export const onDragOver: DragEventHandler = ({ draggable, droppable }) => {
 
 export const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
 	if (!draggable || !droppable) return
-	console.log("DragEnd:", { draggable, droppable }) // Debug log
 
 	const draggableIsSection = draggable.data.type === "section"
 	const droppableIsSection = droppable.data.type === "section"

@@ -152,21 +152,14 @@ export default function TemplateContainer(props: TemplateContainerProps) {
 
 	const sectionIds = createMemo(() => sections().map(section => section.id as unknown as Id))
 
-	createEffect(() => {
-		console.log("sectionIds", sectionIds())
-		console.log("sections", sections())
-	})
-
 	const [dragActive, setDragActive] = createSignal(false)
 
 	const onDragOverHandler = (e: any) => {
 		setDragActive(true)
-		console.log("DragOver event:", e)
 		onDragOver(e)
 	}
 
 	const onDragEndHandler = (e: any) => {
-		console.log("DragEnd event:", e)
 		onDragEnd(e)
 		setDragActive(false)
 	}

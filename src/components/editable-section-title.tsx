@@ -13,7 +13,6 @@ export const EditableSectionTitle = (props: {
 			e.preventDefault()
 			e.stopPropagation()
 			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-				console.log("Enter Key Pressed")
 				props.setInputValueSectionTitle(e.target.value)
 				props.handleSectionNameChange(e.target.value)
 			}
